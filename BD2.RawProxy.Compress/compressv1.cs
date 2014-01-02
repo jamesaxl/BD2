@@ -30,6 +30,23 @@ namespace BD2.RawProxy.compress
 {
 	public class compressv1 : RawProxyv1
 	{
+		Guid 
+		#region implemented abstract members of RawProxyv1
+
+		public override string Name {
+			get {
+				return "Compress";
+			}
+		}
+
+		public override Guid Type {
+			get {
+
+			}
+		}
+
+		#endregion
+
 		public compressv1 ()
 		{
 		}
@@ -69,6 +86,8 @@ namespace BD2.RawProxy.compress
 				System.IO.Compression.GZipStream gzs = new System.IO.Compression.GZipStream (new System.IO.MemoryStream (Input), System.IO.Compression.CompressionMode.Compress);
 				gzs.CopyTo (rms);
 				return rms.ToArray ();
+			default:
+				throw new Exception ("Unknown algorithm requested.");
 			}
 		}
 		#endregion

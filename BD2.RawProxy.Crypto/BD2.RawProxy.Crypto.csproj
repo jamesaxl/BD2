@@ -50,9 +50,5 @@
       <Project>{8DD96596-38AC-46DD-80C1-75D9EBE585EA}</Project>
       <Name>leveldb-sharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BSO\BSO.csproj">
-      <Project>{30A63A7A-34C7-498A-9799-7CDCD3F4B636}</Project>
-      <Name>BSO</Name>
-    </ProjectReference>
   </ItemGroup>
 </Project>

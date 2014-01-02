@@ -42,7 +42,6 @@
     <Compile Include="LockStateWeightComparer.cs" />
     <Compile Include="LockStatus.cs" />
     <Compile Include="LockType.cs" />
-    <Compile Include="Test.cs" />
     <Compile Include="LockableBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

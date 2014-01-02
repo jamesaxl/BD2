@@ -52,14 +52,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
-      <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
-      <Name>BD2.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BSO\BSO.csproj">
-      <Project>{30A63A7A-34C7-498A-9799-7CDCD3F4B636}</Project>
-      <Name>BSO</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj">
       <Project>{D89F122B-1806-4D93-8973-6A6C6DE34E88}</Project>
       <Name>BD2.Frontend.Table.Model</Name>

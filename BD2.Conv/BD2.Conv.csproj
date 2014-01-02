@@ -52,12 +52,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BSO\BSO.csproj">
-      <Project>{30A63A7A-34C7-498A-9799-7CDCD3F4B636}</Project>
-      <Name>BSO</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Model\" />
     <Folder Include="Configuration\" />
   </ItemGroup>

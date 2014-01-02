@@ -59,10 +59,6 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <ProjectReference Include="..\BSO\BSO.csproj">
-      <Project>{30A63A7A-34C7-498A-9799-7CDCD3F4B636}</Project>
-      <Name>BSO</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Block\BD2.Block.csproj">
       <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
       <Name>BD2.Block</Name>
