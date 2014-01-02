@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CA899CAC-7636-4B40-BF89-7B1FB56D945F}</ProjectGuid>
+    <Target>Bin</Target>
+    <Language>C</Language>
+    <Compiler>
+      <Compiler ctype="GccCompiler" />
+    </Compiler>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineSymbols>DEBUG MONODEVELOP</DefineSymbols>
+    <SourceDirectory>.</SourceDirectory>
+    <OutputName>leveldb</OutputName>
+    <CompileTarget>Bin</CompileTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release</OutputPath>
+    <DefineSymbols>MONODEVELOP</DefineSymbols>
+    <SourceDirectory>.</SourceDirectory>
+    <OptimizationLevel>3</OptimizationLevel>
+    <OutputName>leveldb</OutputName>
+    <CompileTarget>Bin</CompileTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="db\builder.cc" />
+    <None Include="db\builder.h" />
+    <None Include="db\builder.o" />
+    <None Include="db\c.cc" />
+    <None Include="db\c.o" />
+    <None Include="db\corruption_test.cc" />
+    <None Include="db\db_bench.cc" />
+    <None Include="db\db_impl.cc" />
+    <None Include="db\db_impl.h" />
+    <None Include="db\db_impl.o" />
+    <None Include="db\db_iter.cc" />
+    <None Include="db\db_iter.h" />
+    <None Include="db\db_iter.o" />
+    <None Include="db\db_test.cc" />
+    <None Include="db\dbformat.cc" />
+    <None Include="db\dbformat.h" />
+    <None Include="db\dbformat.o" />
+    <None Include="db\dbformat_test.cc" />
+    <None Include="db\filename.cc" />
+    <None Include="db\filename.h" />
+    <None Include="db\filename.o" />
+    <None Include="db\filename_test.cc" />
+    <None Include="db\leveldb_main.cc" />
+    <None Include="db\log_format.h" />
+    <None Include="db\log_reader.cc" />
+    <None Include="db\log_reader.h" />
+    <None Include="db\log_reader.o" />
+    <None Include="db\log_test.cc" />
+    <None Include="db\log_writer.cc" />
+    <None Include="db\log_writer.h" />
+    <None Include="db\log_writer.o" />
+    <None Include="db\memtable.cc" />
+    <None Include="db\memtable.h" />
+    <None Include="db\memtable.o" />
+    <None Include="db\repair.cc" />
+    <None Include="db\repair.o" />
+    <None Include="db\skiplist.h" />
+    <None Include="db\skiplist_test.cc" />
+    <None Include="db\snapshot.h" />
+    <None Include="db\table_cache.cc" />
+    <None Include="db\table_cache.h" />
+    <None Include="db\table_cache.o" />
+    <None Include="db\version_edit.cc" />
+    <None Include="db\version_edit.h" />
+    <None Include="db\version_edit.o" />
+    <None Include="db\version_edit_test.cc" />
+    <None Include="db\version_set.cc" />
+    <None Include="db\version_set.h" />
+    <None Include="db\version_set.o" />
+    <None Include="db\version_set_test.cc" />
+    <None Include="db\write_batch.cc" />
+    <None Include="db\write_batch.o" />
+    <None Include="db\write_batch_internal.h" />
+    <None Include="db\write_batch_test.cc" />
+    <None Include="doc\bench\db_bench_sqlite3.cc" />
+    <None Include="doc\bench\db_bench_tree_db.cc" />
+    <None Include="doc\benchmark.html" />
+    <None Include="doc\doc.css" />
+    <None Include="doc\impl.html" />
+    <None Include="doc\index.html" />
+    <None Include="doc\log_format.txt" />
+    <None Include="doc\table_format.txt" />
+    <None Include="helpers\memenv\memenv.cc" />
+    <None Include="helpers\memenv\memenv.h" />
+    <None Include="helpers\memenv\memenv_test.cc" />
+    <None Include="include\leveldb\c.h" />
+    <None Include="include\leveldb\cache.h" />
+    <None Include="include\leveldb\comparator.h" />
+    <None Include="include\leveldb\db.h" />
+    <None Include="include\leveldb\env.h" />
+    <None Include="include\leveldb\filter_policy.h" />
+    <None Include="include\leveldb\iterator.h" />
+    <None Include="include\leveldb\options.h" />
+    <None Include="include\leveldb\slice.h" />
+    <None Include="include\leveldb\status.h" />
+    <None Include="include\leveldb\table.h" />
+    <None Include="include\leveldb\table_builder.h" />
+    <None Include="include\leveldb\write_batch.h" />
+    <None Include="issues\issue178_test.cc" />
+    <None Include="port\win\stdint.h" />
+    <None Include="port\atomic_pointer.h" />
+    <None Include="port\port.h" />
+    <None Include="port\port_example.h" />
+    <None Include="port\port_posix.cc" />
+    <None Include="port\port_posix.h" />
+    <None Include="port\port_posix.o" />
+    <None Include="port\README" />
+    <None Include="port\thread_annotations.h" />
+    <None Include="table\block.cc" />
+    <None Include="table\block.h" />
+    <None Include="table\block.o" />
+    <None Include="table\block_builder.cc" />
+    <None Include="table\block_builder.h" />
+    <None Include="table\block_builder.o" />
+    <None Include="table\filter_block.cc" />
+    <None Include="table\filter_block.h" />
+    <None Include="table\filter_block.o" />
+    <None Include="table\filter_block_test.cc" />
+    <None Include="table\format.cc" />
+    <None Include="table\format.h" />
+    <None Include="table\format.o" />
+    <None Include="table\iterator.cc" />
+    <None Include="table\iterator.o" />
+    <None Include="table\iterator_wrapper.h" />
+    <None Include="table\merger.cc" />
+    <None Include="table\merger.h" />
+    <None Include="table\merger.o" />
+    <None Include="table\table.cc" />
+    <None Include="table\table.o" />
+    <None Include="table\table_builder.cc" />
+    <None Include="table\table_builder.o" />
+    <None Include="table\table_test.cc" />
+    <None Include="table\two_level_iterator.cc" />
+    <None Include="table\two_level_iterator.h" />
+    <None Include="table\two_level_iterator.o" />
+    <None Include="util\arena.cc" />
+    <None Include="util\arena.h" />
+    <None Include="util\arena.o" />
+    <None Include="util\arena_test.cc" />
+    <None Include="util\bloom.cc" />
+    <None Include="util\bloom.o" />
+    <None Include="util\bloom_test.cc" />
+    <None Include="util\cache.cc" />
+    <None Include="util\cache.o" />
+    <None Include="util\cache_test.cc" />
+    <None Include="util\coding.cc" />
+    <None Include="util\coding.h" />
+    <None Include="util\coding.o" />
+    <None Include="util\coding_test.cc" />
+    <None Include="util\comparator.cc" />
+    <None Include="util\comparator.o" />
+    <None Include="util\crc32c.cc" />
+    <None Include="util\crc32c.h" />
+    <None Include="util\crc32c.o" />
+    <None Include="util\crc32c_test.cc" />
+    <None Include="util\env.cc" />
+    <None Include="util\env.o" />
+    <None Include="util\env_posix.cc" />
+    <None Include="util\env_posix.o" />
+    <None Include="util\env_test.cc" />
+    <None Include="util\filter_policy.cc" />
+    <None Include="util\filter_policy.o" />
+    <None Include="util\hash.cc" />
+    <None Include="util\hash.h" />
+    <None Include="util\hash.o" />
+    <None Include="util\histogram.cc" />
+    <None Include="util\histogram.h" />
+    <None Include="util\histogram.o" />
+    <None Include="util\logging.cc" />
+    <None Include="util\logging.h" />
+    <None Include="util\logging.o" />
+    <None Include="util\mutexlock.h" />
+    <None Include="util\options.cc" />
+    <None Include="util\options.o" />
+    <None Include="util\posix_logger.h" />
+    <None Include="util\random.h" />
+    <None Include="util\status.cc" />
+    <None Include="util\status.o" />
+    <None Include="util\testharness.cc" />
+    <None Include="util\testharness.h" />
+    <None Include="util\testutil.cc" />
+    <None Include="util\testutil.h" />
+    <None Include="AUTHORS" />
+    <None Include="LICENSE" />
+    <None Include="Makefile" />
+    <None Include="NEWS" />
+    <None Include="README" />
+    <None Include="TODO" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="db\c_test.c" />
+  </ItemGroup>
+</Project>

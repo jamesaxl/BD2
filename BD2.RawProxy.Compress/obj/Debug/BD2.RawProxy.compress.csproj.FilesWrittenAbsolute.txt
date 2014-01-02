@@ -1,0 +1,3 @@
+/Projects/Esfand/BD2.RawProxy.gzip/obj/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/Projects/Esfand/BD2.RawProxy.gzip/bin/Debug/BD2.RawProxy.dll
+/Projects/Esfand/BD2.RawProxy.gzip/bin/Debug/BD2.RawProxy.dll.mdb

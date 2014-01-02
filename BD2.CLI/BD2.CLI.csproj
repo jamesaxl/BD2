@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BD2.CLI</RootNamespace>
+    <AssemblyName>BD2.CLI</AssemblyName>
+    <StartupObject>BD2.CLI.MainClass</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Mono.CSharp" />
+    <Reference Include="Mono.Data.Sqlite" />
+    <Reference Include="Mono.Http" />
+    <Reference Include="Mono.Simd" />
+    <Reference Include="Mono.Posix" />
+    <Reference Include="Mono.Security" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Main.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Deployment.LinuxDeployData scriptName="bd2" />
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
+  <ItemGroup>
+    <ProjectReference Include="..\BSO\BSO.csproj">
+      <Project>{30A63A7A-34C7-498A-9799-7CDCD3F4B636}</Project>
+      <Name>BSO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Block\BD2.Block.csproj">
+      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
+      <Name>BD2.Block</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Block.Daemon\BD2.Block.Daemon.csproj">
+      <Project>{C60A5077-8EFF-4791-8AA2-89A2EBE58653}</Project>
+      <Name>BD2.Block.Daemon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.BloomFilter\BD2.BloomFilter.csproj">
+      <Project>{8167365B-7849-434A-A5EA-62BE332F523C}</Project>
+      <Name>BD2.BloomFilter</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Certificate\BD2.Certificate.csproj">
+      <Project>{21BD725B-9821-4060-8C52-2AD018EADB25}</Project>
+      <Name>BD2.Certificate</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Repo.LevelDB\BD2.Repo.LevelDB.csproj">
+      <Project>{AD303744-084C-4FC6-84C9-46F6179C670C}</Project>
+      <Name>BD2.Repo.LevelDB</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

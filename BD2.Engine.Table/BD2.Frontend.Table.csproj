@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{285B9E10-0FC7-4D60-9D1D-5068E8963988}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>BD2.Frontend.Table</RootNamespace>
+    <AssemblyName>BD2.Engine.Table</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Column.cs" />
+    <Compile Include="ColumnSet.cs" />
+    <Compile Include="IndexValue.cs" />
+    <Compile Include="Relation.cs" />
+    <Compile Include="Row.cs" />
+    <Compile Include="Table.cs" />
+    <Compile Include="DCBase.cs" />
+    <Compile Include="MultiColumnIndex.cs" />
+    <Compile Include="SingleColumnIndex.cs" />
+    <Compile Include="ConcentraredValueColumn.cs" />
+    <Compile Include="SimpleColumnSet.cs" />
+    <Compile Include="SimpleColumnSetOffsetHandler.cs" />
+    <Compile Include="IColumnSetConverter.cs" />
+    <Compile Include="ColumnSetRawDataAlignment.cs" />
+    <Compile Include="Frontend.cs" />
+    <Compile Include="FrontendInstance.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
+      <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
+      <Name>BD2.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BSO\BSO.csproj">
+      <Project>{30A63A7A-34C7-498A-9799-7CDCD3F4B636}</Project>
+      <Name>BSO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj">
+      <Project>{D89F122B-1806-4D93-8973-6A6C6DE34E88}</Project>
+      <Name>BD2.Frontend.Table.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

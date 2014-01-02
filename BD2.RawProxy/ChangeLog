@@ -1,0 +1,9 @@
+2013-09-19  Behrooz Amoozad  <behrooz0az@gmail.com>
+
+	* ProxyCombination.cs: added support for handling multiple
+	  proxies at once.
+
+	* BD2.RawProxy.csproj: Added ProxyCombination.cs
+
+	* RawProxyv1.cs: Code formatting only
+
