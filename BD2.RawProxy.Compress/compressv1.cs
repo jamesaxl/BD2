@@ -30,9 +30,12 @@ namespace BD2.RawProxy.compress
 {
 	public class compressv1 : RawProxyv1
 	{
-		Guid 
-		#region implemented abstract members of RawProxyv1
+		static readonly Guid TypeGuid = new Guid ("873a0bc6-8631-43cd-8763-764810156050");
 
+		public compressv1 ()
+		{
+		}
+		#region implemented abstract members of BD2.RawProxy.RawProxyv1
 		public override string Name {
 			get {
 				return "Compress";
@@ -41,16 +44,10 @@ namespace BD2.RawProxy.compress
 
 		public override Guid Type {
 			get {
-
+				return TypeGuid;
 			}
 		}
 
-		#endregion
-
-		public compressv1 ()
-		{
-		}
-		#region implemented abstract members of BD2.RawProxy.RawProxyv1
 		public override byte[] Decode (byte[] Input)
 		{
 			switch (Input [0]) {

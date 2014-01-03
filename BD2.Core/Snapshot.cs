@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using BSO;
 
-namespace BD2.Common
+namespace BD2.Core
 {
 	public sealed class Snapshot
 	{
@@ -122,7 +122,7 @@ namespace BD2.Common
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="BD2.Common.Snapshot"/> class.
+		/// Initializes a new instance of the <see cref="BD2.Core.Snapshot"/> class.
 		/// </summary>
 		/// <param name='Database'>
 		/// Database to make an snopshot of.

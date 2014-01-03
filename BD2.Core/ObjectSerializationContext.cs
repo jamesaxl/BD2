@@ -1,5 +1,5 @@
 //
-//  BaseDataObjectDescriptor.cs
+//  ObjectSerializationContext.cs
 //
 //  Author:
 //       Behrooz Amoozad <behrooz0az@gmail.com>
@@ -18,39 +18,18 @@
 //
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using System;
+using System.IO;
 
-namespace BD2.Common
+namespace BD2.Core
 {
-	public sealed class BaseDataObjectDescriptor
+	public abstract class ObjectSerializationContext
 	{
-		Guid objectID;
-		byte[] data;
-		int proxies;
-
-		public Guid ObjectID {
-			get {
-				return objectID;
-			}
-		}
-
-		public byte[] Data {
-			get {
-				return data;
-			}
-		}
-
-		public int Proxies {
-			get {
-				return proxies;
-			}
-		}
-
-		public BaseDataObjectDescriptor (Guid ObjectID, byte[] Data, int Proxies)
-		{
-			objectID = ObjectID;
-			data = Data;
-			proxies = Proxies;
-		}
+		public abstract Serializable GetObject();
+		public abstract byte[] GetAttributes(Guid Type);
+		public abstract bool CanApplyProxy(Guid Type);
+		public abstract byte[] GetBytes();
 	}
+	
 }

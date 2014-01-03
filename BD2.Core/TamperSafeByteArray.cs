@@ -1,5 +1,5 @@
 //
-//  BaseDataObjectModifier.cs
+//  TamperSafeByteArray.cs
 //
 //  Author:
 //       Behrooz Amoozad <behrooz0az@gmail.com>
@@ -18,17 +18,55 @@
 //
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 using System;
-using System.Collections.Generic;
 
-namespace BD2.Common
+namespace BD2.Core
 {
-	public abstract class BaseDataObjectModifier : BaseDataObject
+	public class TamperSafeByteArray : ICloneable
 	{
-		public abstract BaseDataObject UnderlyingObject { get; }
-		//false means delete;
-		public abstract bool TreatAsObject { get; }
-		public abstract bool TreatEnderlyingObjectAsObject { get; }
-	}	
+		byte[] buffer;
+
+		public TamperSafeByteArray (byte[] Buffer)
+		{
+			buffer = Buffer;
+		}
+
+		public int this [int Index] {
+			get {
+				lock (buffer) {
+					return buffer [Index];
+				}
+			}
+		}
+
+		public byte[] GetBuffer ()
+		{
+			byte[] BufferReference;
+			lock (buffer) {
+				BufferReference = buffer;
+				buffer = null;
+			}
+			return BufferReference;
+		}
+
+		public byte[] Clone ()
+		{
+			lock (buffer) {
+				return (byte[])buffer.Clone ();
+			}
+		}
+
+		#region ICloneable implementation
+
+		object ICloneable.Clone ()
+		{
+			lock (buffer) {
+				return buffer.Clone ();
+			}
+		}
+
+		#endregion
+
+	}
 }
+

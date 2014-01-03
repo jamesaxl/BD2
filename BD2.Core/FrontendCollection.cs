@@ -21,7 +21,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BD2.Common
+namespace BD2.Core
 {
 	/// <summary>
 	/// Yet another layer to make sure we are in control.

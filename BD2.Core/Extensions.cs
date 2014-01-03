@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 
-namespace BD2.Common
+namespace BD2.Core
 {
 	public static class Extensions
 	{

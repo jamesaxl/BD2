@@ -1,5 +1,5 @@
 //
-//  TransactionStatus.cs
+//  BaseDataObjectDescriptor.cs
 //
 //  Author:
 //       Behrooz Amoozad <behrooz0az@gmail.com>
@@ -18,20 +18,39 @@
 //
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 using System;
-using System.Collections.Generic;
-using System.IO;
-using BSO;
-using BD2.Common;
 
-namespace BD2
+namespace BD2.Core
 {
-	public enum TransactionStatus
+	public sealed class BaseDataObjectDescriptor
 	{
-		Pending,
-		Commiting,
-		Commited,
-		RolledBack
+		Guid objectID;
+		byte[] data;
+		int proxies;
+
+		public Guid ObjectID {
+			get {
+				return objectID;
+			}
+		}
+
+		public byte[] Data {
+			get {
+				return data;
+			}
+		}
+
+		public int Proxies {
+			get {
+				return proxies;
+			}
+		}
+
+		public BaseDataObjectDescriptor (Guid ObjectID, byte[] Data, int Proxies)
+		{
+			objectID = ObjectID;
+			data = Data;
+			proxies = Proxies;
+		}
 	}
 }

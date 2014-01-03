@@ -1,5 +1,5 @@
 //
-//  TamperSafeByteArray.cs
+//  BaseDataObjectTypeIdAttribute.cs
 //
 //  Author:
 //       Behrooz Amoozad <behrooz0az@gmail.com>
@@ -19,54 +19,25 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
+using System.Collections.Generic;
+using BSO;
+using BD2.Core;
 
-namespace BD2.Common
+namespace BD2
 {
-	public class TamperSafeByteArray : ICloneable
+	internal sealed class BaseDataObjectTypeIdAttribute : Attribute
 	{
-		byte[] buffer;
+		Guid id;
 
-		public TamperSafeByteArray (byte[] Buffer)
-		{
-			buffer = Buffer;
-		}
-
-		public int this [int Index] {
+		public Guid Id {
 			get {
-				lock (buffer) {
-					return buffer [Index];
-				}
+				return id;
 			}
 		}
 
-		public byte[] GetBuffer ()
+		public BaseDataObjectTypeIdAttribute (Guid id)
 		{
-			byte[] BufferReference;
-			lock (buffer) {
-				BufferReference = buffer;
-				buffer = null;
-			}
-			return BufferReference;
+			this.id = id;
 		}
-
-		public byte[] Clone ()
-		{
-			lock (buffer) {
-				return (byte[])buffer.Clone ();
-			}
-		}
-
-		#region ICloneable implementation
-
-		object ICloneable.Clone ()
-		{
-			lock (buffer) {
-				return buffer.Clone ();
-			}
-		}
-
-		#endregion
-
 	}
 }
-

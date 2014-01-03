@@ -21,7 +21,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BD2.Common
+namespace BD2.Core
 {
 	public class SnapshotDescriptor : Serializable
 	{
@@ -61,7 +61,7 @@ namespace BD2.Common
 		class SnapshotSerializationContext : ObjectSerializationContext
 		{
 			SnapshotDescriptor snapshotDescriptor;
-			#region implemented abstract members of BD2.Common.ObjectSerializationContext
+			#region implemented abstract members of BD2.Core.ObjectSerializationContext
 			public override Serializable GetObject ()
 			{
 				return snapshotDescriptor;

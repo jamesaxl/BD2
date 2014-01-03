@@ -21,7 +21,7 @@
 using System;
 using System.IO;
 
-namespace BD2.Common
+namespace BD2.Core
 {
 	public class BD2TypeAttribute : Attribute
 	{

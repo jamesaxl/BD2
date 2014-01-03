@@ -1,5 +1,5 @@
 //
-//  ObjectDropEnumerationMode.cs
+//  SnapshotGoneStaticEventArgs.cs
 //
 //  Author:
 //       Behrooz Amoozad <behrooz0az@gmail.com>
@@ -23,13 +23,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using BSO;
-namespace BD2.Common
+
+namespace BD2.Core
 {
-		public enum ObjectDropEnumerationMode
-		{
-			Ignore,
-			Amend,
-			Yield
+	public class SnapshotGoneStaticEventArgs : EventArgs
+	{
+		Snapshot snapshot;
+		public Snapshot Snapshot {
+			get {
+				return snapshot;
+			}
 		}
+
+		public SnapshotGoneStaticEventArgs (Snapshot Snapshot)
+		{
+			snapshot =  Snapshot;
+		}
+	}
 	
 }

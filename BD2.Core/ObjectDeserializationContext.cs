@@ -1,10 +1,10 @@
 //
-//  Serializable.cs
+//  ObjectDeserializationContext.cs
 //
 //  Author:
 //       Behrooz Amoozad <behrooz0az@gmail.com>
 //
-//  Copyright (c) 2013 behrooz
+//  Copyright (c) 2013 Behrooz Amoozad
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published by
@@ -18,21 +18,14 @@
 //
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 using System;
 using System.IO;
 
-namespace BD2.Common
+namespace BD2.Core
 {
-	public abstract class Serializable
+	public abstract class ObjectDeserializationContext
 	{
-		public abstract ObjectSerializationContext Serialize();
-	 
-		public static void WritePrimitive (BinaryWriter Stream, object obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException ("obj");
-			Stream.GetType().GetMethod("Write", new Type[1] { obj.GetType() }).Invoke(Stream, new object[1] { obj });
-		}
+		public abstract Serializable Deserialize (Stream stream);
 	}
 }
+

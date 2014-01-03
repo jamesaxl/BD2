@@ -1,10 +1,10 @@
 //
-//  DatabaseConfiguration.cs
+//  Serializable.cs
 //
 //  Author:
 //       Behrooz Amoozad <behrooz0az@gmail.com>
 //
-//  Copyright (c) 2013 Behrooz Amoozad
+//  Copyright (c) 2013 behrooz
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published by
@@ -18,15 +18,21 @@
 //
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-using System;
 
-namespace BD2.Common
+using System;
+using System.IO;
+
+namespace BD2.Core
 {
-	public sealed class DatabaseConfiguration
+	public abstract class Serializable
 	{
-		public DatabaseConfiguration ()
+		public abstract ObjectSerializationContext Serialize();
+	 
+		public static void WritePrimitive (BinaryWriter Stream, object obj)
 		{
+			if (obj == null)
+				throw new ArgumentNullException ("obj");
+			Stream.GetType().GetMethod("Write", new Type[1] { obj.GetType() }).Invoke(Stream, new object[1] { obj });
 		}
 	}
 }
-

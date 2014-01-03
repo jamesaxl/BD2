@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace BD2.Common
+namespace BD2.Core
 {
 	internal sealed class CDRSorterhelper
 	{

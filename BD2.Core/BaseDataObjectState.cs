@@ -1,5 +1,5 @@
 //
-//  ByteSequenceComparer.cs
+//  BaseDataObjectState.cs
 //
 //  Author:
 //       Behrooz Amoozad <behrooz0az@gmail.com>
@@ -18,43 +18,49 @@
 //
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 
-namespace BD2.Common
+namespace BD2.Core
 {
-	public sealed class  ByteSequenceComparer : IComparer<byte[]>
+	public abstract class BaseDataObjectState
 	{
-		static ByteSequenceComparer shared = new ByteSequenceComparer ();
-		public static ByteSequenceComparer Shared {
-			get {
-				return shared;
-			}
-		}
-		#region IComparer implementation
-		public int Compare (byte[] x, byte[] y)
-		{
-			if (x == null)
-				throw new ArgumentNullException ("x");
-			if (y == null)
-				throw new ArgumentNullException ("y");
-			int L = Math.Min (y.Length, x.Length);
-			int R;
-			for (int n = 0; n != L; n++) {
-				R = y [n].CompareTo (x [n]);
-				if (R != 0) {
-					return R;
-				}
-			}
-			if (x.Length == 0) {
-				return 0;
-			}
-			if (y.Length > x.Length) {
-				return 1;
-			}
-			return 0;
-		}
-		#endregion
-	}
-}
+		BaseDataObjectStateTracker tracker;
 
+		public BaseDataObjectStateTracker Tracker {
+			get {
+				return tracker;
+			}
+		}
+
+		public abstract bool CanApplyToParent ();
+
+		public abstract void ApplyToParent ();
+
+		protected abstract void OnDrop ();
+
+		public abstract IEnumerable<BaseDataObjectState> GetDependencies ();
+
+		public abstract IEnumerable<BaseDataObjectState> GetLiveReferers ();
+
+		BaseDataObjectState parent;
+
+		public BaseDataObjectState Parent {
+			get {
+				if (parent == null)
+					throw new InvalidOperationException ("BaseDataObjectState is top-level thus has no parent.");
+				return parent;
+			}
+		}
+
+		public bool IsTopLevel {
+			get { 
+				return parent == null; 
+			}
+		}
+
+		Stack<Tuple<Transaction, BaseDataObjectState>> subStates;
+	}
+	
+}

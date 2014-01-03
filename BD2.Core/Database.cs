@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BD2.Common
+namespace BD2.Core
 {
 	public sealed class Database
 	{
