@@ -1,7 +1,13 @@
 BD2(WIP)
 ===
 BD2 is a fully distributed database designed from ground up with security and compatibility in mind.
-It's been a hobby project for near a year and has a lot of week points and all kinds of obvious errors in it's current state.
+It's been a hobby project for near a year and has a lot of weak points and all kinds of obvious errors in it's current state.
 I've released it in the github with the hope that it motivates me more than anyone else to spend more time on it.
+
+The structure(how it works)
+===
+See http://bd2.ir/doc/resources/bd2.structure.simple.pdf for an overly simplified view of how it's tied together.
+There are at least a dozen libraries not shown in the diagram, but that should give you the simplest idea of which paths
+the data goes through to be in a good shape for your application from a disk drive in some other node in the network.
 
 More documentation will be added over time.
