@@ -28,21 +28,21 @@ using System;
 
 namespace BD2.Block
 {
-	public delegate void ChunkInsertedEventHandler (object sender,ChunkInsertedEventArgs e);
-	public class ChunkInsertedEventArgs : EventArgs
+	public delegate void ChunkPushedEventHandler (object sender, ChunkPushedEventArgs e);
+	public class ChunkPushedEventArgs : EventArgs
 	{
-		public ChunkInsertedEventArgs (byte[] ChunkDescriptor)
+		public ChunkPushedEventArgs (byte[] chunkID)
 		{
-			if (ChunkDescriptor == null)
-				throw new ArgumentNullException ("ChunkDescriptor");
-			chunkDescriptor = ChunkDescriptor;
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			this.chunkID = chunkID;
 		}
 
-		byte[] chunkDescriptor;
+		byte[] chunkID;
 
-		public byte[] ChunkDescriptor {
+		public byte[] ChunkID {
 			get {
-				return chunkDescriptor;
+				return chunkID;
 			}
 		}
 	}

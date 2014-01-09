@@ -40,16 +40,16 @@ namespace BD2.Block
 			list = new SortedSet<byte[]> ();
 		}
 
-		public ChunkDescriptorCollection (IEnumerable<byte[]> List)
+		public ChunkDescriptorCollection (IEnumerable<byte[]> list)
 		{
-			list = new SortedSet<byte[]> (List);
+			this.list = new SortedSet<byte[]> (list);
 		}
 
-		public bool DependsOn (byte[] Chunk)
+		public bool DependsOn (byte[] chunk)
 		{
-			if (Chunk == null)
+			if (chunk == null)
 				throw new ArgumentNullException ("Chunk");
-			return list.Contains (Chunk);
+			return list.Contains (chunk);
 		}
 
 		/// <summary>

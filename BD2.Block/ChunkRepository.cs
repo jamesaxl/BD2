@@ -34,11 +34,11 @@ namespace BD2.Block
 	{
 		SortedSet<ChunkRepositoryCollection> chunkRepositoryCollections;
 
-		internal void AddChunkRepositoryCollection (ChunkRepositoryCollection ChunkRepositoryCollection)
+		internal void AddChunkRepositoryCollection (ChunkRepositoryCollection chunkRepositoryCollection)
 		{
 			lock (chunkRepositoryCollections) {
-				chunkRepositoryCollections.Add (ChunkRepositoryCollection);
-				ChunkRepositoryCollection.AddRepository (this);
+				chunkRepositoryCollections.Add (chunkRepositoryCollection);
+				chunkRepositoryCollection.AddRepository (this);
 			}
 		}
 		//		SortedSet<byte[]> state = new SortedSet<byte[]> ();
@@ -47,34 +47,52 @@ namespace BD2.Block
 			chunkRepositoryCollections = new SortedSet<ChunkRepositoryCollection> ();
 		}
 
-		protected ChunkRepository (IEnumerable<ChunkRepositoryCollection> ChunkDescriptorCollections)
+		protected ChunkRepository (IEnumerable<ChunkRepositoryCollection> chunkDescriptorCollections)
 		{
-			if (ChunkDescriptorCollections == null)
+			if (chunkDescriptorCollections == null)
 				throw new ArgumentNullException ("ChunkDescriptorCollections");
 			chunkRepositoryCollections = new SortedSet<ChunkRepositoryCollection> ();
-			chunkRepositoryCollections.UnionWith (ChunkDescriptorCollections);
+			chunkRepositoryCollections.UnionWith (chunkDescriptorCollections);
 			foreach (ChunkRepositoryCollection CRC in chunkRepositoryCollections)
 				CRC.AddRepository (this);
 		}
 
 		public abstract Guid ID { get; }
 
-		public void Push (IEnumerable<KeyValuePair<byte[], byte[]>> Chunks)
+		public virtual void Push (IEnumerable<Tuple<byte[], byte[],  byte[][]>> chunks)
 		{
-			if (Chunks == null)
+			if (chunks == null)
 				throw new ArgumentNullException ("Chunks");
-			foreach (var CD in Chunks)
-				Push (CD.Key, CD.Value);
+			foreach (var chunk in chunks)
+				Push (chunk.Item1, chunk.Item2, chunk.Item3);
 		}
 
-		public abstract void Push (byte[] ChunkID, byte[] Data);
+		public abstract void Push (byte[] chunkId, byte[] data, byte[][] dependencies);
 
-		public abstract byte[] Pull (byte[] ChunkID);
+		public abstract byte[] PullData (byte[] chunkID);
 
-		public abstract IEnumerator<KeyValuePair<byte[], byte[]>> Pull (IEnumerator<byte[]> ChunkID);
+		public abstract byte[][] PullDependencies (byte[] chunkID);
+
+		public virtual IEnumerator<Tuple<byte[], byte[], byte[][]>> Pull (IEnumerable<byte[]> chunkIDs)
+		{
+			foreach (byte[] chunkID in chunkIDs) {
+				byte[] data;
+				byte[][] dependencies;
+				Pull (chunkID, out data, out dependencies);
+				yield return new Tuple <byte[], byte[], byte[][]> (chunkID, data, dependencies); 
+			}
+		}
+
+		public abstract void Pull (byte[] chunkID, out byte[] data, out byte[][] dependencies);
 
 		public abstract IEnumerable<byte[]> Enumerate ();
-		//public abstract SortedSet<byte[]> GetIndependentChunks ();
+
+		public abstract IEnumerable<byte[]> EnumerateTopLevels ();
+
+		public abstract IEnumerable<Tuple<byte[], byte[][]>> EnumerateDependencies ();
+
+		public abstract IEnumerable<Tuple<byte[], byte[][]>> EnumerateTopLevelDependencies ();
+
 		/// <summary>
 		/// Gets the least cost.
 		/// </summary>
@@ -82,30 +100,22 @@ namespace BD2.Block
 		/// The least cost.
 		/// </returns>
 		/// <param name='CurrentMinimum'>
-		/// Current determined minimum.used to skip test and return <remarks>int</remarks>.MaxValue if it's obvious that repository cannot afford better cost.
+		/// Current determined minimum.used to skip test and return <remarks>int</remarks>.MaxValue if it's obvious that repository cannot provide better cost.
 		/// </param>
 		/// <param name='ChunkDescriptor'>
 		/// Chunk descriptor.
 		/// </param>
-		public abstract int GetLeastCost (int CurrentMinimum, byte[] ChunkDescriptor);
+		public abstract int GetLeastCost (int currentMinimum, byte[] chunkID);
 
 		public abstract int GetMaxCostForAny ();
-		//public abstract byte[][] GetDependencies (byte[] ChunkID);
-		//		public event ChunkInsertedEventHandler ChunkInserted;
-		//		protected void OnChunkInserted (byte[] ChunkDescriptor)
-		//		{
-		//			if (ChunkDescriptor == null)
-		//				throw new ArgumentNullException ("chunkDescriptor");
-		//			if (ChunkInserted == null)
-		//				return;
-		//			ChunkInsertedEventArgs CIEA = new ChunkInsertedEventArgs (ChunkDescriptor);
-		//			lock (chunkRepositoryCollections) {
-		//				foreach (ChunkRepositoryCollection CRC in chunkRepositoryCollections) {
-		//					CRC.HandleChunkInserted (this, CIEA);
-		//				}
-		//			}
-		//			ChunkInserted (this, new ChunkInsertedEventArgs (ChunkDescriptor));
-		//		}
-		//Single pass, too much memory footprint for this work. can be redeced by a huge amount. requires optimization.
+
+		public event ChunkPushedEventHandler ChunkPushedEvent;
+
+		protected void OnChunkPushEvent (byte[] chunkID)
+		{
+			if (ChunkPushedEvent == null)
+				return;
+			ChunkPushedEvent (this, new ChunkPushedEventArgs (chunkID));
+		}
 	}
 }

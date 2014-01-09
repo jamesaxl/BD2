@@ -33,7 +33,7 @@ namespace BD2.Block
 	/// <summary>
 	/// All methods af this class are guaranteed to be thread-safe.
 	/// </summary>
-	public sealed class ChunkRepositoryCollection
+	public sealed class ChunkRepositoryCollection : ChunkRepository
 	{
 		SortedSet<ChunkRepository> repositories = new SortedSet<ChunkRepository> ();
 		//		Database database;
@@ -43,13 +43,13 @@ namespace BD2.Block
 		//				throw new ArgumentNullException ("database");
 		//			database = Database;
 		//		}
-		internal void AddRepository (ChunkRepository Repository)
+		internal void AddRepository (ChunkRepository repository)
 		{
-			if (Repository == null)
-				throw new ArgumentNullException ("Repository");
-			if (repositories.Contains (Repository))
+			if (repository == null)
+				throw new ArgumentNullException ("repository");
+			if (repositories.Contains (repository))
 				throw new InvalidOperationException ("Cannot add repository to collection more than once.");
-			repositories.Add (Repository);
+			repositories.Add (repository);
 		}
 		//		internal void HandleChunkInserted (object sender, ChunkInsertedEventArgs e)
 		//		{
@@ -70,12 +70,27 @@ namespace BD2.Block
 			}
 		}
 
-		internal byte[] Pull (byte[] Descriptor)
+		public override byte[] PullData (byte[] chunkID)
 		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
 			foreach (var Repo in GetRepositories ()) {
-				byte[] CD = Repo.Pull (Descriptor);
-				if (CD != null) {
-					return CD;
+				byte[] chunkData = Repo.PullData (chunkID);
+				if (chunkData != null) {
+					return chunkData;
+				}
+			}
+			return null;
+		}
+
+		public override byte[][] PullDependencies (byte[] chunkID)
+		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			foreach (var Repo in GetRepositories ()) {
+				byte[][] chunkMeta = Repo.PullDependencies (chunkID);
+				if (chunkMeta != null) {
+					return chunkMeta;
 				}
 			}
 			return null;
@@ -87,115 +102,73 @@ namespace BD2.Block
 		//			GetLeastCost (ChunkDescriptor, out Cost, out CR);
 		//			return CR.GetDependencies (ChunkDescriptor);
 		//		}
-		internal void Push (byte[] Hash, byte[] Data)
+		public override void Push (byte[] chunkID, byte[] data, byte[][] dependencies)
 		{
-			if (Hash == null)
-				throw new ArgumentNullException ("Hash");
-			if (Data == null)
-				throw new ArgumentNullException ("Data");
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			if (data == null)
+				throw new ArgumentNullException ("data");
+			if (dependencies == null)
+				throw new ArgumentNullException ("dependencies");
 			foreach (ChunkRepository CR in repositories)
-				CR.Push (Hash, Data);
+				CR.Push (chunkID, data, dependencies);
 		}
 
-		internal void GetLeastCost (byte[] ChunkDescriptor, out int Cost, out ChunkRepository Repository)
+		public override int GetLeastCost (int currentMinimum, byte[] chunkID)
 		{
-			if (ChunkDescriptor == null)
-				throw new ArgumentNullException ("ChunkDescriptor");
+			ChunkRepository repository;
+			GetLeastCost (chunkID, out currentMinimum, out repository);
+			return currentMinimum;
+		}
+
+		public void GetLeastCost (byte[] chunkID, out int cost, out ChunkRepository repository)
+		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
 			SortedSet<ChunkRepository> CRs = GetRepositories ();
-			Cost = int.MaxValue;
-			Repository = null;
+			cost = int.MaxValue;
+			repository = null;
 			//instant
 			foreach (var Repo in CRs) {
 				int Current = Repo.GetMaxCostForAny ();
-				if (Current < Cost) {
-					Cost = Current;
+				if (Current < cost) {
+					cost = Current;
 				}
 			}
 			//takes a while if object is not available locally or bad heuristics have deluded the first estimation process
 			foreach (var Repo in CRs) {
-				int Current = Repo.GetLeastCost (Cost, ChunkDescriptor);
-				if (Current < Cost) {
-					Cost = Current;
-					Repository = Repo;
+				int Current = Repo.GetLeastCost (cost, chunkID);
+				if (Current < cost) {
+					cost = Current;
+					repository = Repo;
 				}
 			}
-			if (Repository == null) {
-				Console.Error.WriteLine ("ChunkRepositoryCollection:GetLeastCost failed at first attempt.going fail-safe...");
-				Cost = int.MaxValue;
+			if (repository == null) {
+				Console.Error.WriteLine ("BD2.Block.ChunkRepositoryCollection.GetLeastCost(): failed at first attempt.going fail-safe...");
+				cost = int.MaxValue;
 				foreach (var Repo in CRs) {
-					int Current = Repo.GetLeastCost (Cost, ChunkDescriptor);
-					if (Current < Cost) {
-						Cost = Current;
-						Repository = Repo;
+					int Current = Repo.GetLeastCost (cost, chunkID);
+					if (Current < cost) {
+						cost = Current;
+						repository = Repo;
 					}
 				}
 			}
 		}
 
-		internal MemoryStream GetRawData (byte[] ChunkID, int Offset, int Count = -1)
+		public override IEnumerable<byte[]> Enumerate ()
 		{
-			byte[] CD = Pull (ChunkID);
-			if (CD != null) {
-				return new MemoryStream (CD, Offset, Count, false, false);
-			}
-			return null;
-		}
-		//		internal void Sync (out int ObjectsMoved)
-		//		{
-		//			//TODO: Bring back PPE sepport from experimental tree.it WAS worth it.
-		//			ObjectsMoved = 0;
-		//			SortedDictionary<ChunkRepository, CDRSorterhelper> RemotePPE = new SortedDictionary<ChunkRepository, CDRSorterhelper> ();
-		//			SortedSet<byte[]> RemoteTotalExcept = null;
-		//			SortedSet<byte[]> ExeptUnion = new SortedSet<byte[]> ();
-		//			object Lock_Populate = new object ();
-		//			System.Threading.Tasks.Parallel.ForEach (repositories, (Remote) => {
-		//				lock (Lock_Populate) {
-		//					CDRSorterhelper CSH = new CDRSorterhelper (Remote);
-		//					RemotePPE.Add (Remote, CSH);
-		//					if (RemoteTotalExcept == null) {
-		//						RemoteTotalExcept = new  SortedSet<byte[]> (CSH.OriginalDescriptors, ByteSequenceComparer.Shared);
-		//					} else {
-		//						RemoteTotalExcept.ExceptWith (CSH.OriginalDescriptors);
-		//					}
-		//				}
-		//			});
-		//			System.Threading.Tasks.Parallel.ForEach (RemotePPE, (CSHT) => {
-		//				CDRSorterhelper CSH = CSHT.Value;
-		//				RemoteTotalExcept.ExceptWith (CSH.OriginalDescriptors);
-		//			});
-		//			System.Threading.Tasks.Parallel.ForEach (RemotePPE, (CSHT) => {
-		//				CDRSorterhelper CSH = CSHT.Value;
-		//				CSH.ExceptedDescriptors = new SortedSet<byte[]> (CSH.OriginalDescriptors, CSH.OriginalDescriptors.Comparer);
-		//				CSH.ExceptedDescriptors.ExceptWith (RemoteTotalExcept);
-		//				ExeptUnion.UnionWith (CSH.ExceptedDescriptors);
-		//			});
-		//			System.Threading.Tasks.Parallel.ForEach (RemotePPE, (CSHT) => {
-		//				CDRSorterhelper CSH = CSHT.Value;
-		//				ExeptUnion.UnionWith (CSH.ExceptedDescriptors);
-		//			});
-		//			System.Threading.Tasks.Parallel.ForEach (RemotePPE, (CSHT) => {
-		//				CDRSorterhelper CSH = CSHT.Value;
-		//				CSH.MissingDescriptors = new SortedSet<byte[]> (ExeptUnion, CSH.OriginalDescriptors.Comparer);
-		//				CSH.MissingDescriptors.ExceptWith (CSH.ExceptedDescriptors);
-		//			});
-		//			System.Threading.Tasks.Parallel.ForEach (RemotePPE, (CSHT) => {
-		//				CDRSorterhelper CSH = CSHT.Value;
-		//				foreach (byte[] Chunk in CSH.MissingDescriptors)
-		//					CSH.Remote.Push (Chunk, Pull (Chunk));
-		//			});
-		//		}
-		internal SortedSet<byte[]> Enumerate ()
-		{
-			SortedSet<byte[]> cache = null;
+			SortedSet<byte[]> temp = null;
 			foreach (ChunkRepository CR in GetRepositories()) {
+				//TODO: if temp is initialized, check CR.Enumerate for being a sortedset instead of cloning it
 				SortedSet<byte[]> Chunks = new SortedSet<byte[]> (CR.Enumerate ());
-				if (cache != null)
-					cache.UnionWith (Chunks);
+				if (temp != null)
+					temp.UnionWith (Chunks);
 				else {
-					cache = Chunks;
+					temp = Chunks;
 				}
 			}
-			return cache;
+			return temp;
 		}
 		//		internal SortedSet<byte[]> GetIndependentChunks ()
 		//		{
@@ -210,21 +183,41 @@ namespace BD2.Block
 		//			}
 		//			return cache;
 		//		}
-		internal int GetLeastCost (int CurrentMinimum, byte[] ChunkDescriptor)
+		public override int GetMaxCostForAny ()
 		{
-			throw new NotImplementedException ();
-//			int Min = int.MaxValue;
-//			foreach (ChunkRepository CR in GetRepositories ()) {			
-//			}
-		}
-
-		internal int GetMaxCostForAny ()
-		{
-			//I really want F# here
 			int MaxCost = int.MaxValue;
 			foreach (ChunkRepository repo in GetRepositories ())
 				MaxCost = Math.Min (MaxCost, repo.GetMaxCostForAny ());
 			return MaxCost;
 		}
+		#region implemented abstract members of ChunkRepository
+		public override void Pull (byte[] chunkID, out byte[] data, out byte[][] dependencies)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<byte[]> EnumerateTopLevels ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateDependencies ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateTopLevelDependencies ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		Guid id = Guid.NewGuid ();
+
+		public override Guid ID {
+			get {
+				return id;
+			}
+		}
+		#endregion
 	}
 }
