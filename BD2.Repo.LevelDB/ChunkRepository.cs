@@ -27,47 +27,142 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using BSO;
-using BD2.Common;
+using BD2.Block;
 
-namespace BD2.Repo.LevelDB
+namespace BD2.Repo.Leveldb
 {
 	public class Repository : ChunkRepository
 	{
-		public Repository (string Path)
-		{
+		string path;
+		const string dependenciesDirectoryName = "Dependencies";
+		const string dataDirectoryName = "Data";
+		const string topLevelsDirectoryName = "TopLevel";
+		const string metaDirectoryName = "Meta";
+		LevelDB.DB ldependencies, ldata, ltopLevels, lmeta;
 
+		LevelDB.DB OpenLevelDB (string directoryName)
+		{
+			string dependenciesPath = path + Path.DirectorySeparatorChar + directoryName;
+			LevelDB.Options opts = new LevelDB.Options ();
+			opts.CreateIfMissing = true;
+			return new LevelDB.DB (opts, dependenciesPath, System.Text.Encoding.Unicode);
+		}
+
+		public Repository (string path)
+		{
+			this.path = path;
+			lmeta = OpenLevelDB (metaDirectoryName);
+			ldata = OpenLevelDB (dataDirectoryName);
+			ldependencies = OpenLevelDB (dependenciesDirectoryName);
+			ltopLevels = OpenLevelDB (topLevelsDirectoryName);
+			if (lmeta.GetRaw ("Guid") == null)
+				lmeta.Put ("Guid", Guid.NewGuid ().ToByteArray ());
+		}
+
+		static byte[] DependenciesToArray (byte[][] dependencies)
+		{
+			if (dependencies == null)
+				return null;
+			int lenOfDependencies = 0;
+			for (int n = 0; n != dependencies.Length; n++) {
+				lenOfDependencies += dependencies [n].Length + sizeof(int);
+			}
+			byte[] metadata = new byte[sizeof(int) + lenOfDependencies];
+			MemoryStream metastream = new MemoryStream (metadata, true);
+			BinaryWriter metawriter = new BinaryWriter (metastream);
+			metawriter.Write (dependencies.Length);
+			for (int n = 0; n != dependencies.Length; n++) {
+				metawriter.Write (dependencies [n].Length);
+				metawriter.Write (dependencies [n]);
+			}
+			return metadata;
+		}
+
+		static byte[][] ArrayToDependencies (byte[] array)
+		{
+			if (array == null)
+				return null;
+			MemoryStream metastream = new MemoryStream (array);
+			BinaryReader metareader = new BinaryReader (metastream);
+			int countOfDependencies = metareader.ReadInt32 ();
+			byte[][] dependencies = new byte[countOfDependencies][];
+			for (int n = 0; n != countOfDependencies; n++) {
+				dependencies [n] = metareader.ReadBytes (metareader.ReadInt32 ());
+			}
+			return dependencies;
 		}
 		#region implemented abstract members of ChunkRepository
-		#region implemented abstract members of ChunkRepository
+		public override void Push (byte[] chunkID, byte[] data, byte[][] dependencies)
+		{
+
+			var dependenciesArray = DependenciesToArray (dependencies);
+			ldependencies.Put (chunkID, dependenciesArray);
+			ldata.Put (chunkID, data);
+			ltopLevels.Put (chunkID, dependenciesArray);
+			foreach (byte[] dependency in dependencies) {
+
+				ltopLevels.Delete (dependency);
+			}
+		}
+
+		public override byte[] PullData (byte[] chunkID)
+		{
+			return ldata.GetRaw (chunkID);
+		}
+
+		public override byte[][] PullDependencies (byte[] chunkID)
+		{
+			return ArrayToDependencies (ldependencies.GetRaw (chunkID));
+		}
+
+		public override void Pull (byte[] chunkID, out byte[] data, out byte[][] dependencies)
+		{
+			data = ldata.GetRaw (chunkID);
+			dependencies = ArrayToDependencies (ldependencies.GetRaw (chunkID));
+		}
+
 		public override IEnumerable<byte[]> Enumerate ()
 		{
-			throw new NotImplementedException ();
-		}
-		#endregion
-		public override void Push (byte[] ChunkID, byte[] Data)
-		{
-			throw new NotImplementedException ();
+			IEnumerator<KeyValuePair <byte[],byte[]>> enumerator = ldependencies.GetRawEnumerator ();
+			while (enumerator.MoveNext ())
+				yield return enumerator.Current.Key;
 		}
 
-		public override byte[] Pull (byte[] ChunkID)
+		public override IEnumerable<byte[]> EnumerateTopLevels ()
 		{
-			throw new NotImplementedException ();
+			IEnumerator<KeyValuePair <byte[],byte[]>> enumerator = ltopLevels.GetRawEnumerator ();
+			while (enumerator.MoveNext ())
+				yield return enumerator.Current.Key;
 		}
 
-		public override int GetLeastCost (int CurrentMinimum, byte[] ChunkDescriptor)
+		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateDependencies ()
 		{
-			throw new NotImplementedException ();
+			IEnumerator<KeyValuePair <byte[],byte[]>> enumerator = ldependencies.GetRawEnumerator ();
+			while (enumerator.MoveNext ())
+				yield return new Tuple<byte[], byte[][]> (enumerator.Current.Key, ArrayToDependencies (enumerator.Current.Value));
+		}
+
+		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateTopLevelDependencies ()
+		{
+			IEnumerator<KeyValuePair <byte[],byte[]>> enumerator = ltopLevels.GetRawEnumerator ();
+			while (enumerator.MoveNext ())
+				yield return new Tuple<byte[], byte[][]> (enumerator.Current.Key, ArrayToDependencies (enumerator.Current.Value));
+		}
+
+		public override int GetLeastCost (int currentMinimum, byte[] chunkID)
+		{
+			//leveldb doesn't support any kind of cost estimation.
+			return 1024;
 		}
 
 		public override int GetMaxCostForAny ()
 		{
-			throw new NotImplementedException ();
+			return 1024;
 		}
 
 		public override Guid ID {
 			get {
-				throw new NotImplementedException ();
+				return new Guid (lmeta.GetRaw ("Guid"));
 			}
 		}
 		#endregion

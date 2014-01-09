@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{AD303744-084C-4FC6-84C9-46F6179C670C}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>BD2.Repo.LevelDB</RootNamespace>
+    <RootNamespace>BD2.Repo.Leveldb</RootNamespace>
     <AssemblyName>BD2.Repo.LevelDB</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
