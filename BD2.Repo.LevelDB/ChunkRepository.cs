@@ -42,6 +42,8 @@ namespace BD2.Repo.Leveldb
 
 		LevelDB.DB OpenLevelDB (string directoryName)
 		{
+			if (directoryName == null)
+				throw new ArgumentNullException ("directoryName");
 			string dependenciesPath = path + Path.DirectorySeparatorChar + directoryName;
 			LevelDB.Options opts = new LevelDB.Options ();
 			opts.CreateIfMissing = true;
@@ -50,6 +52,8 @@ namespace BD2.Repo.Leveldb
 
 		public Repository (string path)
 		{
+			if (path == null)
+				throw new ArgumentNullException ("path");
 			this.path = path;
 			lmeta = OpenLevelDB (metaDirectoryName);
 			ldata = OpenLevelDB (dataDirectoryName);
@@ -94,29 +98,46 @@ namespace BD2.Repo.Leveldb
 		#region implemented abstract members of ChunkRepository
 		public override void Push (byte[] chunkID, byte[] data, byte[][] dependencies)
 		{
-
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			if (data == null)
+				throw new ArgumentNullException ("data");
+			if (dependencies == null)
+				throw new ArgumentNullException ("dependencies");
 			var dependenciesArray = DependenciesToArray (dependencies);
 			ldependencies.Put (chunkID, dependenciesArray);
 			ldata.Put (chunkID, data);
 			ltopLevels.Put (chunkID, dependenciesArray);
 			foreach (byte[] dependency in dependencies) {
-
+				if (dependency == null)
+					throw new ArgumentNullException ("dependency[x]");
 				ltopLevels.Delete (dependency);
 			}
+			OnChunkPushEvent (chunkID);
 		}
 
 		public override byte[] PullData (byte[] chunkID)
 		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
 			return ldata.GetRaw (chunkID);
 		}
 
 		public override byte[][] PullDependencies (byte[] chunkID)
 		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
 			return ArrayToDependencies (ldependencies.GetRaw (chunkID));
 		}
 
 		public override void Pull (byte[] chunkID, out byte[] data, out byte[][] dependencies)
 		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			if (data == null)
+				throw new ArgumentNullException ("data");
+			if (dependencies == null)
+				throw new ArgumentNullException ("dependencies");
 			data = ldata.GetRaw (chunkID);
 			dependencies = ArrayToDependencies (ldependencies.GetRaw (chunkID));
 		}
@@ -151,6 +172,8 @@ namespace BD2.Repo.Leveldb
 
 		public override int GetLeastCost (int currentMinimum, byte[] chunkID)
 		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
 			//leveldb doesn't support any kind of cost estimation.
 			return 1024;
 		}
