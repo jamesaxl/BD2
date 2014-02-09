@@ -34,19 +34,48 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StreamHandler.cs" />
-    <Compile Include="ServiceAnnouncement.cs" />
-    <Compile Include="ServiceRequest.cs" />
-    <Compile Include="ServiceResponse.cs" />
-    <Compile Include="ObjectBus.cs" />
-    <Compile Include="ObjectBusMessage.cs" />
-    <Compile Include="ObjectBusMessageDeserializer.cs" />
-    <Compile Include="ServiceManager.cs" />
-    <Compile Include="ObjectBusMessageTypeIDAttribute.cs" />
-    <Compile Include="ServiceResponseStatus.cs" />
-    <Compile Include="ServiceAgent.cs" />
-    <Compile Include="ServiceAgentMode.cs" />
-    <Compile Include="ObjectBusSession.cs" />
-    <Compile Include="ServiceDestroy.cs" />
+    <Compile Include="TransparentStream\TransparentStreamMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamServer.cs" />
+    <Compile Include="TransparentStream\TransparentStream.cs" />
+    <Compile Include="ObjectBus\ObjectBus.cs" />
+    <Compile Include="ObjectBus\ObjectBusMessage.cs" />
+    <Compile Include="ObjectBus\ObjectBusMessageDeserializer.cs" />
+    <Compile Include="ObjectBus\ObjectBusMessageTypeIDAttribute.cs" />
+    <Compile Include="ObjectBus\ObjectBusSession.cs" />
+    <Compile Include="Service\ServiceAgent.cs" />
+    <Compile Include="Service\ServiceAgentMode.cs" />
+    <Compile Include="Service\ServiceAnnounceMessage.cs" />
+    <Compile Include="Service\ServiceDestroyMessage.cs" />
+    <Compile Include="Service\ServiceManager.cs" />
+    <Compile Include="Service\ServiceRequestMessage.cs" />
+    <Compile Include="Service\ServiceResponseMessage.cs" />
+    <Compile Include="Service\ServiceResponseStatus.cs" />
+    <Compile Include="TransparentStream\TransparentStreamReadRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamReadResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamWriteRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamWriteResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamAsyncResult.cs" />
+    <Compile Include="TransparentStream\TransparentStreamGetReadTimeoutRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamGetWriteTimeoutRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamGetReadTimeoutResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamGetWriteTimeoutResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamGetLengthRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamGetLengthResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSetLengthRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSetLengthResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamFlushRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamFlushResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCloseRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCloseResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSetReadTimeoutRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSetReadTimeoutResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSetWriteTimeoutRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSetWriteTimeoutResponseMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="TransparentStream\" />
+    <Folder Include="ObjectBus\" />
+    <Folder Include="Service\" />
+  </ItemGroup>
 </Project>

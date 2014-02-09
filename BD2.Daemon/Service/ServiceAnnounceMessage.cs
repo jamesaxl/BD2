@@ -28,28 +28,48 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("43a54d04-52b8-4052-94bf-bd1512995dec")]
-	[ObjectBusMessageDeserializerAttribute(typeof(ServiceDestroy), "Deserialize")]
-	public class ServiceDestroy : ObjectBusMessage
+	[ObjectBusMessageTypeIDAttribute("51aecfc5-8e82-4ca8-af1d-c5c556d23a55")]
+	[ObjectBusMessageDeserializerAttribute(typeof(ServiceAnnounceMessage), "Deserialize")]
+	public sealed class ServiceAnnounceMessage : ObjectBusMessage, IComparable
 	{
-		Guid sessionID;
+		Guid id;
 
-		public Guid SessionID {
+		public Guid ID {
 			get {
-				return sessionID;
+				return id;
 			}
 		}
 
-		public ServiceDestroy (Guid sessionID)
+		Guid type;
+
+		public Guid Type {
+			get {
+				return type;
+			}
+		}
+
+		string name;
+
+		public string Name {
+			get {
+				return name;
+			}
+		}
+
+		public ServiceAnnounceMessage (Guid id, Guid type, string name)
 		{
-			this.sessionID = sessionID;
+			if (name == null)
+				throw new ArgumentNullException ("name");
+			this.id = id;
+			this.type = type;
+			this.name = name;
 		}
 
 		public static ObjectBusMessage Deserialize (byte[] bytes)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new ServiceDestroy (new Guid (BR.ReadBytes (16)));
+					return new ServiceAnnounceMessage (new Guid (BR.ReadBytes (16)), new Guid (BR.ReadBytes (16)), BR.ReadString ());
 				}
 			}
 		}
@@ -58,7 +78,9 @@ namespace BD2.Daemon
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
-					BW.Write (sessionID.ToByteArray ());
+					BW.Write (id.ToByteArray ());
+					BW.Write (type.ToByteArray ());
+					BW.Write (name);
 					return MS.GetBuffer ();
 				}
 			}
@@ -66,8 +88,16 @@ namespace BD2.Daemon
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("43a54d04-52b8-4052-94bf-bd1512995dec");
+				return Guid.Parse ("51aecfc5-8e82-4ca8-af1d-c5c556d23a55");
 			}
+		}
+		#endregion
+		#region IComparable implementation
+		int IComparable.CompareTo (object obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException ("obj");
+			return id.CompareTo ((obj as ServiceAnnounceMessage).id);
 		}
 		#endregion
 	}

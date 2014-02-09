@@ -28,64 +28,72 @@ using System;
 
 namespace BD2.Daemon
 {
-	public abstract class ServiceAgent
+	[ObjectBusMessageTypeIDAttribute("e7002100-c14c-4170-9e0f-db54aea9a847")]
+	[ObjectBusMessageDeserializerAttribute(typeof(ServiceResponseMessage),"Deserialize")]
+	public class ServiceResponseMessage : ObjectBusMessage
 	{
-		ServiceAgentMode serviceAgentMode;
+	
+		Guid id;
 
-		protected ServiceAgentMode ServiceAgentMode {
+		public Guid ID {
 			get {
-				return serviceAgentMode;
+				return id;
 			}
 		}
 
-		ObjectBusSession objectBusSession;
+		Guid requestID;
 
-		protected ObjectBusSession ObjectBusSession {
+		public Guid RequestID {
 			get {
-				return objectBusSession;
+				return requestID;
 			}
 		}
 
-		System.Threading.Thread thread;
+		ServiceResponseStatus status;
 
-		protected System.Threading.Thread Thread {
+		public ServiceResponseStatus Status {
 			get {
-				return thread;
+				return status;
 			}
 		}
 
-		Action flush;
-
-		protected void Flush ()
+		public static ObjectBusMessage Deserialize (byte[] bytes)
 		{
-			flush ();
-		}
-
-		protected ServiceAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush)
-		{
-			if (!Enum.IsDefined (typeof(ServiceAgentMode), serviceAgentMode)) {
-				throw new ArgumentException ("Invalid value for argument 'serviceAgentMode'", "serviceAgentMode");
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					return new ServiceResponseMessage (new Guid (BR.ReadBytes (16)), new Guid (BR.ReadBytes (16)), (ServiceResponseStatus)BR.ReadInt32 ());
+				}
 			}
-			if (objectBusSession == null)
-				throw new ArgumentNullException ("objectBusSession");
-			if (flush == null)
-				throw new ArgumentNullException ("flush");
-			this.serviceAgentMode = serviceAgentMode;
-			this.objectBusSession = objectBusSession;
-			this.flush = flush;
-			thread = new System.Threading.Thread (Run);
-			thread.Start ();
 		}
 
-		public void Destroy ()
+		public ServiceResponseMessage (Guid id, Guid requestID, ServiceResponseStatus status)
 		{
-			ObjectBusSession.Destroy ();
+			if (!Enum.IsDefined (typeof(ServiceResponseStatus), status)) {
+				throw new ArgumentException ("Status is not valid", "status");
+			}
+			this.id = id;
+			this.requestID = requestID;
+			this.status = status;
+		}
+		#region implemented abstract members of ObjectBusMessage
+		public override byte[] GetMessageBody ()
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (id.ToByteArray ());
+					BW.Write (requestID.ToByteArray ());
+					BW.Write ((int)status);
+					return MS.GetBuffer ();
+				}
+			}
 		}
 
-		protected abstract void Run ();
-
-		public abstract void DestroyRequestReceived ();
-
-		public abstract void SessionDisconnected ();
+		public override Guid TypeID {
+			get {
+				return Guid.Parse ("e7002100-c14c-4170-9e0f-db54aea9a847");
+			}
+		}
+		#endregion
 	}
 }
+

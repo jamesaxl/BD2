@@ -29,8 +29,8 @@ using System;
 namespace BD2.Daemon
 {
 	[ObjectBusMessageTypeIDAttribute("84210e38-8515-48e1-bc00-edbd595d757d")]
-	[ObjectBusMessageDeserializerAttribute(typeof(ServiceRequest), "Deserialize")]
-	public sealed class ServiceRequest : ObjectBusMessage
+	[ObjectBusMessageDeserializerAttribute(typeof(ServiceRequestMessage), "Deserialize")]
+	public sealed class ServiceRequestMessage : ObjectBusMessage
 	{
 
 		Guid id;
@@ -49,7 +49,7 @@ namespace BD2.Daemon
 			}
 		}
 
-		public ServiceRequest (Guid id, Guid serviceID)
+		public ServiceRequestMessage (Guid id, Guid serviceID)
 		{
 			this.id = id;
 			this.serviceID = serviceID;
@@ -59,7 +59,7 @@ namespace BD2.Daemon
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new ServiceRequest (new Guid (BR.ReadBytes (16)), new Guid (BR.ReadBytes (16)));
+					return new ServiceRequestMessage (new Guid (BR.ReadBytes (16)), new Guid (BR.ReadBytes (16)));
 				}
 			}
 		}

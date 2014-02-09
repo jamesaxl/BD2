@@ -32,11 +32,11 @@ namespace BD2.Daemon
 	public class ServiceManager
 	{
 		ObjectBus objectBus;
-		SortedDictionary<Guid, ServiceAnnouncement> localServices = new SortedDictionary<Guid, ServiceAnnouncement> ();
-		SortedDictionary<ServiceAnnouncement, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent>> localServiceAgents = new SortedDictionary<ServiceAnnouncement, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent>> ();
-		SortedSet<ServiceAnnouncement> remoteServices = new SortedSet<ServiceAnnouncement> ();
-		SortedDictionary<Guid, Tuple<ServiceRequest, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent>> requests = new SortedDictionary<Guid, Tuple<ServiceRequest, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent>> ();
-		SortedDictionary<Guid, ServiceResponse> pendingResponses = new SortedDictionary<Guid, ServiceResponse> ();
+		SortedDictionary<Guid, ServiceAnnounceMessage> localServices = new SortedDictionary<Guid, ServiceAnnounceMessage> ();
+		SortedDictionary<ServiceAnnounceMessage, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent>> localServiceAgents = new SortedDictionary<ServiceAnnounceMessage, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent>> ();
+		SortedSet<ServiceAnnounceMessage> remoteServices = new SortedSet<ServiceAnnounceMessage> ();
+		SortedDictionary<Guid, Tuple<ServiceRequestMessage, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent>> requests = new SortedDictionary<Guid, Tuple<ServiceRequestMessage, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent>> ();
+		SortedDictionary<Guid, ServiceResponseMessage> pendingResponses = new SortedDictionary<Guid, ServiceResponseMessage> ();
 		SortedDictionary<Guid, ServiceAgent> sessionAgents = new  SortedDictionary<Guid, ServiceAgent> ();
 
 		public ServiceManager (ObjectBus objectBus)
@@ -44,10 +44,10 @@ namespace BD2.Daemon
 			if (objectBus == null)
 				throw new ArgumentNullException ("objectBus");
 			this.objectBus = objectBus;
-			objectBus.RegisterType (typeof(ServiceAnnouncement), ServiceAnnouncementReceived);
-			objectBus.RegisterType (typeof(ServiceResponse), ServiceResponseReceived);
-			objectBus.RegisterType (typeof(ServiceRequest), ServiceRequestReceived);
-			objectBus.RegisterType (typeof(ServiceDestroy), ServiceDestroyReceived);
+			objectBus.RegisterType (typeof(ServiceAnnounceMessage), ServiceAnnouncementReceived);
+			objectBus.RegisterType (typeof(ServiceResponseMessage), ServiceResponseReceived);
+			objectBus.RegisterType (typeof(ServiceRequestMessage), ServiceRequestReceived);
+			objectBus.RegisterType (typeof(ServiceDestroyMessage), ServiceDestroyReceived);
 			objectBus.Start ();
 		}
 
@@ -58,9 +58,9 @@ namespace BD2.Daemon
 			#endif
 			if (message == null)
 				throw new ArgumentNullException ("message");
-			if (!(message is ServiceAnnouncement))
-				throw new ArgumentException (string.Format ("message type is not valid, must be of type {0}", typeof(ServiceAnnouncement).FullName));
-			ServiceAnnouncement serviceAnnouncement = (ServiceAnnouncement)message;
+			if (!(message is ServiceAnnounceMessage))
+				throw new ArgumentException (string.Format ("message type is not valid, must be of type {0}", typeof(ServiceAnnounceMessage).FullName));
+			ServiceAnnounceMessage serviceAnnouncement = (ServiceAnnounceMessage)message;
 			lock (remoteServices)
 				remoteServices.Add (serviceAnnouncement);
 		}
@@ -72,10 +72,10 @@ namespace BD2.Daemon
 			#endif
 			if (message == null)
 				throw new ArgumentNullException ("message");
-			if (!(message is ServiceResponse))
-				throw new ArgumentException (string.Format ("message type is not valid, must be of type {0}", typeof(ServiceResponse).FullName));
-			ServiceResponse serviceResponse = (ServiceResponse)message;
-			Tuple<ServiceRequest, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent> requestTuple = requests [serviceResponse.RequestID];
+			if (!(message is ServiceResponseMessage))
+				throw new ArgumentException (string.Format ("message type is not valid, must be of type {0}", typeof(ServiceResponseMessage).FullName));
+			ServiceResponseMessage serviceResponse = (ServiceResponseMessage)message;
+			Tuple<ServiceRequestMessage, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent> requestTuple = requests [serviceResponse.RequestID];
 			lock (pendingResponses)
 				pendingResponses.Add (serviceResponse.RequestID, serviceResponse);
 			requestTuple.Item2.Set ();
@@ -90,16 +90,16 @@ namespace BD2.Daemon
 
 			if (message == null)
 				throw new ArgumentNullException ("message");
-			if (!(message is ServiceRequest))
-				throw new ArgumentException (string.Format ("message type is not valid, must be of type {0}", typeof(ServiceRequest).FullName));
-			ServiceRequest serviceRequest = (ServiceRequest)message;
+			if (!(message is ServiceRequestMessage))
+				throw new ArgumentException (string.Format ("message type is not valid, must be of type {0}", typeof(ServiceRequestMessage).FullName));
+			ServiceRequestMessage serviceRequest = (ServiceRequestMessage)message;
 			Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> agentFunc;
 			lock (localServices)
 				lock (localServiceAgents)
 					agentFunc = localServiceAgents [localServices [serviceRequest.ServiceID]];
 			Guid responseID = Guid.NewGuid ();
 			ObjectBusSession session = objectBus.CreateSession (responseID, SessionDisconnected);
-			ServiceResponse response = new ServiceResponse (responseID, serviceRequest.ID, ServiceResponseStatus.Accepted);
+			ServiceResponseMessage response = new ServiceResponseMessage (responseID, serviceRequest.ID, ServiceResponseStatus.Accepted);
 			ServiceAgent agent = agentFunc.Invoke (ServiceAgentMode.Server, session, objectBus.Flush);
 			lock (sessionAgents)
 				sessionAgents.Add (session.SessionID, agent);
@@ -124,26 +124,26 @@ namespace BD2.Daemon
 
 			if (message == null)
 				throw new ArgumentNullException ("message");
-			if (!(message is ServiceDestroy)) {
-				throw new ArgumentException (string.Format ("message type is not valid, must be of type {0}", typeof(ServiceDestroy).FullName));
+			if (!(message is ServiceDestroyMessage)) {
+				throw new ArgumentException (string.Format ("message type is not valid, must be of type {0}", typeof(ServiceDestroyMessage).FullName));
 			}
-			ServiceDestroy serviceDestroy = (ServiceDestroy)message;
+			ServiceDestroyMessage serviceDestroy = (ServiceDestroyMessage)message;
 			lock (sessionAgents)
 				sessionAgents [serviceDestroy.SessionID].DestroyRequestReceived ();
 			objectBus.DestroySession (serviceDestroy);
 
 		}
 
-		public SortedSet<ServiceAnnouncement> EnumerateRemoteServices ()
+		public SortedSet<ServiceAnnounceMessage> EnumerateRemoteServices ()
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
 			#endif
 			lock (remoteServices)
-				return new SortedSet<ServiceAnnouncement> (remoteServices);
+				return new SortedSet<ServiceAnnounceMessage> (remoteServices);
 		}
 
-		public void AnnounceService (ServiceAnnouncement serviceAnnouncement, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> func)
+		public void AnnounceService (ServiceAnnounceMessage serviceAnnouncement, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> func)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -161,7 +161,7 @@ namespace BD2.Daemon
 			objectBus.SendMessage (serviceAnnouncement);
 		}
 
-		public ServiceAgent RequestService (ServiceAnnouncement remoteServiceAnnouncement, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> func)
+		public ServiceAgent RequestService (ServiceAnnounceMessage remoteServiceAnnouncement, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> func)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -170,16 +170,16 @@ namespace BD2.Daemon
 			lock (remoteServices)
 				if (!remoteServices.Contains (remoteServiceAnnouncement))
 					throw new InvalidOperationException ("The provided remoteServiceAnnouncement is not valid.");
-			ServiceRequest request = new ServiceRequest (Guid.NewGuid (), remoteServiceAnnouncement.ID);
+			ServiceRequestMessage request = new ServiceRequestMessage (Guid.NewGuid (), remoteServiceAnnouncement.ID);
 			System.Threading.ManualResetEvent mre = new System.Threading.ManualResetEvent (false);
 			System.Threading.ManualResetEvent mre_done = new System.Threading.ManualResetEvent (false);
 
 			lock (requests)
-				requests.Add (request.ID, new Tuple<ServiceRequest, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent> (request, mre, mre_done));
+				requests.Add (request.ID, new Tuple<ServiceRequestMessage, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent> (request, mre, mre_done));
 			objectBus.SendMessage (request);
 			mre.WaitOne ();
 			//todo: add exception handling here
-			ServiceResponse response = pendingResponses [request.ID];
+			ServiceResponseMessage response = pendingResponses [request.ID];
 			lock (pendingResponses)
 				pendingResponses.Remove (response.RequestID);
 			ServiceAgent agent = func (ServiceAgentMode.Client, objectBus.CreateSession (response.ID, SessionDisconnected), objectBus.Flush);

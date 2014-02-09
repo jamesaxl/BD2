@@ -157,7 +157,7 @@ namespace BD2.Daemon
 				streamHandlerCallbackHandlers.Add (session, streamHandlerCallbackHandler);
 		}
 
-		public void DestroySession (ServiceDestroy serviceDestroy)
+		public void DestroySession (ServiceDestroyMessage serviceDestroy)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -179,7 +179,7 @@ namespace BD2.Daemon
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
 			#endif
-			ServiceDestroy serviceDestroy = new ServiceDestroy (session.SessionID);
+			ServiceDestroyMessage serviceDestroy = new ServiceDestroyMessage (session.SessionID);
 			DestroySession (serviceDestroy);
 			SendMessage (serviceDestroy);
 		}
