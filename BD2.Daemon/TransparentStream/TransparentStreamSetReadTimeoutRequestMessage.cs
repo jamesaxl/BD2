@@ -28,13 +28,21 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("")]
+	[ObjectBusMessageTypeIDAttribute("cdac82dc-4279-42cd-b792-34c44b31e135")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamSetReadTimeoutRequestMessage), "Deserialize")]
-	class TransparentStreamSetReadTimeoutRequestMessage : ObjectBusMessage
+	class TransparentStreamSetReadTimeoutRequestMessage : TransparentStreamMessageBase
 	{
+		Guid id;
+
+		public Guid ID {
+			get {
+				return id;
+			}
+		}
+
 		Guid streamID;
 
-		public Guid StreamID {
+		public override Guid StreamID {
 			get {
 				return streamID;
 			}
@@ -48,20 +56,45 @@ namespace BD2.Daemon
 			}
 		}
 
-		public TransparentStreamSetReadTimeoutRequestMessage (Guid streamID, int readTimeout)
+		public TransparentStreamSetReadTimeoutRequestMessage (Guid id, Guid streamID, int readTimeout)
 		{
+			this.id = id;
 			this.streamID = streamID;
 			this.readTimeout = readTimeout;
+		}
+
+		public static TransparentStreamSetReadTimeoutRequestMessage Deserialize (byte[] buffer)
+		{
+			if (buffer == null)
+				throw new ArgumentNullException ("buffer");
+			Guid streamID;
+			Guid requestID;
+			int readTimeout;
+			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
+					streamID = new Guid (BR.ReadBytes (16));
+					requestID = new Guid (BR.ReadBytes (16));
+					readTimeout = BR.ReadInt32 ();
+				}
+			}
+			return new TransparentStreamSetReadTimeoutRequestMessage (streamID, requestID, readTimeout);
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
-			throw new NotImplementedException ();
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (id.ToByteArray ());
+					BW.Write (streamID.ToByteArray ());
+					BW.Write (readTimeout);
+					return MS.ToArray ();
+				}
+			}
 		}
 
 		public override Guid TypeID {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("cdac82dc-4279-42cd-b792-34c44b31e135");
 			}
 		}
 		#endregion

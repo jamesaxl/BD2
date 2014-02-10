@@ -28,9 +28,9 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("")]
+	[ObjectBusMessageTypeIDAttribute("284c41f1-ce90-4c68-b0b9-1042db977aa5")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamWriteRequestMessage), "Deserialize")]
-	class TransparentStreamWriteRequestMessage : ObjectBusMessage
+	class TransparentStreamWriteRequestMessage : TransparentStreamMessageBase
 	{
 		Guid id;
 
@@ -42,7 +42,7 @@ namespace BD2.Daemon
 
 		Guid streamID;
 
-		public Guid StreamID {
+		public override Guid StreamID {
 			get {
 				return streamID;
 			}
@@ -56,39 +56,46 @@ namespace BD2.Daemon
 			}
 		}
 
-		int offset;
-
-		public int Offset {
-			get {
-				return offset;
-			}
-		}
-
-		int count;
-
-		public int Count {
-			get {
-				return count;
-			}
-		}
-
-		public TransparentStreamWriteRequestMessage (Guid id, Guid streamID, byte[] buffer, int offset, int count)
+		public TransparentStreamWriteRequestMessage (Guid id, Guid streamID, byte[] buffer)
 		{
 			this.id = id;
 			this.streamID = streamID;
 			this.buffer = buffer;
-			this.offset = offset;
-			this.count = count;
+		}
+
+		public static TransparentStreamWriteRequestMessage Deserialize (byte[] buffer)
+		{
+			if (buffer == null)
+				throw new ArgumentNullException ("buffer");
+			Guid streamID;
+			Guid requestID;
+			byte[] data;
+			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
+					streamID = new Guid (BR.ReadBytes (16));
+					requestID = new Guid (BR.ReadBytes (16));
+					data = BR.ReadBytes (BR.ReadInt32 ());
+				}
+			}
+			return new TransparentStreamWriteRequestMessage (streamID, requestID, data);
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
-			throw new NotImplementedException ();
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (id.ToByteArray ());
+					BW.Write (streamID.ToByteArray ());
+					BW.Write (buffer.Length);
+					BW.Write (buffer);
+					return MS.ToArray ();
+				}
+			}
 		}
 
 		public override Guid TypeID {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("284c41f1-ce90-4c68-b0b9-1042db977aa5");
 			}
 		}
 		#endregion

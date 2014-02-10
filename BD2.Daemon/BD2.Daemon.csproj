@@ -71,6 +71,7 @@
     <Compile Include="TransparentStream\TransparentStreamSetReadTimeoutResponseMessage.cs" />
     <Compile Include="TransparentStream\TransparentStreamSetWriteTimeoutRequestMessage.cs" />
     <Compile Include="TransparentStream\TransparentStreamSetWriteTimeoutResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamMessageBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

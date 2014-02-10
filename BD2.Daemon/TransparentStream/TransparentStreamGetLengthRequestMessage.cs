@@ -28,9 +28,9 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("")]
+	[ObjectBusMessageTypeIDAttribute("9341b71c-33df-4ad6-a7d1-824d60d929f7")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamGetLengthRequestMessage), "Deserialize")]
-	class TransparentStreamGetLengthRequestMessage : ObjectBusMessage
+	class TransparentStreamGetLengthRequestMessage : TransparentStreamMessageBase
 	{
 		Guid id;
 
@@ -42,7 +42,7 @@ namespace BD2.Daemon
 
 		Guid streamID;
 
-		public Guid StreamID {
+		public override Guid StreamID {
 			get {
 				return streamID;
 			}
@@ -53,6 +53,21 @@ namespace BD2.Daemon
 			this.id = id;
 			this.streamID = streamID;
 		}
+
+		public static TransparentStreamGetLengthRequestMessage Deserialize (byte[] buffer)
+		{
+			if (buffer == null)
+				throw new ArgumentNullException ("buffer");
+			Guid id;
+			Guid streamID;
+			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
+					id = new Guid (BR.ReadBytes (16));
+					streamID = new Guid (BR.ReadBytes (16));
+				}
+			}
+			return new TransparentStreamGetLengthRequestMessage (id, streamID);
+		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
@@ -60,14 +75,14 @@ namespace BD2.Daemon
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
 					BW.Write (streamID.ToByteArray ());
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("");
+				return Guid.Parse ("9341b71c-33df-4ad6-a7d1-824d60d929f7");
 			}
 		}
 		#endregion

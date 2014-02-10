@@ -28,10 +28,18 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("")]
+	[ObjectBusMessageTypeIDAttribute("ae693bc3-4cdf-4151-9085-5bd4f2093adf")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamGetLengthResponseMessage), "Deserialize")]
-	class TransparentStreamGetLengthResponseMessage : ObjectBusMessage
+	class TransparentStreamGetLengthResponseMessage : TransparentStreamMessageBase
 	{
+		Guid streamID;
+
+		public override Guid StreamID {
+			get {
+				return streamID;
+			}
+		}
+
 		Guid requestID;
 
 		public Guid RequsetID {
@@ -48,26 +56,73 @@ namespace BD2.Daemon
 			}
 		}
 
-		public TransparentStreamGetLengthResponseMessage (Guid requestID, long length)
+		Exception exception;
+
+		public Exception Exception {
+			get {
+				return exception;
+			}
+		}
+
+		public TransparentStreamGetLengthResponseMessage (Guid streamID, Guid requestID, long length, Exception exception)
 		{
+			this.streamID = streamID;
 			this.requestID = requestID;
 			this.length = length;
+			this.exception = exception;
+		}
+
+		public static TransparentStreamGetLengthResponseMessage Deserialize (byte[] buffer)
+		{
+			if (buffer == null)
+				throw new ArgumentNullException ("buffer");
+			Guid streamID;
+			Guid requestID;
+			long length;
+			Exception exception;
+			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
+					streamID = new Guid (BR.ReadBytes (16));
+					requestID = new Guid (BR.ReadBytes (16));
+					length = BR.ReadInt64 ();
+				}
+				if (MS.ReadByte () == 0) {
+					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+					object deserializedObject = BF.Deserialize (MS);
+					if (deserializedObject is Exception) {
+						exception = (Exception)deserializedObject;
+					} else {
+						throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
+					}
+				} else
+					exception = null;
+			}
+			return new TransparentStreamGetLengthResponseMessage (streamID, requestID, length, exception);
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (streamID.ToByteArray ());
 					BW.Write (requestID.ToByteArray ());
 					BW.Write (length);
-					return MS.GetBuffer ();
 				}
+				if (exception == null) {
+					MS.WriteByte (0);
+				} else {
+					MS.WriteByte (1);
+					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+					BF.Serialize (MS, exception);
+				}
+				return MS.ToArray ();
+
 			}
 		}
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("");
+				return Guid.Parse ("ae693bc3-4cdf-4151-9085-5bd4f2093adf");
 			}
 		}
 		#endregion

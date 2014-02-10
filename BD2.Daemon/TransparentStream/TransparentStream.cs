@@ -165,6 +165,52 @@ namespace BD2.Daemon
 		{
 			base.Close ();
 		}
+
+		public void ResponseReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+			throw new NotImplementedException ();
+		}
+		#region "Callbacks"
+		void TransparentStreamCloseResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+
+		void TransparentStreamFlushResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+
+		void TransparentStreamGetLengthResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+
+		void TransparentStreamGetReadTimeoutResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+
+		void TransparentStreamGetWriteTimeoutResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+
+		void TransparentStreamReadResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+
+		void TransparentStreamSetLengthResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+
+		void TransparentStreamSetReadTimeoutResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+
+		void TransparentStreamSetWriteTimeoutResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+
+		void TransparentStreamWriteResponseMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+		}
+		#endregion
 	}
 }
 

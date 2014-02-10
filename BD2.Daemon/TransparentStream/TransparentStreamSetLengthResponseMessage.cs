@@ -28,10 +28,18 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("")]
+	[ObjectBusMessageTypeIDAttribute("1d3efdf8-38f9-423f-b626-da130710adc8")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamSetLengthResponseMessage), "Deserialize")]
-	class TransparentStreamSetLengthResponseMessage : ObjectBusMessage
+	class TransparentStreamSetLengthResponseMessage : TransparentStreamMessageBase
 	{
+		Guid streamID;
+
+		public override Guid StreamID {
+			get {
+				return streamID;
+			}
+		}
+
 		Guid requestID;
 
 		public Guid RequestID {
@@ -48,16 +56,46 @@ namespace BD2.Daemon
 			}
 		}
 
-		public TransparentStreamSetLengthResponseMessage (Guid requestID, Exception exception)
+		public TransparentStreamSetLengthResponseMessage (Guid streamID, Guid requestID, Exception exception)
 		{
+			this.streamID = streamID;
 			this.requestID = requestID;
 			this.exception = exception;
+		}
+
+		public static TransparentStreamSetLengthResponseMessage Deserialize (byte[] buffer)
+		{
+			if (buffer == null)
+				throw new ArgumentNullException ("buffer");
+			Guid streamID;
+			Guid requestID;
+			Exception exception;
+			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
+					streamID = new Guid (BR.ReadBytes (16));
+					requestID = new Guid (BR.ReadBytes (16));
+				}
+				if (MS.ReadByte () == 0) {
+					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+					object deserializedObject = BF.Deserialize (MS);
+					if (deserializedObject is Exception) {
+						exception = (Exception)deserializedObject;
+					} else {
+						throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
+					}
+				} else
+					exception = null;
+			}
+			return new TransparentStreamSetLengthResponseMessage (streamID, requestID, exception);
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
-				MS.Write (requestID.ToByteArray (), 0, 16);
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					MS.Write (streamID.ToByteArray (), 0, 16);
+					MS.Write (requestID.ToByteArray (), 0, 16);
+				}
 				if (exception == null) {
 					MS.WriteByte (0);
 				} else {
@@ -65,13 +103,13 @@ namespace BD2.Daemon
 					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
 					BF.Serialize (MS, exception);
 				}
-				return MS.GetBuffer ();
+				return MS.ToArray ();
 			}
 		}
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("");
+				return Guid.Parse ("1d3efdf8-38f9-423f-b626-da130710adc8");
 			}
 		}
 		#endregion

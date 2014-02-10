@@ -56,7 +56,7 @@ namespace BD2.Daemon
 			}
 		}
 
-		protected ObjectBusSession ObjectBusSession {
+		public ObjectBusSession ObjectBusSession {
 			get {
 				return objectBusSession;
 			}
@@ -90,26 +90,26 @@ namespace BD2.Daemon
 			this.objectBusSession = objectBusSession;
 			this.flush = flush;
 			thread = new System.Threading.Thread (Run);
-			objectBusSession.RegisterType (typeof(TransparentStreamCloseRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamCloseResponseMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamFlushRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamFlushResponseMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamGetLengthRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamGetLengthResponseMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamGetReadTimeoutRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamGetReadTimeoutResponseMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamGetWriteTimeoutRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamGetWriteTimeoutResponseMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamReadRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamReadResponseMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamSetLengthRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamSetLengthResponseMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamSetReadTimeoutRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamSetReadTimeoutResponseMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamSetWriteTimeoutRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamSetWriteTimeoutResponseMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamWriteRequestMessage), TransparentStreamNotImplemented);
-			objectBusSession.RegisterType (typeof(TransparentStreamWriteResponseMessage), TransparentStreamNotImplemented);
+			objectBusSession.RegisterType (typeof(TransparentStreamCloseRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamCloseResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamFlushRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamFlushResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamGetLengthRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamGetLengthResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamGetReadTimeoutRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamGetReadTimeoutResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamGetWriteTimeoutRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamGetWriteTimeoutResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamReadRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamReadResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSetLengthRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSetLengthResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSetReadTimeoutRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSetReadTimeoutResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSetWriteTimeoutRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSetWriteTimeoutResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamWriteRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamWriteResponseMessage), TransparentStreamMessageReceived);
 			thread.Start ();
 		}
 
@@ -124,9 +124,24 @@ namespace BD2.Daemon
 
 		public abstract void SessionDisconnected ();
 
-		void TransparentStreamNotImplemented (ObjectBusMessage objectBusMessage)
+		void TransparentStreamServerMessageReceived (ObjectBusMessage objectBusMessage)
 		{
-			throw new NotImplementedException ();
+			if (objectBusMessage == null)
+				throw new ArgumentNullException ("objectBusMessage");
+			TransparentStreamMessageBase transparentStreamMessageBase = objectBusMessage as TransparentStreamMessageBase;
+			if (transparentStreamMessageBase == null)
+				throw new ArgumentException ("objectBusMessage must be of type TransparentStreamMessageBase", "objectBusMessage");
+			streamServers [transparentStreamMessageBase.StreamID].EnqueueRequest (transparentStreamMessageBase);
+		}
+
+		void TransparentStreamMessageReceived (ObjectBusMessage objectBusMessage)
+		{
+			if (objectBusMessage == null)
+				throw new ArgumentNullException ("objectBusMessage");
+			TransparentStreamMessageBase transparentStreamMessageBase = objectBusMessage as TransparentStreamMessageBase;
+			if (transparentStreamMessageBase == null)
+				throw new ArgumentException ("objectBusMessage must be of type TransparentStreamMessageBase", "objectBusMessage");
+			streams [transparentStreamMessageBase.StreamID].ResponseReceived (transparentStreamMessageBase);
 		}
 	}
 }

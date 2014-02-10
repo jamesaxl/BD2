@@ -28,31 +28,37 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("")]
+	[ObjectBusMessageTypeIDAttribute("80985cb9-71a8-449a-ab01-37ca0f009c10")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamMessage), "Deserialize")]
 	class TransparentStreamMessage : ObjectBusMessage
 	{
-		Guid streamID;
+		Guid id;
 
-		public Guid StreamID {
+		public Guid ID {
 			get {
-				return streamID;
+				return id;
 			}
 		}
 
-		public TransparentStreamMessage (Guid streamID)
+		public TransparentStreamMessage (Guid id)
 		{
-			this.streamID = streamID;
+			this.id = id;
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
-			throw new NotImplementedException ();
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (id.ToByteArray ());
+					return MS.ToArray ();
+				}
+			}
+
 		}
 
 		public override Guid TypeID {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("80985cb9-71a8-449a-ab01-37ca0f009c10");
 			}
 		}
 		#endregion

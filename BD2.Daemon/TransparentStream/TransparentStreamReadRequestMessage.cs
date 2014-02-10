@@ -29,9 +29,9 @@ using System.Collections.Generic;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("")]
+	[ObjectBusMessageTypeIDAttribute("e8b0a379-8089-4a33-bf89-f3887029d058")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamReadRequestMessage), "Deserialize")]
-	class TransparentStreamReadRequestMessage : ObjectBusMessage
+	class TransparentStreamReadRequestMessage : TransparentStreamMessageBase
 	{
 		Guid id;
 
@@ -43,17 +43,9 @@ namespace BD2.Daemon
 
 		Guid streamID;
 
-		public Guid StreamID {
+		public override Guid StreamID {
 			get {
 				return streamID;
-			}
-		}
-
-		int offset;
-
-		public int Offset {
-			get {
-				return offset;
 			}
 		}
 
@@ -65,11 +57,10 @@ namespace BD2.Daemon
 			}
 		}
 
-		public TransparentStreamReadRequestMessage (Guid id, Guid streamID, int offset, int count)
+		public TransparentStreamReadRequestMessage (Guid id, Guid streamID, int count)
 		{
 			this.id = id;
 			this.streamID = streamID;
-			this.offset = offset;
 			this.count = count;
 		}
 		#region implemented abstract members of ObjectBusMessage
@@ -79,16 +70,15 @@ namespace BD2.Daemon
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
 					BW.Write (streamID.ToByteArray ());
-					BW.Write (offset);
 					BW.Write (count);
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}
 
 		public override Guid TypeID {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("e8b0a379-8089-4a33-bf89-f3887029d058");
 			}
 		}
 		#endregion
