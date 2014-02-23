@@ -952,6 +952,7 @@ namespace BD2.Daemon
 			}
 			while (ars.Count != 0)
 				ars.Dequeue ().AsyncWaitHandle.WaitOne ();
+			destination.Flush ();
 		}
 	}
 }
