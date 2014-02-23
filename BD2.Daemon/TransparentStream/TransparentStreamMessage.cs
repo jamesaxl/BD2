@@ -28,9 +28,7 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("80985cb9-71a8-449a-ab01-37ca0f009c10")]
-	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamMessage), "Deserialize")]
-	class TransparentStreamMessage : ObjectBusMessage
+	abstract class TransparentStreamMessage : ObjectBusMessage
 	{
 		Guid id;
 
@@ -40,28 +38,9 @@ namespace BD2.Daemon
 			}
 		}
 
-		public TransparentStreamMessage (Guid id)
+		protected TransparentStreamMessage (Guid id)
 		{
 			this.id = id;
 		}
-		#region implemented abstract members of ObjectBusMessage
-		public override byte[] GetMessageBody ()
-		{
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
-				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
-					BW.Write (id.ToByteArray ());
-					return MS.ToArray ();
-				}
-			}
-
-		}
-
-		public override Guid TypeID {
-			get {
-				return Guid.Parse ("80985cb9-71a8-449a-ab01-37ca0f009c10");
-			}
-		}
-		#endregion
 	}
 }
-

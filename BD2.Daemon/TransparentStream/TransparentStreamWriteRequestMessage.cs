@@ -30,7 +30,7 @@ namespace BD2.Daemon
 {
 	[ObjectBusMessageTypeIDAttribute("284c41f1-ce90-4c68-b0b9-1042db977aa5")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamWriteRequestMessage), "Deserialize")]
-	class TransparentStreamWriteRequestMessage : TransparentStreamMessageBase
+	sealed class TransparentStreamWriteRequestMessage : TransparentStreamMessageBase
 	{
 		Guid id;
 

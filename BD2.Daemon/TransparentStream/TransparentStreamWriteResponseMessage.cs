@@ -30,7 +30,7 @@ namespace BD2.Daemon
 {
 	[ObjectBusMessageTypeIDAttribute("1b081ad0-7395-40d2-ad72-b724d4b21c8a")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamWriteResponseMessage), "Deserialize")]
-	class TransparentStreamWriteResponseMessage : TransparentStreamMessageBase
+	sealed class TransparentStreamWriteResponseMessage : TransparentStreamMessageBase
 	{
 		Guid streamID;
 
@@ -74,17 +74,17 @@ namespace BD2.Daemon
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
 					streamID = new Guid (BR.ReadBytes (16));
 					requestID = new Guid (BR.ReadBytes (16));
+					if (MS.ReadByte () == 0) {
+						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+						object deserializedObject = BF.Deserialize (MS);
+						if (deserializedObject is Exception) {
+							exception = (Exception)deserializedObject;
+						} else {
+							throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
+						}
+					} else
+						exception = null;
 				}
-				if (MS.ReadByte () == 0) {
-					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
-					object deserializedObject = BF.Deserialize (MS);
-					if (deserializedObject is Exception) {
-						exception = (Exception)deserializedObject;
-					} else {
-						throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
-					}
-				} else
-					exception = null;
 			}
 			return new TransparentStreamWriteResponseMessage (streamID, requestID, exception);
 		}

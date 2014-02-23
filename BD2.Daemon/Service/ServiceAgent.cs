@@ -38,16 +38,36 @@ namespace BD2.Daemon
 
 		protected Guid CreateStream (System.IO.Stream backendStream)
 		{
-			TransparentStreamServer tss = new TransparentStreamServer (this, backendStream);
+			TransparentStreamServer tss = new TransparentStreamServer (this, backendStream, objectBusSession);
 			streamServers.TryAdd (tss.StreamID, tss);
 			return tss.StreamID;
 		}
 
 		protected TransparentStream OpenStream (Guid streamID)
 		{
-			TransparentStream ts = new TransparentStream (this, streamID);
+			TransparentStream ts = new TransparentStream (this, streamID, objectBusSession);
 			streams.TryAdd (streamID, ts);
 			return ts;
+		}
+
+		internal void RemoveStream (TransparentStream transparentStream)
+		{
+			TransparentStream referenece;
+			streams.TryGetValue (transparentStream.StreamID, out referenece);
+			if (referenece != transparentStream) {
+				throw new InvalidOperationException ("requested stream has an id belonging to this agent but the object itself does not");
+			}
+			streams.TryRemove (transparentStream.StreamID, out referenece);
+		}
+
+		internal void RemoveStreamServer (TransparentStreamServer transparentStreamServer)
+		{
+			TransparentStreamServer referenece;
+			streamServers.TryGetValue (transparentStreamServer.StreamID, out referenece);
+			if (referenece != transparentStreamServer) {
+				throw new InvalidOperationException ("requested stream server has an id belonging to this agent but the object itself does not");
+			}
+			streamServers.TryRemove (transparentStreamServer.StreamID, out referenece);
 		}
 
 		protected ServiceAgentMode ServiceAgentMode {
@@ -56,7 +76,7 @@ namespace BD2.Daemon
 			}
 		}
 
-		public ObjectBusSession ObjectBusSession {
+		protected ObjectBusSession ObjectBusSession {
 			get {
 				return objectBusSession;
 			}
@@ -90,20 +110,34 @@ namespace BD2.Daemon
 			this.objectBusSession = objectBusSession;
 			this.flush = flush;
 			thread = new System.Threading.Thread (Run);
+			objectBusSession.RegisterType (typeof(TransparentStreamCanReadRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamCanReadResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamCanSeekRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamCanSeekResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamCanTimeoutRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamCanTimeoutResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamCanWriteRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamCanWriteResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamCloseRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamCloseResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamFlushRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamFlushResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamGetLengthRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamGetLengthResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamGetPositionRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamGetPositionResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamGetReadTimeoutRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamGetReadTimeoutResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamGetWriteTimeoutRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamGetWriteTimeoutResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamReadRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamReadResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSeekRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSeekResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamSetLengthRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamSetLengthResponseMessage), TransparentStreamMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSetPositionRequestMessage), TransparentStreamServerMessageReceived);
+			objectBusSession.RegisterType (typeof(TransparentStreamSetPositionResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamSetReadTimeoutRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamSetReadTimeoutResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamSetWriteTimeoutRequestMessage), TransparentStreamServerMessageReceived);

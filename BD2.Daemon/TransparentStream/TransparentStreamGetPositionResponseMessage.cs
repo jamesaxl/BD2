@@ -28,18 +28,10 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("c6d8cd0b-fe98-447d-81a2-689b778610f1")]
-	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamGetReadTimeoutResponseMessage), "Deserialize")]
-	sealed class TransparentStreamGetReadTimeoutResponseMessage : TransparentStreamMessageBase
+	[ObjectBusMessageTypeIDAttribute("72e32ed9-8c61-45a2-903e-03ae101f2882")]
+	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamGetPositionResponseMessage), "Deserialize")]
+	sealed class TransparentStreamGetPositionResponseMessage : TransparentStreamMessageBase
 	{
-		Guid streamID;
-
-		public override Guid StreamID {
-			get {
-				return streamID;
-			}
-		}
-
 		Guid requestID;
 
 		public Guid RequestID {
@@ -48,11 +40,11 @@ namespace BD2.Daemon
 			}
 		}
 
-		int readTimeout;
+		long position;
 
-		public int ReadTimeout {
+		public long Position {
 			get {
-				return readTimeout;
+				return position;
 			}
 		}
 
@@ -64,27 +56,27 @@ namespace BD2.Daemon
 			}
 		}
 
-		public TransparentStreamGetReadTimeoutResponseMessage (Guid streamID, Guid requestID, int readTimeout, Exception exception)
+		public TransparentStreamGetPositionResponseMessage (Guid streamID, Guid requestID, long position, Exception exception)
 		{
 			this.streamID = streamID;
 			this.requestID = requestID;
-			this.readTimeout = readTimeout;
+			this.position = position;
 			this.exception = exception;
 		}
 
-		public static TransparentStreamGetReadTimeoutResponseMessage Deserialize (byte[] buffer)
+		public static TransparentStreamGetPositionResponseMessage Deserialize (byte[] buffer)
 		{
 			if (buffer == null)
 				throw new ArgumentNullException ("buffer");
 			Guid streamID;
 			Guid requestID;
-			int readTimeout;
+			long position;
 			Exception exception;
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
 					streamID = new Guid (BR.ReadBytes (16));
 					requestID = new Guid (BR.ReadBytes (16));
-					readTimeout = BR.ReadInt32 ();
+					position = BR.ReadInt64 ();
 					if (MS.ReadByte () == 1) {
 						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
 						object deserializedObject = BF.Deserialize (MS);
@@ -97,16 +89,16 @@ namespace BD2.Daemon
 						exception = null;
 				}
 			}
-			return new TransparentStreamGetReadTimeoutResponseMessage (streamID, requestID, readTimeout, exception);
+			return new TransparentStreamGetPositionResponseMessage (streamID, requestID, position, exception);
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
-				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+			using (System.IO.MemoryStream MS  =new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW =  new System.IO.BinaryWriter (MS)) {
 					BW.Write (streamID.ToByteArray ());
 					BW.Write (requestID.ToByteArray ());
-					BW.Write (readTimeout);
+					BW.Write (position);
 				}
 				if (exception == null) {
 					MS.WriteByte (0);
@@ -117,12 +109,20 @@ namespace BD2.Daemon
 				}
 				return MS.ToArray ();
 			}
-
 		}
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("c6d8cd0b-fe98-447d-81a2-689b778610f1");
+				return Guid.Parse ("72e32ed9-8c61-45a2-903e-03ae101f2882");
+			}
+		}
+		#endregion
+		#region implemented abstract members of TransparentStreamMessageBase
+		Guid streamID;
+
+		public override Guid StreamID {
+			get {
+				return streamID;
 			}
 		}
 		#endregion

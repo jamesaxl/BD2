@@ -21,7 +21,6 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
@@ -72,6 +71,20 @@
     <Compile Include="TransparentStream\TransparentStreamSetWriteTimeoutRequestMessage.cs" />
     <Compile Include="TransparentStream\TransparentStreamSetWriteTimeoutResponseMessage.cs" />
     <Compile Include="TransparentStream\TransparentStreamMessageBase.cs" />
+    <Compile Include="TransparentStream\TransparentStreamGetPositionRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamGetPositionResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSetPositionRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSetPositionResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCanTimeoutResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCanTimeoutRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCanReadRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCanReadResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCanWriteRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCanWriteResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCanSeekRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamCanSeekResponseMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSeekRequestMessage.cs" />
+    <Compile Include="TransparentStream\TransparentStreamSeekResponseMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -28,51 +28,64 @@ using System;
 
 namespace BD2.Daemon
 {
-	class TransparentStreamAsyncResult : IAsyncResult
+	sealed class TransparentStreamAsyncResult : IAsyncResult
 	{
-		ServiceAgent agent;
-		TransparentStream transparentStream;
-		ObjectBusMessage requestMessage;
 		System.Threading.ManualResetEvent waitHandle = new System.Threading.ManualResetEvent (false);
 		object asyncState;
+		TransparentStreamMessageBase response;
+		AsyncCallback callback;
 
-		public TransparentStream TransparentStream {
+		public TransparentStreamMessageBase Response {
 			get {
-				return transparentStream;
+				if (!IsCompleted) {
+					waitHandle.WaitOne ();
+				}
+				return response;
 			}
+		}
+
+		internal TransparentStreamAsyncResult (AsyncCallback callback, object asyncState)
+		:this(asyncState)
+		{
+			this.callback = callback;
 		}
 
 		internal TransparentStreamAsyncResult (object asyncState)
 		{
-			if (asyncState == null)
-				throw new ArgumentNullException ("asyncState");
 			this.asyncState = asyncState;
 		}
 		#region IAsyncResult implementation
-		object IAsyncResult.AsyncState {
+		public object AsyncState {
 			get {
 				return asyncState;
 			}
 		}
 
-		System.Threading.WaitHandle IAsyncResult.AsyncWaitHandle {
+		public System.Threading.WaitHandle AsyncWaitHandle {
 			get {
 				return waitHandle;
 			}
 		}
 
-		bool IAsyncResult.CompletedSynchronously {
+		public  bool CompletedSynchronously {
 			get {
 				//never happens
 				return false;
 			}
 		}
 
-		bool IAsyncResult.IsCompleted {
+		public bool IsCompleted {
 			get {
-				throw new NotImplementedException ();
+				return response != null;
 			}
 		}
 		#endregion
+		internal void Set (TransparentStreamMessageBase transparentStreamMessageBase)
+		{
+			response = transparentStreamMessageBase;
+			waitHandle.Set ();
+			if (callback != null)
+				callback (this);
+		}
 	}
 }

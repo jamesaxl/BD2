@@ -78,6 +78,9 @@ namespace BD2.Daemon
 			byte[] messageTypeBytes = new byte[16];
 			System.Buffer.BlockCopy (messageContents, 0, messageTypeBytes, 0, 16);
 			Guid MessageType = new Guid (messageTypeBytes);
+			if (!deserializers.ContainsKey (MessageType)) {
+				throw new Exception (string.Format ("Deserializer for object type id '{0}' is not registered", MessageType));
+			}
 			ObjectBusMessageDeserializerAttribute obmda = deserializers [MessageType];
 			byte[] bytes = new byte[messageContents.Length - 16];
 			System.Buffer.BlockCopy (messageContents, 16, bytes, 0, messageContents.Length - 16);

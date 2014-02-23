@@ -30,7 +30,7 @@ namespace BD2.Daemon
 {
 	[ObjectBusMessageTypeIDAttribute("16867e85-948e-40e8-9b01-b05f793dd44a")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamGetWriteTimeoutResponseMessage), "Deserialize")]
-	class TransparentStreamGetWriteTimeoutResponseMessage : TransparentStreamMessageBase
+	sealed class TransparentStreamGetWriteTimeoutResponseMessage : TransparentStreamMessageBase
 	{
 		Guid streamID;
 
@@ -80,22 +80,22 @@ namespace BD2.Daemon
 			Guid requestID;
 			int writeTimeout;
 			Exception exception;
-			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
 					streamID = new Guid (BR.ReadBytes (16));
 					requestID = new Guid (BR.ReadBytes (16));
 					writeTimeout = BR.ReadInt32 ();
+					if (MS.ReadByte () == 1) {
+						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+						object deserializedObject = BF.Deserialize (MS);
+						if (deserializedObject is Exception) {
+							exception = (Exception)deserializedObject;
+						} else {
+							throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
+						}
+					} else
+						exception = null;
 				}
-				if (MS.ReadByte () == 0) {
-					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
-					object deserializedObject = BF.Deserialize (MS);
-					if (deserializedObject is Exception) {
-						exception = (Exception)deserializedObject;
-					} else {
-						throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
-					}
-				} else
-					exception = null;
 			}
 			return new TransparentStreamGetWriteTimeoutResponseMessage (streamID, requestID, writeTimeout, exception);
 		}

@@ -30,7 +30,7 @@ namespace BD2.Daemon
 {
 	[ObjectBusMessageTypeIDAttribute("415bd4c1-274c-42d9-8201-975253753245")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamReadResponseMessage), "Deserialize")]
-	class TransparentStreamReadResponseMessage : TransparentStreamMessageBase
+	sealed class TransparentStreamReadResponseMessage : TransparentStreamMessageBase
 	{
 		Guid streamID;
 
@@ -82,22 +82,22 @@ namespace BD2.Daemon
 			Guid requestID;
 			byte[] data;
 			Exception exception;
-			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
 					streamID = new Guid (BR.ReadBytes (16));
 					requestID = new Guid (BR.ReadBytes (16));
 					data = BR.ReadBytes (BR.ReadInt32 ());
+					if (MS.ReadByte () == 1) {
+						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+						object deserializedObject = BF.Deserialize (MS);
+						if (deserializedObject is Exception) {
+							exception = (Exception)deserializedObject;
+						} else {
+							throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
+						}
+					} else
+						exception = null;
 				}
-				if (MS.ReadByte () == 0) {
-					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
-					object deserializedObject = BF.Deserialize (MS);
-					if (deserializedObject is Exception) {
-						exception = (Exception)deserializedObject;
-					} else {
-						throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
-					}
-				} else
-					exception = null;
 			}
 			return new TransparentStreamReadResponseMessage (streamID, requestID, data, exception);
 		}
@@ -110,17 +110,16 @@ namespace BD2.Daemon
 					BW.Write (requestID.ToByteArray ());
 					BW.Write (data.Length);
 					BW.Write (data);
-				}
-				if (exception == null) {
-					MS.WriteByte (0);
-				} else {
-					MS.WriteByte (1);
-					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
-					BF.Serialize (MS, exception);
+					if (exception == null) {
+						MS.WriteByte (0);
+					} else {
+						MS.WriteByte (1);
+						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+						BF.Serialize (MS, exception);
+					}
 				}
 				return MS.ToArray ();
 			}
-
 		}
 
 		public override Guid TypeID {

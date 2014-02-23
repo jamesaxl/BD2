@@ -42,6 +42,7 @@ namespace BD2.Daemon
 		System.Threading.Thread thread_tx, thread_rx;
 		List<Action<byte[]>> callbacks = new List<Action<byte[]>> ();
 		List<Action<StreamHandler>> disconnectCallbacks = new  List<Action<StreamHandler>> ();
+		System.Threading.ManualResetEventSlim mre_tx = new System.Threading.ManualResetEventSlim (false);
 
 		public void RegisterCallback (Action<byte[]> callback)
 		{
@@ -70,6 +71,7 @@ namespace BD2.Daemon
 			if (!thread_tx.IsAlive)
 				throw new InvalidOperationException ("thread_tx is not alive.");
 			sendQueue.Enqueue (messageContents);
+			mre_tx.Set ();
 		}
 
 		public StreamHandler (Stream peer)
@@ -118,9 +120,9 @@ namespace BD2.Daemon
 			BinaryWriter peerWriter = new BinaryWriter (peer);
 			while (thread_rx.IsAlive) {
 				byte[] messageBytes;
-					
 				while (!sendQueue.TryDequeue (out messageBytes))
-					System.Threading.Thread.Sleep (0);
+					mre_tx.Wait (10);
+				mre_tx.Reset ();
 				try {
 					WriteMessage (peerWriter, messageBytes);
 				} catch {

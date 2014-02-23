@@ -25,17 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
-using System.Collections.Generic;
 
 namespace BD2.Daemon
 {
 	[ObjectBusMessageTypeIDAttribute("e8b0a379-8089-4a33-bf89-f3887029d058")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamReadRequestMessage), "Deserialize")]
-	class TransparentStreamReadRequestMessage : TransparentStreamMessageBase
+	sealed class TransparentStreamReadRequestMessage : TransparentStreamMessageBase
 	{
 		Guid id;
 
-		public Guid Id {
+		public Guid ID {
 			get {
 				return id;
 			}
@@ -63,6 +62,23 @@ namespace BD2.Daemon
 			this.streamID = streamID;
 			this.count = count;
 		}
+
+		public static TransparentStreamReadRequestMessage Deserialize (byte[] buffer)
+		{
+			if (buffer == null)
+				throw new ArgumentNullException ("buffer");
+			Guid id;
+			Guid streamID;
+			int count;
+			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
+					id = new Guid (BR.ReadBytes (16));
+					streamID = new Guid (BR.ReadBytes (16));
+					count = BR.ReadInt32 ();
+				}
+			}
+			return new TransparentStreamReadRequestMessage (id, streamID, count);
+		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
@@ -71,8 +87,8 @@ namespace BD2.Daemon
 					BW.Write (id.ToByteArray ());
 					BW.Write (streamID.ToByteArray ());
 					BW.Write (count);
-					return MS.ToArray ();
 				}
+				return MS.ToArray ();
 			}
 		}
 

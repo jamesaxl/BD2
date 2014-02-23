@@ -30,7 +30,7 @@ namespace BD2.Daemon
 {
 	[ObjectBusMessageTypeIDAttribute("cdac82dc-4279-42cd-b792-34c44b31e135")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamSetReadTimeoutRequestMessage), "Deserialize")]
-	class TransparentStreamSetReadTimeoutRequestMessage : TransparentStreamMessageBase
+	sealed class TransparentStreamSetReadTimeoutRequestMessage : TransparentStreamMessageBase
 	{
 		Guid id;
 

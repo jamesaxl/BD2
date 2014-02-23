@@ -30,7 +30,7 @@ namespace BD2.Daemon
 {
 	[ObjectBusMessageTypeIDAttribute("ae693bc3-4cdf-4151-9085-5bd4f2093adf")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamGetLengthResponseMessage), "Deserialize")]
-	class TransparentStreamGetLengthResponseMessage : TransparentStreamMessageBase
+	sealed class TransparentStreamGetLengthResponseMessage : TransparentStreamMessageBase
 	{
 		Guid streamID;
 
@@ -42,7 +42,7 @@ namespace BD2.Daemon
 
 		Guid requestID;
 
-		public Guid RequsetID {
+		public Guid RequestID {
 			get {
 				return requestID;
 			}
@@ -80,22 +80,22 @@ namespace BD2.Daemon
 			Guid requestID;
 			long length;
 			Exception exception;
-			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
 					streamID = new Guid (BR.ReadBytes (16));
 					requestID = new Guid (BR.ReadBytes (16));
 					length = BR.ReadInt64 ();
+					if (MS.ReadByte () == 1) {
+						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+						object deserializedObject = BF.Deserialize (MS);
+						if (deserializedObject is Exception) {
+							exception = (Exception)deserializedObject;
+						} else {
+							throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
+						}
+					} else
+						exception = null;
 				}
-				if (MS.ReadByte () == 0) {
-					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
-					object deserializedObject = BF.Deserialize (MS);
-					if (deserializedObject is Exception) {
-						exception = (Exception)deserializedObject;
-					} else {
-						throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
-					}
-				} else
-					exception = null;
 			}
 			return new TransparentStreamGetLengthResponseMessage (streamID, requestID, length, exception);
 		}
@@ -107,13 +107,13 @@ namespace BD2.Daemon
 					BW.Write (streamID.ToByteArray ());
 					BW.Write (requestID.ToByteArray ());
 					BW.Write (length);
-				}
-				if (exception == null) {
-					MS.WriteByte (0);
-				} else {
-					MS.WriteByte (1);
-					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
-					BF.Serialize (MS, exception);
+					if (exception == null) {
+						MS.WriteByte (0);
+					} else {
+						MS.WriteByte (1);
+						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+						BF.Serialize (MS, exception);
+					}
 				}
 				return MS.ToArray ();
 
