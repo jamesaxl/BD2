@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">Win32</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3AABD676-FFEA-4912-A1F2-ED4535961699}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BD2.Conv</RootNamespace>
+    <AssemblyName>BD2.Conv</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DataSource.cs" />
+    <Compile Include="STableBase.cs" />
+    <Compile Include="SColumnBase.cs" />
+    <Compile Include="SRowBase.cs" />
+    <Compile Include="Model\ITableNameTranslator.cs" />
+    <Compile Include="Model\IDataTranslator.cs" />
+    <Compile Include="Configuration\SourceEngine.cs" />
+    <Compile Include="Configuration\DestinationEngine.cs" />
+    <Compile Include="Configuration\DestinationEngineInstance.cs" />
+    <Compile Include="Configuration\SourceEngineInstance.cs" />
+    <Compile Include="Configuration\SourceTransform.cs" />
+    <Compile Include="Configuration\TableNameTranslation.cs" />
+    <Compile Include="Configuration\Transform.cs" />
+    <Compile Include="Configuration\LibraryConfiguration.cs" />
+    <Compile Include="Configuration\SourceTransformStep.cs" />
+    <Compile Include="SchemaLoaderBase.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Model\" />
+    <Folder Include="Configuration\" />
+  </ItemGroup>
+</Project>

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
-using BD2.Common;
+using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {

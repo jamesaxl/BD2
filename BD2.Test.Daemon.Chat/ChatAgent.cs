@@ -33,7 +33,7 @@ namespace BD2.Test.Daemon.Chat
 	{
 
 		ChatAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush)
-			:base(serviceAgentMode, objectBusSession, flush)
+			: base(serviceAgentMode, objectBusSession, flush)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));

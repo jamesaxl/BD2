@@ -27,7 +27,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using BD2.Block;
+using BD2.Chunk;
 
 namespace BD2.Repo.Leveldb
 {
@@ -108,9 +108,10 @@ namespace BD2.Repo.Leveldb
 			ldependencies.Put (chunkID, dependenciesArray);
 			ldata.Put (chunkID, data);
 			ltopLevels.Put (chunkID, dependenciesArray);
-			foreach (byte[] dependency in dependencies) {
+			for (int n = 0; n != dependencies.Length; n++) {
+				byte[] dependency = dependencies [n];
 				if (dependency == null)
-					throw new ArgumentNullException ("dependency[x]");
+					throw new ArgumentNullException (string.Format ("dependency[{0}]", n), "dependency cannot be null");
 				ltopLevels.Delete (dependency);
 			}
 			OnChunkPushEvent (chunkID);

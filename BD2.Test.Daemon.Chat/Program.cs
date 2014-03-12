@@ -26,7 +26,6 @@
  * */
 using System;
 using BD2.Daemon;
-using System.Collections.Generic;
 
 namespace BD2.Test.Daemon.Chat
 {
@@ -36,24 +35,28 @@ namespace BD2.Test.Daemon.Chat
 
 		public static string ConsoleReadLine ()
 		{
-			//Console.WriteLine (new System.Diagnostics.StackTrace ().ToString ());
+			#if TRACE
+			Console.WriteLine (new System.Diagnostics.StackTrace ().ToString ());
+			#endif
 			lock (ConsoleLock)
 				return Console.ReadLine ();
 		}
 
 		static void HandleConnection (string modeName, Guid chatServiceAnouncementType, System.Net.Sockets.TcpClient TC)
 		{
+			if (modeName == null)
+				throw new ArgumentNullException ("modeName");
+			if (TC == null)
+				throw new ArgumentNullException ("TC");
 			System.IO.Stream PS = TC.GetStream ();
 			StreamHandler SH = new StreamHandler (PS);
 			ObjectBus OB = new ObjectBus (SH);
 			ServiceManager SM = new ServiceManager (OB);
 			if (modeName == "Server") {
-				SM.AnnounceService (new ServiceAnnouncement (Guid.NewGuid (), chatServiceAnouncementType, "Chat"), ChatAgent.CreateAgent);
+				SM.AnnounceService (new ServiceAnnounceMessage (Guid.NewGuid (), chatServiceAnouncementType, "Chat"), ChatAgent.CreateAgent);
 			}
 			if (modeName == "Client") {
-				System.Threading.Thread.Sleep (100);//wait for service announcement from remote
-				SortedSet<ServiceAnnouncement> RSAs = SM.EnumerateRemoteServices ();
-				foreach (ServiceAnnouncement RSA in RSAs) {
+				foreach (ServiceAnnounceMessage RSA in SM.EnumerateRemoteServices ()) {
 					Console.WriteLine ("Service found: {0}", RSA.Name);
 					Console.WriteLine ("Press Enter to request service");
 					ConsoleReadLine ();
@@ -66,8 +69,8 @@ namespace BD2.Test.Daemon.Chat
 		{
 			Console.Write ("Please Enter Operation Mode <Client|Server>: ");
 			string modeName = ConsoleReadLine ();
-
 			Guid ChatServiceAnouncementType = Guid.Parse ("b0021151-a1cc-4f82-aa8d-a2cdb905e6ca");
+
 			if (modeName == "Server") {
 				System.Net.Sockets.TcpListener TL = new System.Net.Sockets.TcpListener (new System.Net.IPEndPoint (System.Net.IPAddress.Parse ("0.0.0.0"), 28000));
 				TL.Start ();

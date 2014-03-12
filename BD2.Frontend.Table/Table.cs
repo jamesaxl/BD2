@@ -28,7 +28,7 @@ using System;
 using System.IO;
 using BSO;
 using System.Collections.Generic;
-using BD2.Common;
+using BD2.Core;
 using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table

@@ -29,7 +29,7 @@ using System.Collections.Generic;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class Frontend : BD2.Common.Frontend
+	public abstract class Frontend : BD2.Core.Frontend
 	{
 	}
 }

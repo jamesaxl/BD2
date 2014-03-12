@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
+using BD2.Common;
 
 namespace BD2.Core
 {
-	public abstract class BaseDataObject : Serializable, IComparable<BaseDataObject>
+	public sealed class BaseDataObject : Serializable, IComparable<BaseDataObject>
 	{
 		Frontend frontend;
-		Dictionary<FrontendInstanceBase, BaseDataObjectStateTracker> state;
-		private byte[] chunkDescriptor;
+		Dictionary<FrontendInstanceBase, BaseDataObjectStateTracker> states;
+		byte[] chunkDescriptor;
 
 		public Frontend Frontend {
 			get {
@@ -17,9 +18,9 @@ namespace BD2.Core
 
 		public BaseDataObjectStateTracker GetTrackerFor (FrontendInstanceBase fib)
 		{
-			lock (state) {
+			lock (states) {
 				BaseDataObjectStateTracker st;
-				if (state.TryGetValue (fib, out st)) {
+				if (states.TryGetValue (fib, out st)) {
 					return st;
 				}
 			}
@@ -41,25 +42,21 @@ namespace BD2.Core
 				return (byte[])chunkDescriptor.Clone ();
 			}
 		}
-		//for de/serialization porpuses
-		public abstract Guid ObjectType { get; }
+		//for de/serialization purposes
+		public Guid ObjectType { get; }
 
-		public abstract Guid ObjectID { get; }
-
+		public Guid ObjectID { get; }
 		#region IComparable implementation
-
 		public int CompareTo (BaseDataObject other)
 		{
 			if (other == null)
 				throw new ArgumentNullException ("other");
-			int R = other.ObjectID.CompareTo (this.ObjectID);
+			int R = other.ObjectID.CompareTo (ObjectID);
 			if (R == 0) {
-				R = other.frontend.CompareTo (this.frontend);
+				R = other.frontend.CompareTo (frontend);
 			}
 			return R;
 		}
-
 		#endregion
-
 	}
 }

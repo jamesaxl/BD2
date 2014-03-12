@@ -41,9 +41,9 @@
       <Project>{8DD96596-38AC-46DD-80C1-75D9EBE585EA}</Project>
       <Name>leveldb-sharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Block\BD2.Block.csproj">
+    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
       <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
-      <Name>BD2.Block</Name>
+      <Name>BD2.Chunk</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

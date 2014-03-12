@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>BD2.Conv.Frontend.Table</RootNamespace>
+    <AssemblyName>BD2.Conv.Frontend.Table</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceAgent.cs" />
+    <Compile Include="Model\Table.cs" />
+    <Compile Include="Model\Column.cs" />
+    <Compile Include="Model\Row.cs" />
+    <Compile Include="Model\ForeignKeyRelation.cs" />
+    <Compile Include="Model\Messages\GetTablesRequestMessage.cs" />
+    <Compile Include="Model\Messages\GetTablesResponseMessage.cs" />
+    <Compile Include="Model\Messages\GetColumnsRequestMessage.cs" />
+    <Compile Include="Model\Messages\GetColumnsResponseMessage.cs" />
+    <Compile Include="Model\Messages\GetRowsRequestMessage.cs" />
+    <Compile Include="Model\Messages\GetRowsResponseMessage.cs" />
+    <Compile Include="Model\Messages\GetDependenciesRequestMessage.cs" />
+    <Compile Include="Model\Messages\GetDependenciesResponseMessage.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\BD2.Daemon\BD2.Daemon.csproj">
+      <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>
+      <Name>BD2.Daemon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Frontend.Table\BD2.Frontend.Table.csproj">
+      <Project>{285B9E10-0FC7-4D60-9D1D-5068E8963988}</Project>
+      <Name>BD2.Frontend.Table</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv\BD2.Conv.csproj">
+      <Project>{CFC2FE19-A495-44D1-9B56-E0FB316A6414}</Project>
+      <Name>BD2.Conv</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv.Generic\BD2.Conv.Generic.csproj">
+      <Project>{3AABD676-FFEA-4912-A1F2-ED4535961699}</Project>
+      <Name>BD2.Conv.Generic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv.Generic.DataTranslator\BD2.Conv.Generic.DataTranslator.csproj">
+      <Project>{0E351074-E71D-449C-990C-93D93953D949}</Project>
+      <Name>BD2.Conv.Generic.DataTranslator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv.Generic.TableNameTranslator\BD2.Conv.Generic.TableNameTranslator.csproj">
+      <Project>{DD766E91-87CB-432F-A0E5-065C5D8ADE30}</Project>
+      <Name>BD2.Conv.Generic.TableNameTranslator</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Model\" />
+    <Folder Include="Model\Messages\" />
+  </ItemGroup>
+</Project>

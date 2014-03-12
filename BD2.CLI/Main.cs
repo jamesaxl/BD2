@@ -26,6 +26,7 @@
  * */
 using System;
 using System.Collections.Generic;
+using BD2.Common;
 
 namespace BD2.CLI
 {
@@ -55,12 +56,13 @@ namespace BD2.CLI
 
 		public static void Main (string[] args)
 		{
+			System.Collections.Generic.SortedDictionary<string, BD2.Chunk.ChunkRepository> repositories;
 			Modifiers.Add ("Async");
-//			BD2.Common.Database DB = new BD2.Common.Database ();
+//			BD2.Core.Database DB = new BD2.Core.Database ();
 			string command;
 			do {
 				command = Query ("Command>");
-				BSO.OffsetedArray<string> commandparts = command.Split (' ');
+				OffsetedArray<string> commandparts = command.Split (' ');
 				string[] CommandParts = (string[])((string[])commandparts).Clone ();
 				commandparts.Offset = ExtractModifiers (CommandParts);
 				string[] CommandModifiers = commandparts.GetStrippedPart ();
@@ -68,8 +70,8 @@ namespace BD2.CLI
 				case "Open":
 					switch (CommandParts [1]) {
 					case "File":
-						BD2.Block.ChunkRepository LRepo = new BD2.Repo.LevelDB.Repository ("/home/behrooz/Esfand/Repo/");
-						LRepo.Pull ();
+						BD2.Chunk.ChunkRepository LRepo = new BD2.Repo.Leveldb.Repository ("/home/behrooz/Esfand/Repo/");
+
 						break;
 					case "Network":
 						break;

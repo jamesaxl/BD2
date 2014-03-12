@@ -30,33 +30,26 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Mono.Data.Sqlite" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Net" />
-    <Reference Include="Mono.Zeroconf">
-      <HintPath>..\..\..\usr\lib\cli\Mono.Zeroconf-1.0\Mono.Zeroconf.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Zeroconf.cs" />
+    <Compile Include="ChunkRepository.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Block\BD2.Block.csproj">
-      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
-      <Name>BD2.Block</Name>
+    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
+      <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
+      <Name>BD2.Common</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ChunkPullRequestMessage.cs" />
-    <None Include="ChunkPullResponseMessage.cs" />
-    <None Include="ChunkPushRequestMessage.cs" />
-    <None Include="ChunkPushResponseMessage.cs" />
-    <None Include="EnumerateRequestMessage.cs" />
-    <None Include="EnumerateResponseMessage.cs" />
-    <None Include="Peer.cs" />
-    <None Include="RemoteChunk.cs" />
+    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
+      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
+      <Name>BD2.Chunk</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Daemon\BD2.Daemon.csproj">
+      <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>
+      <Name>BD2.Daemon</Name>
+    </ProjectReference>
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

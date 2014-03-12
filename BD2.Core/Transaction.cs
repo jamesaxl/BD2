@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using BSO;
 using BD2.Core;
 
 namespace BD2
 {
 	public sealed class Transaction
 	{
+		byte[] id;
 		Guid author;
 		string comment;
 		object transaction_lock = new object ();
 		TransactionStatus status = TransactionStatus.Pending;
-		FrontendInstanceBase frontendInstance;
 		SortedDictionary<Guid, RawProxy.RawProxyv1> rawProxyDefs = new SortedDictionary<Guid, BD2.RawProxy.RawProxyv1> ();
 		List<Guid[]> rawProxyyCombinations = new List<Guid[]> ();
 		System.Collections.Generic.List<Tuple<BaseDataObject, Reference<long>>> objects = new List<Tuple<BaseDataObject, Reference<long>>> (32);
@@ -110,31 +109,6 @@ namespace BD2
 		TransactionStatus Status {
 			get {
 				return status;
-			}
-		}
-
-		public void Commit ()
-		{
-			lock (transaction_lock) {
-				if (status != TransactionStatus.Pending) {
-					throw new InvalidOperationException ("Cannot commit an already commited/rolled back transaction.");
-				}
-				status = TransactionStatus.Commiting;
-				if (frontendInstance.CommitTransaction (this)) {
-					status = TransactionStatus.Commited;
-				} else {
-					status = TransactionStatus.RolledBack;
-				}
-			}
-		}
-
-		public void RollBack ()
-		{
-			lock (transaction_lock) {
-				if (status == TransactionStatus.Commited) {
-					throw new InvalidOperationException ("Transaction has been queued for commited.It may be long gone.\nThere is almost nothing you can do about it now except pulling the plug.");
-				}
-				frontendInstance.RollbackTransaction (this);
 			}
 		}
 	}

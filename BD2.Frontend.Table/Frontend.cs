@@ -31,14 +31,14 @@ namespace BD2.Frontend.Table
 {
 	public class Frontend : BD2.Frontend.Table.Model.Frontend
 	{
-		#region implemented abstract members of BD2.Common.Frontend
+		#region implemented abstract members of BD2.Core.Frontend
 		public override string Name {
 			get {
 				return "BD2.Frontend.Table";
 			}
 		}
 
-		protected override void OnObjectInserted (BD2.Common.BaseDataObject Object)
+		protected override void OnObjectInserted (BD2.Core.BaseDataObject Object)
 		{
 		}
 		#endregion

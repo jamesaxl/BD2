@@ -48,7 +48,7 @@ namespace BD2.Chunk.Daemon
 				throw new ArgumentNullException ("repository");
 			this.repository = repository;
 			objectBusSession.RegisterType (typeof(RequestTopLevelChunkDeltaMessage), RequestTopLevelChunkDeltaMessageReceived);
-			objectBusSession.RegisterType (typeof(PushChunkMessage), PushChunkMessageReceived);
+			objectBusSession.RegisterType (typeof(PushChunksRequestMessage), PushChunkMessageReceived);
 
 		}
 
@@ -107,7 +107,6 @@ namespace BD2.Chunk.Daemon
 			
 				default:
 					throw new InvalidOperationException ("BD2.Chunk.Daemon doesn't support anything further than simple lists right now. cope with it.");
-					break;
 				}
 			}
 			//empty datasets on remote? hmmm
@@ -142,34 +141,12 @@ namespace BD2.Chunk.Daemon
 			return r;
 		}
 
-		static byte GetState (int count)
+		IEnumerable<IRangedFilter> CreateSectionFilters (List<SortedSet<byte[]>> topLevelListSections, SortedSet<byte[]> leftOvers, bool last)
 		{
-			//TODO:All states and RangedFilter classes along with all the unclean code they have with them should be 
-			//put in external libraries and used as plugins.
-			if (count == 0) {
-				return state_empty;
-			} else if (count < 16) {
-				return state_few;
-			} else if (count < 32) {
-				return state_normal;
-			} else if (count < 128) {
-				return state_many;
-			} else {
-				return state_full;
-			}
+			//return all usable items as filters and add the ones that decrease performance or efficiency to leftOvers
 		}
-		// skip
-		const int state_empty = 0;
-		//merge with neighbors
-		const int state_few = 1;
-		//list //try neighbors
-		const int state_normal = 2;
-		//bf 
-		const int state_many = 3;
-		//split and retry
-		const int state_full = 4;
 
-		SortedSet<IRangedFilter> CreateFilters (IEnumerable<IEnumerable<byte[]>> topLevelLists, int depth = 0)
+		SortedSet<IRangedFilter> CreateFilters (IEnumerable<IEnumerable<byte[]>> topLevelLists, SortedSet<byte[]> leftOvers, int depth)
 		{
 			SortedSet<IRangedFilter> filters = new SortedSet<IRangedFilter> ();
 			int splitbits = 8;
@@ -181,7 +158,7 @@ namespace BD2.Chunk.Daemon
 					buckets [bitid].Add (chunk);
 				}
 			int total = 0;
-			List<SortedSet<byte[]>> toplevellistsection = new List<SortedSet<byte[]>> ();
+			List<SortedSet<byte[]>> toplevellistsections = new List<SortedSet<byte[]>> ();
 
 			for (int n = 0; n != bitexp; n++) {
 				total += buckets [n].Count;
@@ -214,13 +191,17 @@ namespace BD2.Chunk.Daemon
 				}
 			}
 			//the last few items left
-			{
-				RangedListFilter RLF = new RangedListFilter (toplevellistsection);
-				filters.Add (RLF);
-				foreach (SortedSet<byte[]> bucket in toplevellistsection)
-					bucket.Clear ();
-				toplevellistsection.Clear ();
-				total = 0;				
+			if (depth == 0) {
+				if (total != 0) {
+					RangedListFilter RLF = new RangedListFilter (toplevellistsection);
+					filters.Add (RLF);
+					foreach (SortedSet<byte[]> bucket in toplevellistsection)
+						bucket.Clear ();
+					toplevellistsection.Clear ();
+					total = 0;				
+				}
+			} else {
+				//add to leftOvers
 			}
 			return filters;
 		}

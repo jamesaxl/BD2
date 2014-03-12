@@ -115,7 +115,7 @@ namespace BD2.LockManager
 			lock_access = new object ();
 		}
 
-		internal LockState CreateLock (LockType type, LockableBase[] BaseDataObjectStateTrackers, int TimeoutMilliSeconds, Action<LockState> StateChanged)
+		public LockState CreateLock (LockType type, LockableBase[] BaseDataObjectStateTrackers, int TimeoutMilliSeconds, Action<LockState> StateChanged)
 		{
 			//TODO: aqcuire lock here or provide option to do so later and make a call-back for it.
 			try {

@@ -26,7 +26,7 @@
  * */
 using System;
 using System.Collections.Generic;
-using BD2.Common;
+using BD2.Core;
 
 namespace BD2.Frontend.Table
 {
@@ -65,7 +65,7 @@ namespace BD2.Frontend.Table
 			throw new NotImplementedException ();
 		}
 
-		public override BD2.Common.Frontend Frontend {
+		public override BD2.Core.Frontend Frontend {
 			get {
 				throw new NotImplementedException ();
 			}

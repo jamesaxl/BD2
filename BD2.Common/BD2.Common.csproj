@@ -35,6 +35,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ArrayManipulation.cs" />
     <Compile Include="OffsetedArray.cs" />
+    <Compile Include="TamperSafeByteArray.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Serializable.cs" />
+    <Compile Include="WeakReference.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

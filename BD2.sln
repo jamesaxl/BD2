@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Block", "BD2.Block\BD2.Block.csproj", "{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Chunk", "BD2.Chunk\BD2.Chunk.csproj", "{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.RawProxy", "BD2.RawProxy\BD2.RawProxy.csproj", "{C73FD016-664C-4888-86AA-1293FFC3E264}"
 EndProject
@@ -9,9 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.RawProxy.Compress", "BD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.RawProxy.Crypto", "BD2.RawProxy.Crypto\BD2.RawProxy.Crypto.csproj", "{FFFF9B90-CB32-4841-B335-1F646B2A6FB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Block.Daemon", "BD2.Block.Daemon\BD2.Block.Daemon.csproj", "{C60A5077-8EFF-4791-8AA2-89A2EBE58653}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Chunk.Daemon", "BD2.Chunk.Daemon\BD2.Chunk.Daemon.csproj", "{C60A5077-8EFF-4791-8AA2-89A2EBE58653}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.BloomFilter", "BD2.BloomFilter\BD2.BloomFilter.csproj", "{8167365B-7849-434A-A5EA-62BE332F523C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Chunk.Daemon.BloomFilter", "BD2.Chunk.Daemon.BloomFilter\BD2.Chunk.Daemon.BloomFilter.csproj", "{8167365B-7849-434A-A5EA-62BE332F523C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Certificate", "BD2.Certificate\BD2.Certificate.csproj", "{21BD725B-9821-4060-8C52-2AD018EADB25}"
 EndProject
@@ -19,13 +19,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "leveldb-sharp", "leveldb-sh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.CLI", "BD2.CLI\BD2.CLI.csproj", "{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv", "BD2.Conv\BD2.Conv.csproj", "{3AABD676-FFEA-4912-A1F2-ED4535961699}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Generic", "BD2.Conv.Generic\BD2.Conv.Generic.csproj", "{3AABD676-FFEA-4912-A1F2-ED4535961699}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Generic.DataTranslator", "BD2.Conv.Generic.DataTranslator\BD2.Conv.Generic.DataTranslator.csproj", "{0E351074-E71D-449C-990C-93D93953D949}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Generic.TableNameTranslator", "BD2.Conv.Generic.TableNameTranslator\BD2.Conv.Generic.TableNameTranslator.csproj", "{DD766E91-87CB-432F-A0E5-065C5D8ADE30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.MSSQL", "BD2.Conv.MSSQL\BD2.Conv.MSSQL.csproj", "{84598FAA-8E5D-47A9-9463-AFB5A5FAD28F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Daemon.MSSQL", "BD2.Conv.Daemon.MSSQL\BD2.Conv.Daemon.MSSQL.csproj", "{84598FAA-8E5D-47A9-9463-AFB5A5FAD28F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Frontend.TextStream", "BD2.Frentend.TextStream\BD2.Frontend.TextStream.csproj", "{19E7BB88-BD82-4428-B256-6B8A7C8682B3}"
 EndProject
@@ -41,9 +41,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Repo.Net", "BD2.Repo.Ne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Repo.File", "BD2.Repo.File\BD2.Repo.File.csproj", "{7C75502F-DF43-42E9-95F4-F00B5D3774D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Repo.LevelDB", "BD2.Repo.LevelDB\BD2.Repo.LevelDB.csproj", "{AD303744-084C-4FC6-84C9-46F6179C670C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Repo.Leveldb", "BD2.Repo.LevelDB\BD2.Repo.Leveldb.csproj", "{AD303744-084C-4FC6-84C9-46F6179C670C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Squad", "Squad\Squad.csproj", "{8179BF44-79F2-4A33-AA38-0872CCCBB85E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Common", "BD2.Common\BD2.Common.csproj", "{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Daemon", "BD2.Daemon\BD2.Daemon.csproj", "{0395A016-3F02-4D16-904D-868CA51EF1B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Test.Daemon.Chat", "BD2.Test.Daemon.Chat\BD2.Test.Daemon.Chat.csproj", "{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Test.Daemon.FileShare", "BD2.Test.Daemon.FileShare\BD2.Test.Daemon.FileShare.csproj", "{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv", "BD2.Conv\BD2.Conv.csproj", "{CFC2FE19-A495-44D1-9B56-E0FB316A6414}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Frontend.Table", "BD2.Conv.Frontend.Table\BD2.Conv.Frontend.Table.csproj", "{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Frontend.Raw", "BD2.Conv.Frontend.Raw\BD2.Conv.Frontend.Raw.csproj", "{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Core", "BD2.Core\BD2.Core.csproj", "{8D352784-ED9B-4C46-A5E9-B2E32481E25B}"
 EndProject
@@ -55,6 +69,22 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0395A016-3F02-4D16-904D-868CA51EF1B0}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{0395A016-3F02-4D16-904D-868CA51EF1B0}.Debug|Win32.Build.0 = Debug|Any CPU
+		{0395A016-3F02-4D16-904D-868CA51EF1B0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0395A016-3F02-4D16-904D-868CA51EF1B0}.Debug|x86.Build.0 = Debug|Any CPU
+		{0395A016-3F02-4D16-904D-868CA51EF1B0}.Release|Win32.ActiveCfg = Release|Any CPU
+		{0395A016-3F02-4D16-904D-868CA51EF1B0}.Release|Win32.Build.0 = Release|Any CPU
+		{0395A016-3F02-4D16-904D-868CA51EF1B0}.Release|x86.ActiveCfg = Release|Any CPU
+		{0395A016-3F02-4D16-904D-868CA51EF1B0}.Release|x86.Build.0 = Release|Any CPU
+		{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}.Debug|Win32.Build.0 = Debug|Any CPU
+		{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}.Debug|x86.Build.0 = Debug|Any CPU
+		{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}.Release|Win32.ActiveCfg = Release|Any CPU
+		{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}.Release|Win32.Build.0 = Release|Any CPU
+		{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}.Release|x86.ActiveCfg = Release|Any CPU
+		{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}.Release|x86.Build.0 = Release|Any CPU
 		{0E351074-E71D-449C-990C-93D93953D949}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{0E351074-E71D-449C-990C-93D93953D949}.Debug|Win32.Build.0 = Debug|Any CPU
 		{0E351074-E71D-449C-990C-93D93953D949}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -63,6 +93,14 @@ Global
 		{0E351074-E71D-449C-990C-93D93953D949}.Release|Win32.Build.0 = Release|Any CPU
 		{0E351074-E71D-449C-990C-93D93953D949}.Release|x86.ActiveCfg = Release|Any CPU
 		{0E351074-E71D-449C-990C-93D93953D949}.Release|x86.Build.0 = Release|Any CPU
+		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Debug|Win32.ActiveCfg = Debug|x86
+		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Debug|Win32.Build.0 = Debug|x86
+		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Debug|x86.ActiveCfg = Debug|x86
+		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Debug|x86.Build.0 = Debug|x86
+		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Release|Win32.ActiveCfg = Release|x86
+		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Release|Win32.Build.0 = Release|x86
+		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Release|x86.ActiveCfg = Release|x86
+		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Release|x86.Build.0 = Release|x86
 		{19E7BB88-BD82-4428-B256-6B8A7C8682B3}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{19E7BB88-BD82-4428-B256-6B8A7C8682B3}.Debug|Win32.Build.0 = Debug|Any CPU
 		{19E7BB88-BD82-4428-B256-6B8A7C8682B3}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -71,6 +109,14 @@ Global
 		{19E7BB88-BD82-4428-B256-6B8A7C8682B3}.Release|Win32.Build.0 = Release|Any CPU
 		{19E7BB88-BD82-4428-B256-6B8A7C8682B3}.Release|x86.ActiveCfg = Release|Any CPU
 		{19E7BB88-BD82-4428-B256-6B8A7C8682B3}.Release|x86.Build.0 = Release|Any CPU
+		{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}.Debug|Win32.Build.0 = Debug|Any CPU
+		{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}.Debug|x86.Build.0 = Debug|Any CPU
+		{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}.Release|Win32.ActiveCfg = Release|Any CPU
+		{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}.Release|Win32.Build.0 = Release|Any CPU
+		{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}.Release|x86.ActiveCfg = Release|Any CPU
+		{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}.Release|x86.Build.0 = Release|Any CPU
 		{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}.Debug|Win32.Build.0 = Debug|Any CPU
 		{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -111,6 +157,14 @@ Global
 		{6938747E-45CF-4653-99C8-5D40E436E244}.Release|Win32.Build.0 = Release|Any CPU
 		{6938747E-45CF-4653-99C8-5D40E436E244}.Release|x86.ActiveCfg = Release|Any CPU
 		{6938747E-45CF-4653-99C8-5D40E436E244}.Release|x86.Build.0 = Release|Any CPU
+		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Debug|Win32.ActiveCfg = Debug|x86
+		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Debug|Win32.Build.0 = Debug|x86
+		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Debug|x86.ActiveCfg = Debug|x86
+		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Debug|x86.Build.0 = Debug|x86
+		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Release|Win32.ActiveCfg = Release|x86
+		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Release|Win32.Build.0 = Release|x86
+		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Release|x86.ActiveCfg = Release|x86
+		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Release|x86.Build.0 = Release|x86
 		{7C75502F-DF43-42E9-95F4-F00B5D3774D3}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{7C75502F-DF43-42E9-95F4-F00B5D3774D3}.Debug|Win32.Build.0 = Debug|Any CPU
 		{7C75502F-DF43-42E9-95F4-F00B5D3774D3}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -191,6 +245,14 @@ Global
 		{C73FD016-664C-4888-86AA-1293FFC3E264}.Release|Win32.Build.0 = Release|Any CPU
 		{C73FD016-664C-4888-86AA-1293FFC3E264}.Release|x86.ActiveCfg = Release|Any CPU
 		{C73FD016-664C-4888-86AA-1293FFC3E264}.Release|x86.Build.0 = Release|Any CPU
+		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Debug|Win32.ActiveCfg = Debug|x86
+		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Debug|Win32.Build.0 = Debug|x86
+		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Debug|x86.ActiveCfg = Debug|x86
+		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Debug|x86.Build.0 = Debug|x86
+		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Release|Win32.ActiveCfg = Release|x86
+		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Release|Win32.Build.0 = Release|x86
+		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Release|x86.ActiveCfg = Release|x86
+		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Release|x86.Build.0 = Release|x86
 		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Debug|Win32.Build.0 = Debug|Any CPU
 		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -231,6 +293,14 @@ Global
 		{F1659C24-EB5A-4980-9891-6FCDE3FB496D}.Release|Win32.Build.0 = Release|Any CPU
 		{F1659C24-EB5A-4980-9891-6FCDE3FB496D}.Release|x86.ActiveCfg = Release|Any CPU
 		{F1659C24-EB5A-4980-9891-6FCDE3FB496D}.Release|x86.Build.0 = Release|Any CPU
+		{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}.Debug|Win32.Build.0 = Debug|Any CPU
+		{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}.Debug|x86.Build.0 = Debug|Any CPU
+		{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}.Release|Win32.ActiveCfg = Release|Any CPU
+		{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}.Release|Win32.Build.0 = Release|Any CPU
+		{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}.Release|x86.ActiveCfg = Release|Any CPU
+		{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}.Release|x86.Build.0 = Release|Any CPU
 		{FFFF9B90-CB32-4841-B335-1F646B2A6FB8}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{FFFF9B90-CB32-4841-B335-1F646B2A6FB8}.Debug|Win32.Build.0 = Debug|Any CPU
 		{FFFF9B90-CB32-4841-B335-1F646B2A6FB8}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -241,6 +311,27 @@ Global
 		{FFFF9B90-CB32-4841-B335-1F646B2A6FB8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = BD2.Block\BD2.Block.csproj
+		StartupItem = BD2.Test.Daemon.FileShare\BD2.Test.Daemon.FileShare.csproj
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.inheritsSet = null
+		$1.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $2
+		$2.AfterDelegateDeclarationParameterComma = True
+		$2.inheritsSet = Mono
+		$2.inheritsScope = text/x-csharp
+		$2.scope = text/x-csharp
+		$0.TextStylePolicy = $3
+		$3.FileWidth = 160
+		$3.TabsToSpaces = False
+		$3.inheritsSet = VisualStudio
+		$3.inheritsScope = text/plain
+		$3.scope = text/plain
+		$0.TextStylePolicy = $4
+		$4.inheritsSet = null
+		$4.scope = application/config+xml
+		$0.XmlFormattingPolicy = $5
+		$5.inheritsSet = null
+		$5.scope = application/config+xml
 	EndGlobalSection
 EndGlobal

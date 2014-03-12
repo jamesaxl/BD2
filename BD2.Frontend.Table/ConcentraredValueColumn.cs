@@ -26,7 +26,7 @@
  * */
 using System;
 using System.Collections.Generic;
-using BD2.Common;
+using BD2.Core;
 using BSO;
 
 namespace BD2
@@ -43,7 +43,7 @@ namespace BD2
 		}
 
 		public ConcentraredValueColumn (Table Table, Guid ID, string Name,
-		                               bool AllowNull, Guid Authority)
+		                                bool AllowNull, Guid Authority)
 		:base(Table,ID,Name,AllowNull)
 		{
 			authority = Authority;

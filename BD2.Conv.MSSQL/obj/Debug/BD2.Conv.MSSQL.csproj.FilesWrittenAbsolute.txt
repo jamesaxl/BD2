@@ -1,9 +1,0 @@
-/Projects/Esfand/BD2.Conv.MSSQL/obj/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
-/Projects/Esfand/BD2.Conv.MSSQL/bin/Debug/BD2.Conv.MSSQL.exe.mdb
-/Projects/Esfand/BD2.Conv.MSSQL/bin/Debug/BD2.Conv.MSSQL.exe
-/Projects/Esfand/BD2.Conv.MSSQL/obj/Debug/BD2.Conv.MSSQL.exe
-/Projects/Esfand/BD2.Conv.MSSQL/obj/Debug/BD2.Conv.MSSQL.exe.mdb
-/Projects/Esfand/BD2.Conv.MSSQL/bin/Debug/BSO.dll
-/Projects/Esfand/BD2.Conv.MSSQL/bin/Debug/BSO.dll.mdb
-/Projects/Esfand/BD2.Conv.MSSQL/bin/Debug/BD2.Conv.exe
-/Projects/Esfand/BD2.Conv.MSSQL/bin/Debug/BD2.Conv.exe.mdb

@@ -38,7 +38,6 @@
     <Compile Include="TransparentStream\TransparentStream.cs" />
     <Compile Include="ObjectBus\ObjectBus.cs" />
     <Compile Include="ObjectBus\ObjectBusMessage.cs" />
-    <Compile Include="ObjectBus\ObjectBusMessageDeserializer.cs" />
     <Compile Include="ObjectBus\ObjectBusMessageTypeIDAttribute.cs" />
     <Compile Include="ObjectBus\ObjectBusSession.cs" />
     <Compile Include="Service\ServiceAgent.cs" />
@@ -85,6 +84,7 @@
     <Compile Include="TransparentStream\TransparentStreamCanSeekResponseMessage.cs" />
     <Compile Include="TransparentStream\TransparentStreamSeekRequestMessage.cs" />
     <Compile Include="TransparentStream\TransparentStreamSeekResponseMessage.cs" />
+    <Compile Include="ObjectBus\ObjectBusMessageDeserializerAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -26,7 +26,7 @@
  * */
 using System;
 using System.Collections.Generic;
-using BD2.Common;
+using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {

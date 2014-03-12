@@ -59,25 +59,29 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Block\BD2.Block.csproj">
-      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
-      <Name>BD2.Block</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Block.Daemon\BD2.Block.Daemon.csproj">
-      <Project>{C60A5077-8EFF-4791-8AA2-89A2EBE58653}</Project>
-      <Name>BD2.Block.Daemon</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.BloomFilter\BD2.BloomFilter.csproj">
-      <Project>{8167365B-7849-434A-A5EA-62BE332F523C}</Project>
-      <Name>BD2.BloomFilter</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Certificate\BD2.Certificate.csproj">
       <Project>{21BD725B-9821-4060-8C52-2AD018EADB25}</Project>
       <Name>BD2.Certificate</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Repo.LevelDB\BD2.Repo.LevelDB.csproj">
+    <ProjectReference Include="..\BD2.Repo.LevelDB\BD2.Repo.Leveldb.csproj">
       <Project>{AD303744-084C-4FC6-84C9-46F6179C670C}</Project>
-      <Name>BD2.Repo.LevelDB</Name>
+      <Name>BD2.Repo.Leveldb</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
+      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
+      <Name>BD2.Chunk</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Chunk.Daemon\BD2.Chunk.Daemon.csproj">
+      <Project>{C60A5077-8EFF-4791-8AA2-89A2EBE58653}</Project>
+      <Name>BD2.Chunk.Daemon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
+      <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
+      <Name>BD2.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Chunk.Daemon.BloomFilter\BD2.Chunk.Daemon.BloomFilter.csproj">
+      <Project>{8167365B-7849-434A-A5EA-62BE332F523C}</Project>
+      <Name>BD2.Chunk.Daemon.BloomFilter</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
