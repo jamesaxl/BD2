@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -27,21 +27,66 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using BSO;
-using BD2.Core;
+using BD2.Chunk;
 
 namespace BD2.Repo.File
 {
 	public class Repository : ChunkRepository
 	{
+		#region implemented abstract members of ChunkRepository
+		public override void Push (byte[] chunkId, byte[] data, byte[][] dependencies)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override byte[] PullData (byte[] chunkID)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override byte[][] PullDependencies (byte[] chunkID)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void Pull (byte[] chunkID, out byte[] data, out byte[][] dependencies)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<byte[]> EnumerateTopLevels ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateDependencies ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateTopLevelDependencies ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override int GetLeastCost (int currentMinimum, byte[] chunkID)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override int GetMaxCostForAny ()
+		{
+			throw new NotImplementedException ();
+		}
+		#endregion
 		SortedSet<byte[]> publicChunks;
 		Mono.Data.Sqlite.SqliteConnection Base;
 		string path;
 		string name;
 		Guid id;
 
-		public Repository (ChunkRepositoryCollection Repo, string Path, string Name)
-			: base (Repo)
+		public Repository (IEnumerable<ChunkRepositoryCollection> Repos, string Path, string Name)
+			: base (Repos)
 		{
 			if (Name == null)
 				throw new ArgumentNullException ("Name");
@@ -97,13 +142,14 @@ namespace BD2.Repo.File
 			Base.Dispose ();
 		}
 
-		public override void Push (byte[] ChunkDescriptor, byte[] Data)
+		public  void Push (byte[] ChunkDescriptor, byte[] Data)
 		{
 			if (ChunkDescriptor == null)
 				throw new ArgumentNullException ("ChunkDescriptor");
-			string NName = ChunkDescriptor.ToHexadecimal ();
+			//TODO:FIX
+			string NName = "TODO:FIX";//ChunkDescriptor.ToHexadecimal ();
 			string FPath = path + System.IO.Path.DirectorySeparatorChar + NName;
-			new File (ChunkDescriptor, this, FPath, Data);
+			System.IO.File.WriteAllBytes (FPath, Data);
 			using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand ("INSERT INTO Files (ID, Name, Hash, Attributes) VALUES (@p0,@p1,@p2,@p3)", Base)) {
 				Comm.Parameters.AddWithValue ("p0", ChunkDescriptor);
 				Comm.Parameters.AddWithValue ("p1", NName);
@@ -113,13 +159,15 @@ namespace BD2.Repo.File
 
 		}
 
-		public override byte[] Pull (byte[] ChunkDescriptor)
+		public  byte[] Pull (byte[] ChunkDescriptor)
 		{
 			using (Mono.Data.Sqlite.SqliteCommand Comm  = new Mono.Data.Sqlite.SqliteCommand ("SELECT PATH FROM CHUNKS WHERE ID = @p0", Base)) {
 				Comm.Parameters.AddWithValue ("p0", ChunkDescriptor);
 				Mono.Data.Sqlite.SqliteDataReader DR = Comm.ExecuteReader ();
+				string NName = "TODO:FIX";//ChunkDescriptor.ToHexadecimal ();
+				string FPath = path + System.IO.Path.DirectorySeparatorChar + NName;
 				if (DR.Read ()) {
-					return new File (ChunkDescriptor, this, DR.GetString (0));
+					return System.IO.File.ReadAllBytes (FPath);
 				}
 				return null;
 			}

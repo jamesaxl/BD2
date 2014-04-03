@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,8 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
-using System.IO;
-using BSO;
 using System.Collections.Generic;
 using BD2.Core;
 using BD2.Frontend.Table.Model;
@@ -62,70 +60,41 @@ namespace BD2.Frontend.Table
 
 		Snapshot snapshot;
 
-		public Table (Snapshot Snapshot, Guid ID, string Name)
-			:base()
+		public Table (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, Snapshot snapshot, string name)
+			:base(frontendInstanceBase, objectID, chunkID)
 		{
-			snapshot = Snapshot;
-			id = ID;
-			name = Name;
+			this.snapshot = snapshot; 
+			this.name = name;
 		}
 
-		internal Table (Snapshot Snapshot, System.IO.BinaryReader BR)
-			:base()
+		internal SortedDictionary<Guid, SortedSet<Column>> ColumnSets;
+		#region implemented abstract members of Serializable
+		public override void Serialize (System.IO.Stream stream)
 		{
-			snapshot = Snapshot;
-			id = (Guid)BSO.Processor.DeserializeOne (BR, typeof(Guid), null);
-			name = (string)BSO.Processor.DeserializeOne (BR, typeof(string), null);
-		}
-
-		public override void Serialize (System.IO.BinaryWriter BW)
-		{
-			base.Serialize (BW);
-			BSO.Processor.SerializeOne (BW, id, typeof(Guid), null);
-			BSO.Processor.SerializeOne (BW, name, typeof(string), null);
-		}
-
-		Guid id;
-
-		public override Guid ObjectID {
-			get {
-				return id;
-			}
-		}
-
-		internal System.Collections.Generic.SortedDictionary<Guid, System.Collections.Generic.SortedSet<Column>> ColumnSets;
-		#region implemented abstract members of BaseDataObject
-		public override BaseDataObject Drop ()
-		{
-			return new ObjectDrop (Guid.NewGuid (), this);
+			throw new NotImplementedException ();
 		}
 		#endregion
-		#region implemented abstract members of Table
-		public override bool Alive {
-			get {
-				throw new System.NotImplementedException ();
-			}
-		}
-
-		public override IEnumerable<Row> GetRows ()
-		{
-			foreach (Row Row in Rows.Values)
-				yield return Row;
-		}
-
-		public override IEnumerable<Row> GetRows (Predicate<Row> Predicate)
+		#region implemented abstract members of BaseDataObject
+		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override IEnumerable<Row> GetRows (IndexBase Index)
+		public override Guid ObjectType {
+			get {
+				throw new NotImplementedException ();
+			}
+		}
+		#endregion
+		#region implemented abstract members of Table
+		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows ()
 		{
-			throw new System.NotImplementedException ();
+			throw new NotImplementedException ();
 		}
 
-		public override IEnumerable<Row> GetRows (IndexBase Index, Predicate<Row> Predicate)
+		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (IndexBase Index)
 		{
-			throw new System.NotImplementedException ();
+			throw new NotImplementedException ();
 		}
 
 		public override IEnumerable<IndexBase> GetIndices ()
@@ -133,14 +102,9 @@ namespace BD2.Frontend.Table
 			throw new NotImplementedException ();
 		}
 
-		public void AddRow (Row row);
-
-		public void AddIndex (IndexBase Index);
-
-		public override Snapshot Snapshot {
-			get {
-				return snapshot;
-			}
+		public override IEnumerable<ColumnSet> GetColumnSets ()
+		{
+			throw new NotImplementedException ();
 		}
 		#endregion
 	}

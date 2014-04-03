@@ -4,48 +4,71 @@ using BD2.Common;
 
 namespace BD2.Core
 {
-	public sealed class BaseDataObject : Serializable, IComparable<BaseDataObject>
+	public abstract class BaseDataObject : Serializable, IComparable<BaseDataObject>
 	{
-		Frontend frontend;
-		Dictionary<FrontendInstanceBase, BaseDataObjectStateTracker> states;
-		byte[] chunkDescriptor;
+		public abstract IEnumerable<BaseDataObject> GetDependenies ();
+
+		public bool IsVolatile {
+			get {
+				return chunkID == null;
+			}
+		}
+
+		byte[] chunkID;
+		FrontendInstanceBase frontendInstanceBase;
+		Guid objectID;
+
+		protected BaseDataObject (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID)
+		{
+			if (frontendInstanceBase == null)
+				throw new ArgumentNullException ("frontendInstanceBase");
+			this.frontendInstanceBase = frontendInstanceBase;
+			this.objectID = objectID;
+			this.chunkID = chunkID;
+		}
+
+		protected void SetChunkID (byte[] newChunkID)
+		{
+			if (newChunkID == null)
+				throw new ArgumentNullException ("newChunkID");
+			if (chunkID != null)
+				throw new InvalidOperationException ();
+			chunkID = newChunkID;
+		}
+
+		public FrontendInstanceBase FrontendInstanceBase {
+			get {
+				return frontendInstanceBase;
+			}
+		}
 
 		public Frontend Frontend {
 			get {
-				return frontend;
+				return frontendInstanceBase.Frontend;
 			}
 		}
 
-		public BaseDataObjectStateTracker GetTrackerFor (FrontendInstanceBase fib)
-		{
-			lock (states) {
-				BaseDataObjectStateTracker st;
-				if (states.TryGetValue (fib, out st)) {
-					return st;
-				}
-			}
-			return null;
-		}
-
-		public class Comparer_ID : IComparer<BaseDataObject>
+		public class ComparerID : IComparer<BaseDataObject>
 		{
 			int IComparer<BaseDataObject>.Compare (BaseDataObject x, BaseDataObject y)
 			{
-			
-
 				return y.ObjectID.CompareTo (x.ObjectID);
 			}
 		}
 
-		internal byte[] ChunkDescriptor {
+		internal byte[] ChunkID {
 			get {
-				return (byte[])chunkDescriptor.Clone ();
+				return (byte[])chunkID.Clone ();
 			}
 		}
 		//for de/serialization purposes
-		public Guid ObjectType { get; }
+		public abstract Guid ObjectType { get; }
 
-		public Guid ObjectID { get; }
+		public Guid ObjectID {
+			get {
+				return objectID;
+			}
+		}
 		#region IComparable implementation
 		public int CompareTo (BaseDataObject other)
 		{
@@ -53,7 +76,7 @@ namespace BD2.Core
 				throw new ArgumentNullException ("other");
 			int R = other.ObjectID.CompareTo (ObjectID);
 			if (R == 0) {
-				R = other.frontend.CompareTo (frontend);
+				R = other.Frontend.CompareTo (Frontend);
 			}
 			return R;
 		}

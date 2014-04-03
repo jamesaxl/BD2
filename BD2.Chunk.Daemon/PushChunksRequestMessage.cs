@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -35,34 +35,27 @@ namespace BD2.Chunk.Daemon
 	public class PushChunksRequestMessage : ObjectBusMessage
 	{
 		Guid id;
-		SortedDictionary<byte[], byte[]> chunkData;
-		SortedDictionary<byte[], byte[]> chunkMeta;
+		Guid chunks;
 
-		public PushChunksRequestMessage (Guid id, IDictionary<byte[], byte[]> chunkData, IDictionary<byte[], byte[]> chunkMeta)
+		public PushChunksRequestMessage (Guid id, Guid chunks)
 		{
-			if (chunkData == null)
+			if (chunks == null)
 				throw new ArgumentNullException ("chunkData");
-			if (chunkMeta == null)
-				throw new ArgumentNullException ("chunkMeta");
 			this.id = id;
-			this.chunkData = new SortedDictionary<byte[], byte[]> (chunkData);
-			this.chunkMeta = new SortedDictionary<byte[], byte[]> (chunkMeta);
+			this.chunks = chunks;
 		}
 
 		public static PushChunksRequestMessage Deserialize (byte[] bytes)
 		{
 			Guid id;
-			SortedDictionary<byte[], byte[]> chunkData;
-			SortedDictionary<byte[], byte[]> chunkMeta;
-			chunkData = new SortedDictionary<byte[], byte[]> ();
-			chunkMeta = new SortedDictionary<byte[], byte[]> ();
+			Guid chunks;
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					id = new Guid (BR.ReadBytes (16));
-
+					chunks = new Guid (BR.ReadBytes (16));
 				}
 			}
-			return new PushChunksRequestMessage (id,);
+			return new PushChunksRequestMessage (id, chunks);
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
@@ -70,16 +63,7 @@ namespace BD2.Chunk.Daemon
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
-					BW.Write (chunkData.Count);
-					for (int n = 0; n != chunkData.Count; n++) {
-						BW.Write (chunkData [n].Length);
-						BW.Write (chunkData [n]);
-					}
-					BW.Write (chunkMeta.Count);
-					for (int n = 0; n != chunkMeta.Count; n++) {
-						BW.Write (chunkMeta [n].Length);
-						BW.Write (chunkMeta [n]);
-					}
+					BW.Write (chunks.ToByteArray ());
 				}
 				return MS.ToArray ();
 			}

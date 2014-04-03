@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -32,24 +32,44 @@ namespace BD2.Frontend.Table.Model
 	public abstract class IndexColumnBase : BaseDataObject
 	{
 		Column column;
+
+		public Column Column {
+			get {
+				return column;
+			}
+		}
+
+		ColumnSet columnSet;
+
+		public ColumnSet ColumnSet {
+			get {
+				return columnSet;
+			}
+		}
+
 		bool sortAscending;
+
+		public bool SortAscending {
+			get {
+				return sortAscending;
+			}
+		}
+
 		int HashCode;
-
-		public Column Column { get { return column; } }
-
-		public bool SortAscending { get { return sortAscending; } }
 
 		public override int GetHashCode ()
 		{
 			return HashCode;
 		}
 
-		public IndexColumnBase (Column Column, bool SortAscending = true)
+		protected IndexColumnBase (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, Column column, ColumnSet columnSet, bool sortAscending = true)
+			:base (frontendInstanceBase, objectID, chunkID)
 		{
-			if (Column == null)
-				throw new ArgumentNullException ("Column");
-			column = Column;
-			sortAscending = SortAscending;
+			if (column == null)
+				throw new ArgumentNullException ("column");
+			this.column = column;
+			this.columnSet = columnSet;
+			this.sortAscending = sortAscending;
 			HashCode = column.GetHashCode ();
 			if (!sortAscending) {
 				HashCode ^= 0x12345678; 

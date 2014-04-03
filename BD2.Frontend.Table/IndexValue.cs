@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
-using BSO;
 using System.Collections.Generic;
+using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
@@ -41,20 +41,18 @@ namespace BD2.Frontend.Table
 				throw new ArgumentException ("obj must be of type IndexValue.", "obj");
 			if (!OtherIV.index.Equals (index))
 				throw new ArgumentException ("obj must have the same index signature", "obj");
-			DCBase OtherRow = OtherIV.row;
+			Row OtherRow = OtherIV.row;
 			IEnumerator<IndexColumnBase> OtherIndices = OtherIV.index.GetIndexColumns ();
 			IEnumerator<IndexColumnBase> ThisIndices = this.index.GetIndexColumns ();
 			while (ThisIndices.MoveNext () && OtherIndices.MoveNext ()) {
 				int CompareValue;
-				CompareValue = row.GetValue (ThisIndices.Current.Column).CompareTo (OtherRow.GetValue (OtherIndices.Current.Column));
-				if (CompareValue == 0) {
+				//TODO:HACK:XXX
+				CompareValue = 0;//row.GetValue (ThisIndices.Current.Column).CompareTo (OtherRow.GetValue (OtherIndices.Current.Column));
+				if (CompareValue == 0)
 					continue;
-				}
-				if (ThisIndices.Current.SortAscending) {
+				if (ThisIndices.Current.SortAscending)
 					return CompareValue;
-				} else {
-					return -CompareValue;
-				}
+				return -CompareValue;
 			}
 			return 0;
 		}
@@ -67,22 +65,22 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		DCBase row;
+		Row row;
 
-		public DCBase Row {
+		public Row Row {
 			get {
 				return row;
 			}
 		}
 
-		public IndexValue (IndexBase Index, DCBase Row)
+		public IndexValue (IndexBase index, Row row)
 		{
-			if (Row == null)
-				throw new ArgumentNullException ("Row");
-			if (Index == null)
+			if (index == null)
 				throw new ArgumentNullException ("Index");
-			row = Row;
-			index = Index;
+			if (row == null)
+				throw new ArgumentNullException ("Row");
+			this.index = index;
+			this.row = row;
 		}
 	}
 }

@@ -1,4 +1,3 @@
-//
 /*
  * Copyright (c) 2014 Behrooz Amoozad
  * All rights reserved.
@@ -17,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -32,14 +31,74 @@ namespace BD2.Core
 {
 	public abstract class FrontendInstanceBase : IDisposable
 	{
-		public abstract Snapshot Snapshot { get; }
+		Snapshot snapshot;
+		System.Threading.Thread initializationThread;
+
+		protected FrontendInstanceBase (Snapshot snapshot)
+		{
+			if (snapshot == null)
+				throw new ArgumentNullException ("snapshot");
+			this.snapshot = snapshot;
+			initializationThread = new System.Threading.Thread (initialize);
+			initializationThread.Start ();
+		}
+
+		void initialize ()
+		{
+			foreach (byte[] chunks in snapshot.GetChunks ()) {
+				//something like this
+				//TODO:HACK:FIX:XXX
+				//CreateObject( snapshot.Database.Backends.GetRepositories ().GetEnumerator ().Current.PullData (chunks));
+			}
+		}
+
+		public void WaitForInitialization ()
+		{
+			initializationThread.Join ();
+		}
+
+		public string Name { get { return snapshot.Name; } }
 
 		public abstract Frontend Frontend { get; }
 
-		public abstract bool Dynamic { get; }
+		protected abstract void CreateObject (byte[] bytes);
 
-		protected abstract void OnAddObject (BaseDataObject objectReference);
+		protected abstract IEnumerable<BaseDataObject> GetVolatileObjects ();
 
-		protected void AddObject (BaseDataObject objectReference);
+		protected abstract IEnumerable<BaseDataObject> GetObjectsWithID (Guid id);
+		#region IDisposable implementation
+		public abstract void Dispose ();
+		#endregion
+		internal void GetVolatileData (System.IO.BinaryWriter binaryWriter)
+		{
+			SortedSet<BaseDataObject> baseDataObjects = new SortedSet<BaseDataObject> ();
+			foreach (BaseDataObject baseDataObject in baseDataObjects)
+				GetVolatileData (binaryWriter, baseDataObjects, baseDataObject);
+		}
+
+		protected abstract void PurgeObject (BaseDataObject baseDataObject);
+
+		public void PurgeVolatileData ()
+		{
+			foreach (BaseDataObject baseDataObject in GetVolatileObjects()) {
+				PurgeObject (baseDataObject);
+			}
+		}
+
+		internal void GetVolatileData (System.IO.BinaryWriter binaryWriter, SortedSet<BaseDataObject> objects, BaseDataObject baseDataObject)
+		{
+			binaryWriter.Write (SerializeSingleObject (baseDataObject));
+			SortedSet<BaseDataObject> finishedList = new SortedSet<BaseDataObject> ();
+			foreach (BaseDataObject dependency in baseDataObject.GetDependenies ()) {
+				if (dependency.IsVolatile) {
+					if (!finishedList.Contains (dependency)) {
+						finishedList.Add (dependency);
+						GetVolatileData (binaryWriter, objects, dependency);
+					}
+				}
+			}
+		}
+
+		protected abstract byte[] SerializeSingleObject (BaseDataObject baseDataObject);
 	}
 }

@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -27,15 +27,41 @@
 using System;
 using LevelDB;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 
 namespace BD2.RawProxy.crypto
 {
-	public class cryptov1 : BD2.RawProxy.RawProxyv1
+	[RawProxyAttribute(typeof(cryptov1), "1c36f5fc-e0f0-4836-8723-c4d2371c2018", "Deserialize")]
+	public class cryptov1 : RawProxyv1
 	{
-		DB storage;
+		static System.Collections.Generic.SortedDictionary<Guid, X509Certificate2> certificates = new System.Collections.Generic.SortedDictionary<Guid, X509Certificate2> ();
 
-		public cryptov1 (string StoragePath)
+		public static void ImportCertificate (Guid id, X509Certificate2 certificate)
 		{
+			if (certificate == null)
+				throw new ArgumentNullException ("certificate");
+			lock (certificates) {
+				certificates.Add (id, certificate);
+			}
+		}
+		#region implemented abstract members of RawProxyv1
+		public override string Name {
+			get {
+				return "Crypto";
+			}
+		}
+
+		public override Guid Type {
+			get {
+				return Guid.Parse ("0d1b1c2d-8eff-4167-99e5-3feccf7585e0");
+			}
+		}
+		#endregion
+		static DB storage;
+
+		static cryptov1 ()
+		{
+			string StoragePath = BD2.Common.Configuration.GetConfig (null, "RawProxy.Crypto", "StorageConfiguration");
 			storage = new DB (new Options () { Compression = CompressionType.SnappyCompression }, StoragePath, System.Text.Encoding.Unicode);
 		}
 		#region implemented abstract members of BD2.RawProxy.RawProxyv1
@@ -43,7 +69,6 @@ namespace BD2.RawProxy.crypto
 		{
 			if (Input == null)
 				throw new ArgumentNullException ("Input");
-
 		}
 
 		public override byte[] Encode (byte[] Input)
@@ -62,9 +87,13 @@ namespace BD2.RawProxy.crypto
 			if (Attributes.Length == 0)
 				throw new ArgumentException ("Attributes cannot be empty.", "Attributes");
 			MemoryStream MS = new MemoryStream ();
-			MS.Write (Input.Length);
 			MS.Write (Input);
-
+			MS.Seek (0, SeekOrigin.Begin);
+			System.Security.Cryptography.Aes aes = System.Security.Cryptography.Aes.Create ();
+			aes.Mode = System.Security.Cryptography.CipherMode.CBC;
+			aes.Key = Attributes;
+			System.Security.Cryptography.CryptoStream cs = new System.Security.Cryptography.CryptoStream (MS, aes.CreateEncryptor (), System.Security.Cryptography.CryptoStreamMode.Write);
+			
 		}
 
 		byte[] defaultEncoder;
@@ -88,28 +117,28 @@ namespace BD2.RawProxy.crypto
 			defaultEncoder = hash;
 		}
 		#endregion
-		public void AddCertificate (System.Security.Cryptography.X509Certificates.X509Certificate2 cert)
+		public void AddCertificate (X509Certificate2 cert)
 		{
 			if (cert == null)
 				throw new ArgumentNullException ("cert");
 			storage.Put (cert.GetCertHash (),
-			             cert.Export (System.Security.Cryptography.X509Certificates.X509ContentType.Pkcs12));
+			             cert.Export (X509ContentType.Pkcs12));
 		}
 
-		System.Collections.Generic.SortedDictionary<byte[], System.Security.Cryptography.X509Certificates.X509Certificate2> certs = new System.Collections.Generic.SortedDictionary<byte[], System.Security.Cryptography.X509Certificates.X509Certificate2> ();
+		System.Collections.Generic.SortedDictionary<byte[], X509Certificate2> certs = new System.Collections.Generic.SortedDictionary<byte[], X509Certificate2> ();
 
-		public System.Security.Cryptography.X509Certificates.X509Certificate2 GetCertificate (byte[] hash)
+		public X509Certificate2 GetCertificate (byte[] hash)
 		{
 			lock (certs) {
-				System.Security.Cryptography.X509Certificates.X509Certificate2 ret;
+				X509Certificate2 ret;
 				if (certs.TryGetValue (hash, out ret)) {
 					return ret;
 				}
 				byte[] rawcert = GetRawCertificate (hash);
 				try {
-					ret = new System.Security.Cryptography.X509Certificates.X509Certificate2 (rawcert);
+					ret = new X509Certificate2 (rawcert);
 				} catch (Exception ex) {
-					throw new InvalidDataException ("Certificate information is damaged/wrong and unusable.");
+					throw new InvalidDataException ("Certificate information is damaged/wrong and unusable.", ex);
 				}
 				certs.Add (hash, rawcert);
 				return ret;

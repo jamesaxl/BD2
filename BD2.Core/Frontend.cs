@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -31,7 +31,7 @@ using BD2.LockManager;
 namespace BD2.Core
 {
 	public abstract class Frontend : IComparable
-	{
+	{	
 		//For comparison 'only' just to make things smoother in case of needing to sort or search or whatever somewhere.
 		Guid id = Guid.NewGuid ();
 
@@ -47,6 +47,6 @@ namespace BD2.Core
 
 		public abstract string Name { get; }
 
-		protected abstract FrontendInstanceBase CreateInstantiate (Snapshot Snapshot);
+		public abstract FrontendInstanceBase CreateInstanse (Snapshot snapshot);
 	}
 }

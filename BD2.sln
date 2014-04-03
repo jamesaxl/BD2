@@ -13,13 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Chunk.Daemon", "BD2.Chu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Chunk.Daemon.BloomFilter", "BD2.Chunk.Daemon.BloomFilter\BD2.Chunk.Daemon.BloomFilter.csproj", "{8167365B-7849-434A-A5EA-62BE332F523C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Certificate", "BD2.Certificate\BD2.Certificate.csproj", "{21BD725B-9821-4060-8C52-2AD018EADB25}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "leveldb-sharp", "leveldb-sharp\leveldb-sharp.csproj", "{8DD96596-38AC-46DD-80C1-75D9EBE585EA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.CLI", "BD2.CLI\BD2.CLI.csproj", "{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Generic", "BD2.Conv.Generic\BD2.Conv.Generic.csproj", "{3AABD676-FFEA-4912-A1F2-ED4535961699}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Generic.DataTranslator", "BD2.Conv.Generic.DataTranslator\BD2.Conv.Generic.DataTranslator.csproj", "{0E351074-E71D-449C-990C-93D93953D949}"
 EndProject
@@ -30,8 +26,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Frontend.TextStream", "BD2.Frentend.TextStream\BD2.Frontend.TextStream.csproj", "{19E7BB88-BD82-4428-B256-6B8A7C8682B3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Frontend.Table", "BD2.Frontend.Table\BD2.Frontend.Table.csproj", "{285B9E10-0FC7-4D60-9D1D-5068E8963988}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Frontend.Table.Model", "BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj", "{D89F122B-1806-4D93-8973-6A6C6DE34E88}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Frontend.Table.Linq", "BD2.Frontend.Table.Linq\BD2.Frontend.Table.Linq.csproj", "{F1659C24-EB5A-4980-9891-6FCDE3FB496D}"
 EndProject
@@ -60,6 +54,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Frontend.Raw", "BD2.Conv.Frontend.Raw\BD2.Conv.Frontend.Raw.csproj", "{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Core", "BD2.Core\BD2.Core.csproj", "{8D352784-ED9B-4C46-A5E9-B2E32481E25B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Daemon.Sqlite", "BD2.Conv.Daemon.Sqlite\BD2.Conv.Daemon.Sqlite.csproj", "{436AE80B-3AE2-448F-B0A4-2676449B7AC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Conv.Daemon.DB4O", "BD2.Conv.Daemon.DB4O\BD2.Conv.Daemon.DB4O.csproj", "{5B861B2E-347C-4E75-AC23-C05326E330C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Frontend.Table.Model", "BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj", "{A4059B19-5E63-468E-9AE0-6D55AFD9775E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2", "BD2\BD2.csproj", "{51635361-E0F0-4E98-B2A2-C7F354DA02A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,14 +127,6 @@ Global
 		{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}.Release|Win32.Build.0 = Release|Any CPU
 		{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}.Release|x86.ActiveCfg = Release|Any CPU
 		{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}.Release|x86.Build.0 = Release|Any CPU
-		{21BD725B-9821-4060-8C52-2AD018EADB25}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{21BD725B-9821-4060-8C52-2AD018EADB25}.Debug|Win32.Build.0 = Debug|Any CPU
-		{21BD725B-9821-4060-8C52-2AD018EADB25}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{21BD725B-9821-4060-8C52-2AD018EADB25}.Debug|x86.Build.0 = Debug|Any CPU
-		{21BD725B-9821-4060-8C52-2AD018EADB25}.Release|Win32.ActiveCfg = Release|Any CPU
-		{21BD725B-9821-4060-8C52-2AD018EADB25}.Release|Win32.Build.0 = Release|Any CPU
-		{21BD725B-9821-4060-8C52-2AD018EADB25}.Release|x86.ActiveCfg = Release|Any CPU
-		{21BD725B-9821-4060-8C52-2AD018EADB25}.Release|x86.Build.0 = Release|Any CPU
 		{285B9E10-0FC7-4D60-9D1D-5068E8963988}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{285B9E10-0FC7-4D60-9D1D-5068E8963988}.Debug|Win32.Build.0 = Debug|Any CPU
 		{285B9E10-0FC7-4D60-9D1D-5068E8963988}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -141,14 +135,30 @@ Global
 		{285B9E10-0FC7-4D60-9D1D-5068E8963988}.Release|Win32.Build.0 = Release|Any CPU
 		{285B9E10-0FC7-4D60-9D1D-5068E8963988}.Release|x86.ActiveCfg = Release|Any CPU
 		{285B9E10-0FC7-4D60-9D1D-5068E8963988}.Release|x86.Build.0 = Release|Any CPU
-		{3AABD676-FFEA-4912-A1F2-ED4535961699}.Debug|Win32.ActiveCfg = Debug|Win32
-		{3AABD676-FFEA-4912-A1F2-ED4535961699}.Debug|Win32.Build.0 = Debug|Win32
-		{3AABD676-FFEA-4912-A1F2-ED4535961699}.Debug|x86.ActiveCfg = Debug|Win32
-		{3AABD676-FFEA-4912-A1F2-ED4535961699}.Debug|x86.Build.0 = Debug|Win32
-		{3AABD676-FFEA-4912-A1F2-ED4535961699}.Release|Win32.ActiveCfg = Release|Win32
-		{3AABD676-FFEA-4912-A1F2-ED4535961699}.Release|Win32.Build.0 = Release|Win32
-		{3AABD676-FFEA-4912-A1F2-ED4535961699}.Release|x86.ActiveCfg = Release|Win32
-		{3AABD676-FFEA-4912-A1F2-ED4535961699}.Release|x86.Build.0 = Release|Win32
+		{436AE80B-3AE2-448F-B0A4-2676449B7AC8}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{436AE80B-3AE2-448F-B0A4-2676449B7AC8}.Debug|Win32.Build.0 = Debug|Any CPU
+		{436AE80B-3AE2-448F-B0A4-2676449B7AC8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{436AE80B-3AE2-448F-B0A4-2676449B7AC8}.Debug|x86.Build.0 = Debug|Any CPU
+		{436AE80B-3AE2-448F-B0A4-2676449B7AC8}.Release|Win32.ActiveCfg = Release|Any CPU
+		{436AE80B-3AE2-448F-B0A4-2676449B7AC8}.Release|Win32.Build.0 = Release|Any CPU
+		{436AE80B-3AE2-448F-B0A4-2676449B7AC8}.Release|x86.ActiveCfg = Release|Any CPU
+		{436AE80B-3AE2-448F-B0A4-2676449B7AC8}.Release|x86.Build.0 = Release|Any CPU
+		{51635361-E0F0-4E98-B2A2-C7F354DA02A0}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{51635361-E0F0-4E98-B2A2-C7F354DA02A0}.Debug|Win32.Build.0 = Debug|Any CPU
+		{51635361-E0F0-4E98-B2A2-C7F354DA02A0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{51635361-E0F0-4E98-B2A2-C7F354DA02A0}.Debug|x86.Build.0 = Debug|Any CPU
+		{51635361-E0F0-4E98-B2A2-C7F354DA02A0}.Release|Win32.ActiveCfg = Release|Any CPU
+		{51635361-E0F0-4E98-B2A2-C7F354DA02A0}.Release|Win32.Build.0 = Release|Any CPU
+		{51635361-E0F0-4E98-B2A2-C7F354DA02A0}.Release|x86.ActiveCfg = Release|Any CPU
+		{51635361-E0F0-4E98-B2A2-C7F354DA02A0}.Release|x86.Build.0 = Release|Any CPU
+		{5B861B2E-347C-4E75-AC23-C05326E330C6}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{5B861B2E-347C-4E75-AC23-C05326E330C6}.Debug|Win32.Build.0 = Debug|Any CPU
+		{5B861B2E-347C-4E75-AC23-C05326E330C6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5B861B2E-347C-4E75-AC23-C05326E330C6}.Debug|x86.Build.0 = Debug|Any CPU
+		{5B861B2E-347C-4E75-AC23-C05326E330C6}.Release|Win32.ActiveCfg = Release|Any CPU
+		{5B861B2E-347C-4E75-AC23-C05326E330C6}.Release|Win32.Build.0 = Release|Any CPU
+		{5B861B2E-347C-4E75-AC23-C05326E330C6}.Release|x86.ActiveCfg = Release|Any CPU
+		{5B861B2E-347C-4E75-AC23-C05326E330C6}.Release|x86.Build.0 = Release|Any CPU
 		{6938747E-45CF-4653-99C8-5D40E436E244}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{6938747E-45CF-4653-99C8-5D40E436E244}.Debug|Win32.Build.0 = Debug|Any CPU
 		{6938747E-45CF-4653-99C8-5D40E436E244}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -221,6 +231,14 @@ Global
 		{9B5ABA79-CDA4-4762-B03E-1D04E79F8088}.Release|Win32.Build.0 = Release|Any CPU
 		{9B5ABA79-CDA4-4762-B03E-1D04E79F8088}.Release|x86.ActiveCfg = Release|Any CPU
 		{9B5ABA79-CDA4-4762-B03E-1D04E79F8088}.Release|x86.Build.0 = Release|Any CPU
+		{A4059B19-5E63-468E-9AE0-6D55AFD9775E}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{A4059B19-5E63-468E-9AE0-6D55AFD9775E}.Debug|Win32.Build.0 = Debug|Any CPU
+		{A4059B19-5E63-468E-9AE0-6D55AFD9775E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A4059B19-5E63-468E-9AE0-6D55AFD9775E}.Debug|x86.Build.0 = Debug|Any CPU
+		{A4059B19-5E63-468E-9AE0-6D55AFD9775E}.Release|Win32.ActiveCfg = Release|Any CPU
+		{A4059B19-5E63-468E-9AE0-6D55AFD9775E}.Release|Win32.Build.0 = Release|Any CPU
+		{A4059B19-5E63-468E-9AE0-6D55AFD9775E}.Release|x86.ActiveCfg = Release|Any CPU
+		{A4059B19-5E63-468E-9AE0-6D55AFD9775E}.Release|x86.Build.0 = Release|Any CPU
 		{AD303744-084C-4FC6-84C9-46F6179C670C}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{AD303744-084C-4FC6-84C9-46F6179C670C}.Debug|Win32.Build.0 = Debug|Any CPU
 		{AD303744-084C-4FC6-84C9-46F6179C670C}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -253,14 +271,6 @@ Global
 		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Release|Win32.Build.0 = Release|x86
 		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Release|x86.ActiveCfg = Release|x86
 		{CFC2FE19-A495-44D1-9B56-E0FB316A6414}.Release|x86.Build.0 = Release|x86
-		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Debug|Win32.Build.0 = Debug|Any CPU
-		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Debug|x86.Build.0 = Debug|Any CPU
-		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Release|Win32.ActiveCfg = Release|Any CPU
-		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Release|Win32.Build.0 = Release|Any CPU
-		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Release|x86.ActiveCfg = Release|Any CPU
-		{D89F122B-1806-4D93-8973-6A6C6DE34E88}.Release|x86.Build.0 = Release|Any CPU
 		{DD766E91-87CB-432F-A0E5-065C5D8ADE30}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{DD766E91-87CB-432F-A0E5-065C5D8ADE30}.Debug|Win32.Build.0 = Debug|Any CPU
 		{DD766E91-87CB-432F-A0E5-065C5D8ADE30}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -333,5 +343,142 @@ Global
 		$0.XmlFormattingPolicy = $5
 		$5.inheritsSet = null
 		$5.scope = application/config+xml
+		$0.StandardHeader = $6
+		$6.Text = @/*\n * Copyright (c) 2014 Behrooz Amoozad\n * All rights reserved.\n *\n * Redistribution and use in source and binary forms, with or without\n * modification, are permitted provided that the following conditions are met:\n *     * Redistributions of source code must retain the above copyright\n *       notice, this list of conditions and the following disclaimer.\n *     * Redistributions in binary form must reproduce the above copyright\n *       notice, this list of conditions and the following disclaimer in the\n *       documentation and/or other materials provided with the distribution.\n *     * Neither the name of the bd2 nor the\n *       names of its contributors may be used to endorse or promote products\n *       derived from this software without specific prior written permission.\n *\n * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND\n * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY\n * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS\n * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n * */
+		$6.IncludeInNewFiles = True
+		$0.NameConventionPolicy = $7
+		$7.Rules = $8
+		$8.NamingRule = $9
+		$9.Name = Namespaces
+		$9.AffectedEntity = Namespace
+		$9.VisibilityMask = VisibilityMask
+		$9.NamingStyle = PascalCase
+		$9.IncludeInstanceMembers = True
+		$9.IncludeStaticEntities = True
+		$8.NamingRule = $10
+		$10.Name = Types
+		$10.AffectedEntity = Class, Struct, Enum, Delegate
+		$10.VisibilityMask = Public
+		$10.NamingStyle = PascalCase
+		$10.IncludeInstanceMembers = True
+		$10.IncludeStaticEntities = True
+		$8.NamingRule = $11
+		$11.Name = Interfaces
+		$11.RequiredPrefixes = $12
+		$12.String = I
+		$11.AffectedEntity = Interface
+		$11.VisibilityMask = Public
+		$11.NamingStyle = PascalCase
+		$11.IncludeInstanceMembers = True
+		$11.IncludeStaticEntities = True
+		$8.NamingRule = $13
+		$13.Name = Attributes
+		$13.RequiredSuffixes = $14
+		$14.String = Attribute
+		$13.AffectedEntity = CustomAttributes
+		$13.VisibilityMask = Public
+		$13.NamingStyle = PascalCase
+		$13.IncludeInstanceMembers = True
+		$13.IncludeStaticEntities = True
+		$8.NamingRule = $15
+		$15.Name = Event Arguments
+		$15.RequiredSuffixes = $16
+		$16.String = EventArgs
+		$15.AffectedEntity = CustomEventArgs
+		$15.VisibilityMask = Public
+		$15.NamingStyle = PascalCase
+		$15.IncludeInstanceMembers = True
+		$15.IncludeStaticEntities = True
+		$8.NamingRule = $17
+		$17.Name = Exceptions
+		$17.RequiredSuffixes = $18
+		$18.String = Exception
+		$17.AffectedEntity = CustomExceptions
+		$17.VisibilityMask = VisibilityMask
+		$17.NamingStyle = PascalCase
+		$17.IncludeInstanceMembers = True
+		$17.IncludeStaticEntities = True
+		$8.NamingRule = $19
+		$19.Name = Methods
+		$19.AffectedEntity = Methods
+		$19.VisibilityMask = Protected, Public
+		$19.NamingStyle = PascalCase
+		$19.IncludeInstanceMembers = True
+		$19.IncludeStaticEntities = True
+		$8.NamingRule = $20
+		$20.Name = Static Readonly Fields
+		$20.AffectedEntity = ReadonlyField
+		$20.VisibilityMask = Protected, Public
+		$20.NamingStyle = PascalCase
+		$20.IncludeInstanceMembers = False
+		$20.IncludeStaticEntities = True
+		$8.NamingRule = $21
+		$21.Name = Fields
+		$21.AffectedEntity = Field
+		$21.VisibilityMask = Protected, Public
+		$21.NamingStyle = PascalCase
+		$21.IncludeInstanceMembers = True
+		$21.IncludeStaticEntities = True
+		$8.NamingRule = $22
+		$22.Name = ReadOnly Fields
+		$22.AffectedEntity = ReadonlyField
+		$22.VisibilityMask = Protected, Public
+		$22.NamingStyle = PascalCase
+		$22.IncludeInstanceMembers = True
+		$22.IncludeStaticEntities = False
+		$8.NamingRule = $23
+		$23.Name = Constant Fields
+		$23.AffectedEntity = ConstantField
+		$23.VisibilityMask = Protected, Public
+		$23.NamingStyle = PascalCase
+		$23.IncludeInstanceMembers = True
+		$23.IncludeStaticEntities = True
+		$8.NamingRule = $24
+		$24.Name = Properties
+		$24.AffectedEntity = Property
+		$24.VisibilityMask = Protected, Public
+		$24.NamingStyle = PascalCase
+		$24.IncludeInstanceMembers = True
+		$24.IncludeStaticEntities = True
+		$8.NamingRule = $25
+		$25.Name = Events
+		$25.AffectedEntity = Event
+		$25.VisibilityMask = Protected, Public
+		$25.NamingStyle = PascalCase
+		$25.IncludeInstanceMembers = True
+		$25.IncludeStaticEntities = True
+		$8.NamingRule = $26
+		$26.Name = Enum Members
+		$26.AffectedEntity = EnumMember
+		$26.VisibilityMask = VisibilityMask
+		$26.NamingStyle = PascalCase
+		$26.IncludeInstanceMembers = True
+		$26.IncludeStaticEntities = True
+		$8.NamingRule = $27
+		$27.Name = Parameters
+		$27.AffectedEntity = Parameter
+		$27.VisibilityMask = VisibilityMask
+		$27.NamingStyle = CamelCase
+		$27.IncludeInstanceMembers = True
+		$27.IncludeStaticEntities = True
+		$8.NamingRule = $28
+		$28.Name = Type Parameters
+		$28.RequiredPrefixes = $29
+		$29.String = T
+		$28.AffectedEntity = TypeParameter
+		$28.VisibilityMask = VisibilityMask
+		$28.NamingStyle = PascalCase
+		$28.IncludeInstanceMembers = True
+		$28.IncludeStaticEntities = True
+		$0.VersionControlPolicy = $30
+		$30.CommitMessageStyle = $31
+		$31.LastFilePostfix = "@:\n  "
+		$31.IncludeDirectoryPaths = True
+		$30.inheritsSet = Mono
+		$0.ChangeLogPolicy = $32
+		$32.UpdateMode = None
+		$32.MessageStyle = $33
+		$33.LineAlign = 0
+		$32.inheritsSet = Mono
 	EndGlobalSection
 EndGlobal

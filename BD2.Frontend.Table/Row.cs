@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -27,22 +27,12 @@
 using System;
 using System.Collections.Generic;
 using BD2.Core;
-using BSO;
+using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
 	public class Row : Model.Row
 	{
-		public override bool Alive {
-			get {
-				throw new System.NotImplementedException ();
-			}
-		}
-
-		public override BaseDataObject Drop ()
-		{
-			throw new ObjectDrop (Guid.NewGuid (), this);
-		}
 
 		byte[] rawData;
 
@@ -51,61 +41,39 @@ namespace BD2.Frontend.Table
 			return rawData.Clone ();
 		}
 
-		Model.ColumnSet columnSet;
-
-		public override Model.ColumnSet DefaultColumnSet { get { return columnSet; } }
-
-		string name;
-
-		public string Name { get { return name; } }
-
-		long? length;
-
-		public long Length { get { return length.Value; } }
-
-		private Row (ColumnSet ColumnSet, Guid ID)
-			: base()
+		internal Row (FrontendInstanceBase  frontendInstanceBase, Guid objectID, byte[] chunkID, ColumnSet columnSet, byte[] rawData)
+			: base(frontendInstanceBase, objectID, chunkID, columnSet)
 		{
-			if (ColumnSet == null)
-				throw new ArgumentNullException ("Table");
-			columnSet = ColumnSet;
-			objectID = ID;
-			length = null;
-		}
-
-		internal Row (ColumnSet ColumnSet, Guid ID, byte[] RawData)
-			: base()
-		{
-			if (RawData == null)
+			if (rawData == null)
 				throw new ArgumentNullException ("RawData");
-			if (ColumnSet == null)
+			if (columnSet == null)
 				throw new ArgumentNullException ("Table");
-			columnSet = ColumnSet;
-			objectID = ID;
-			rawData = RawData;
+			this.rawData = rawData;
 		}
-
-		internal Row (ColumnSet ColumnSet, System.IO.BinaryReader BR)
-		: base ()
+		#region implemented abstract members of Serializable
+		public override void Serialize (System.IO.Stream stream)
 		{
-			if (BR == null)
-				throw new ArgumentNullException ("BR");
-			if (ColumnSet == null)
-				throw new ArgumentNullException ("Table");
-			objectID = (Guid)BSO.Processor.DeserializeOne (BR, typeof(Guid), null);
-			name = (string)BSO.Processor.DeserializeOne (BR, typeof(string), null);
-			columnSet = ColumnSet;
+			throw new NotImplementedException ();
 		}
-
-		Guid objectID;
-
-		public override Guid ObjectID { get { return objectID; } }
-
-		public override void Serialize (System.IO.BinaryWriter BW)
+		#endregion
+		#region implemented abstract members of Row
+		public override ValueSet GetValues ()
 		{
-			if (BW == null)
-				throw new ArgumentNullException ("BW");
-			BSO.Processor.SerializeOne (BW, objectID, typeof(Guid), null);
+			throw new NotImplementedException ();
 		}
+		#endregion
+		#region implemented abstract members of BaseDataObject
+		public override Guid ObjectType {
+			get {
+				throw new NotImplementedException ();
+			}
+		}
+		#endregion
+		#region implemented abstract members of BaseDataObject
+		public override IEnumerable<BaseDataObject> GetDependenies ()
+		{
+			throw new NotImplementedException ();
+		}
+		#endregion
 	}
 }

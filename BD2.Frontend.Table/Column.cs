@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -27,60 +27,78 @@
 using System;
 using System.Collections.Generic;
 using BD2.Core;
-using BSO;
+using BD2.Daemon;
 
 namespace BD2.Frontend.Table
 {
+	[ObjectBusMessageTypeID("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60")]
+	[ObjectBusMessageDeserializer(typeof(Column), "Deserialize")]
 	public class Column : Model.Column
 	{
-		public override BaseDataObject Drop ()
+		#region implemented abstract members of BaseDataObject
+		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			throw new System.NotImplementedException ();
+			yield return table;
+		}
+		#endregion
+		Table table;
+
+		public Table Table {
+			get {
+				return table;
+			}
 		}
 
-		Table table;
 		string name;
 
 		public override string Name { get { return name; } }
+
+		long typeID;
+
+		public long TypeID {
+			get {
+				return typeID;
+			}
+		}
 
 		bool? allowNull;
 
 		public override bool AllowNull { get { return allowNull.Value; } }
 
-		public Column (Table Table, Guid ID, string Name, bool AllowNull)
-			:base()
+		long length;
+
+		public Column (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, Table table, string name, long typeID, bool allowNull, long length)
+			:base(frontendInstanceBase, objectID, chunkID)
 		{
-			if (Table == null)
+			if (table == null)
 				throw new ArgumentNullException ("Table");
-			if (Name == null)
+			if (name == null)
 				throw new ArgumentNullException ("Name");
-			table = Table;
-			objectId = ID;
-			name = Name;
-			allowNull = AllowNull;
+			this.table = table;
+			this.name = name;
+			this.typeID = typeID;
+			this.allowNull = allowNull;
+			this.length = length;
 		}
-
-		internal Column (Table Table, System.IO.BinaryReader BR)
-			:base()
+		#region implemented abstract members of Serializable
+		public override void Serialize (System.IO.Stream stream)
 		{
-			table = Table;
-			objectId = (Guid)BSO.Processor.DeserializeOne (BR, typeof(Guid), null);
-			name = (string)BSO.Processor.DeserializeOne (BR, typeof(string), null);
+
 		}
-
-		Guid objectId;
-
-		public override Guid ObjectID {
+		#endregion
+		#region implemented abstract members of BaseDataObject
+		public override Guid ObjectType {
 			get {
-				return objectId;
+				return Guid.Parse ("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60");
 			}
 		}
-
-		public override void Serialize (System.IO.BinaryWriter BW)
-		{
-			base.Serialize (BW);
-			BSO.Processor.SerializeOne (BW, objectId, typeof(Guid), null);
-			BSO.Processor.SerializeOne (BW, name, typeof(string), null);
+		#endregion
+		#region implemented abstract members of Column
+		public override long Length {
+			get {
+				return length;
+			}
 		}
+		#endregion
 	}
 }

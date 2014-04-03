@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -32,15 +32,16 @@ namespace BD2.Frontend.Table.Model
 {
 	public abstract class Column : BaseDataObject
 	{
-		public abstract ColumnSet ColumnSet { get; internal set; }
+		protected Column (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID)
+			:base (frontendInstanceBase, objectID, chunkID)
+		{
+		}
 
 		public abstract string Name { get; }
 
 		public abstract long Length { get; }
 
 		public abstract bool AllowNull { get; }
-
-		public abstract bool PrioratizedOffset { get; }
 
 		int HashCode;
 
@@ -50,7 +51,7 @@ namespace BD2.Frontend.Table.Model
 			if (HashCode == 0) {
 				HashCode = Name.GetHashCode () ^ ((int)(Length >> 32)) ^ ((int)Length) ^ (AllowNull ? 0x7C3B9473 : 0);
 			}
-			return base.GetHashCode ();
+			return HashCode;
 		}
 
 		public  bool TypeEquals (object obj)
@@ -62,11 +63,5 @@ namespace BD2.Frontend.Table.Model
 				throw new ArgumentException ("obj must be of type Column.", "obj");
 			return  (OtherColumn.AllowNull == this.AllowNull) && (OtherColumn.Length == this.Length);
 		}
-		#region implemented abstract members of Serializable
-		public override void Serialize (System.IO.BinaryWriter Stream)
-		{
-			base.Serialize (Stream);//Just to raise an error.do not raise it here. more stack trace helps debugging
-		}
-		#endregion
 	}
 }

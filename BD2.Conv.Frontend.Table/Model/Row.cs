@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,8 +28,14 @@ using System;
 
 namespace BD2.Conv.Frontend.Table
 {
-	public sealed class Row
+	public class Row
 	{
+		public int FieldCount {
+			get {
+				return fields.Length;
+			}
+		}
+
 		Guid tableID;
 
 		public Guid TableID {
@@ -38,33 +44,45 @@ namespace BD2.Conv.Frontend.Table
 			}
 		}
 
-		byte[] fields;
+		object[] fields;
 
-		public byte[] Fields {
+		public object[] Fields {
 			get {
 				return fields;
 			}
 		}
 
-		bool[] nulls;
-
-		public bool[] Nulls {
-			get {
-				return nulls;
-			}
-		}
-
-		public Row (Guid tableID, byte[] fields, bool[] nulls)
+		public Row (Guid tableID, object[] fields)
 		{
 			if (fields == null)
 				throw new ArgumentNullException ("fields");
-			if (nulls == null)
-				throw new ArgumentNullException ("nulls");
 			this.tableID = tableID;
-			if (fields.Length != nulls.Length)
-				throw new ArgumentException ("the null state for all fileds must be specified.");
 			this.fields = fields;
-			this.nulls = nulls;
+		}
+
+		public byte[] Serialize (Func<System.IO.Stream, byte[]> CreateStream)
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (MS)) {
+					BW.Write (tableID.ToByteArray ());
+					BW.Write (FieldCount);
+					for (int n = 0; n != FieldCount; n++) {
+						if (fields [n] == null) {
+							BW.Write (1);
+						} else if (fields [n] is System.IO.Stream) {
+							BW.Write (2);
+							BW.Write (CreateStream ((System.IO.Stream)fields [n]));
+						} else {
+							BW.Write (0);
+							BW.Write (((byte[])fields [n]).Length);
+							BW.Write ((byte[])fields [n]);
+						}
+
+					}
+
+				}
+				return MS.ToArray ();
+			}
 		}
 
 		public static Row Deserialize (byte[] bytes)
@@ -72,14 +90,8 @@ namespace BD2.Conv.Frontend.Table
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					Guid tableID = new Guid (BR.ReadBytes (16));
-					int fieldCount = BR.ReadInt32 ();
-					byte[][] fields = new byte[fieldCount][];
-					bool[] nulls = new bool[fieldCount];
-					for (int n = 0; n != fieldCount; n++) {
-						if (nulls [n] = BR.ReadBoolean (n))
-							fields [n] = BR.ReadBytes (BR.ReadInt32 ());
-					}
-					return new Row (tableID, fields, nulls);
+					object[] fields = new object[BR.ReadInt32 ()];
+					return new Row (tableID, fields);
 				}
 			}
 		}

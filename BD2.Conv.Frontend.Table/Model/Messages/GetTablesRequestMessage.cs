@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,23 +25,61 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
+using BD2.Daemon;
 
 namespace BD2.Conv.Frontend.Table
 {
-	public class GetTablesRequestMessage:BD2.Daemon.ObjectBusMessage
+	[ObjectBusMessageTypeIDAttribute("59373f30-1169-4e7e-a87a-0abe9914840f")]
+	[ObjectBusMessageDeserializerAttribute(typeof(GetTablesRequestMessage), "Deserialize")]
+	public class GetTablesRequestMessage : ObjectBusMessage
 	{
-		public GetTablesRequestMessage ()
+		Guid id;
+
+		public Guid ID {
+			get {
+				return id;
+			}
+		}
+
+		bool refresh;
+
+		public bool Refresh {
+			get {
+				return refresh;
+			}
+		}
+
+		public GetTablesRequestMessage (Guid id, bool refresh)
 		{
+			this.id = id;
+			this.refresh = refresh;
+		}
+
+		public static ObjectBusMessage Deserialize (byte[] bytes)
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					Guid requestID = new Guid (BR.ReadBytes (16));
+					bool refresh = BR.ReadBoolean ();
+					return new GetTablesRequestMessage (requestID, refresh);
+				}
+			}
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
-			throw new NotImplementedException ();
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (id.ToByteArray ());
+					BW.Write (refresh);
+					return MS.GetBuffer ();
+				}
+			}
 		}
 
 		public override Guid TypeID {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("59373f30-1169-4e7e-a87a-0abe9914840f");
 			}
 		}
 		#endregion

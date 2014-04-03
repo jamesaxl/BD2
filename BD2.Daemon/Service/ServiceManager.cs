@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -161,7 +161,7 @@ namespace BD2.Daemon
 			objectBus.SendMessage (serviceAnnouncement);
 		}
 
-		public ServiceAgent RequestService (ServiceAnnounceMessage remoteServiceAnnouncement, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> func)
+		public ServiceAgent RequestService (ServiceAnnounceMessage remoteServiceAnnouncement, byte[] parameters, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> func)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -170,7 +170,7 @@ namespace BD2.Daemon
 			lock (remoteServices)
 				if (!remoteServices.Contains (remoteServiceAnnouncement))
 					throw new InvalidOperationException ("The provided remoteServiceAnnouncement is not valid.");
-			ServiceRequestMessage request = new ServiceRequestMessage (Guid.NewGuid (), remoteServiceAnnouncement.ID);
+			ServiceRequestMessage request = new ServiceRequestMessage (Guid.NewGuid (), remoteServiceAnnouncement.ID, parameters);
 			System.Threading.ManualResetEvent mre = new System.Threading.ManualResetEvent (false);
 			System.Threading.ManualResetEvent mre_done = new System.Threading.ManualResetEvent (false);
 

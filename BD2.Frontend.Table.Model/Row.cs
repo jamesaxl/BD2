@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -27,47 +27,26 @@
 using System;
 using System.Collections.Generic;
 using BD2.Core;
-using BSO;
+using BD2.Common;
 
 namespace BD2.Frontend.Table.Model
 {
 	public abstract class Row : BaseDataObject
 	{
-		protected SortedDictionary<ColumnSet, WeakReference<byte[][]>> valueCache;
-		private byte[][] defaultColumnSetValues;
+		ColumnSet columnSet;
 
-		private byte[][] DefaultColumnSetValues {
+		public ColumnSet ColumnSet {
 			get {
-				if (defaultColumnSetValues == null)
-					defaultColumnSetValues = OnDefaultColumnSetValuesNeeded ();
-				return defaultColumnSetValues;
+				return columnSet;
 			}
 		}
 
-		protected abstract byte[][] OnDefaultColumnSetValuesNeeded ();
-
-		protected byte[] this [int Index] {
-			get {
-				return DefaultColumnSetValues [Index];
-			}
-		}
-
-		protected int ColumnCount {
-			get {
-				return DefaultColumnSetValues.Length;
-			}
-		}
-
-		public abstract ColumnSet DefaultColumnSet { get; }
-
-		public byte[][] GetValuesFor (ColumnSet ColumnSet)
+		protected Row (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, ColumnSet columnSet)
+			:base (frontendInstanceBase, objectID, chunkID)
 		{
-			if (ColumnSet == DefaultColumnSet)
-				return (byte[][])DefaultColumnSetValues.Clone ();
-			//TODO: USE ValueCache; and don't forget thread synchronization
-			return OnGetValuesFor (ColumnSet);
+			this.columnSet = columnSet;
 		}
 
-		protected abstract byte[][] OnGetValuesFor (ColumnSet ColumnSet);
+		public abstract ValueSet GetValues ();
 	}
 }

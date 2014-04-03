@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -31,34 +31,60 @@ using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class ColumnSet : BaseDataObject
+	public sealed class ColumnSet : BaseDataObject
 	{
-		public abstract ColumnSetOffsetHandler OffsetHandler{ get; }
+		Table table;
 
-		public abstract Table Table { get; }
+		public Table Table {
+			get {
+				return table;
+			}
+		}
 
-		public abstract IEnumerable<Column> GetColumns ();
+		Column[] columns;
 
-		public abstract object[] FromRaw (byte[] Raw);
+		public Column[] Columns {
+			get {
+				return columns;
+			}
+		}
 
-		public abstract object[] FromRawStream (Stream Raw);
-
-		public abstract byte[] ToRaw (object[] Objects);
-
-		/// <summary>
-		/// Writes Objects to Stream
-		/// </summary>
-		/// <returns>
-		/// The number of bytes written to stream
-		/// </returns>
-		/// <param name='Objects'>
-		/// Objects to serialize as column values
-		/// </param>
-		/// <param name='Stream'>
-		/// stream to write data to
-		/// </param>
-		public abstract int ToRawStream (object[] Objects, Stream Stream);
-
-		public abstract void Retrieve (Column Column);
+		public ColumnSet (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, Table table, Column[] columns)
+			: base(frontendInstanceBase, objectID, chunkID)
+		{
+			if (table == null)
+				throw new ArgumentNullException ("table");
+			if (columns == null)
+				throw new ArgumentNullException ("columns");
+			this.table = table;
+			this.columns = columns;
+		}
+		#region implemented abstract members of Serializable
+		public override void Serialize (Stream stream)
+		{
+			using (BinaryWriter BW =  new BinaryWriter (stream)) {
+				BW.Write (table.ObjectID.ToByteArray ());
+				BW.Write (columns.Length);
+				for (int n = 0; n != columns.Length; n++) {
+					BW.Write (columns [n].ObjectID.ToByteArray ());
+				}
+			}
+		}
+		#endregion
+		#region implemented abstract members of BaseDataObject
+		public override Guid ObjectType {
+			get {
+				return Guid.Parse ("b7138176-bdf7-4a80-9944-c8fd2ee16e94");
+			}
+		}
+		#endregion
+		#region implemented abstract members of BaseDataObject
+		public override IEnumerable<BaseDataObject> GetDependenies ()
+		{
+			yield return table;
+			foreach (Column column in columns)
+				yield return column;
+		}
+		#endregion
 	}
 }

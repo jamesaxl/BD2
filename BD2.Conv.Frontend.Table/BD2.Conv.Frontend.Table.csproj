@@ -30,10 +30,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceAgent.cs" />
     <Compile Include="Model\Table.cs" />
     <Compile Include="Model\Column.cs" />
     <Compile Include="Model\Row.cs" />
@@ -44,8 +44,8 @@
     <Compile Include="Model\Messages\GetColumnsResponseMessage.cs" />
     <Compile Include="Model\Messages\GetRowsRequestMessage.cs" />
     <Compile Include="Model\Messages\GetRowsResponseMessage.cs" />
-    <Compile Include="Model\Messages\GetDependenciesRequestMessage.cs" />
-    <Compile Include="Model\Messages\GetDependenciesResponseMessage.cs" />
+    <Compile Include="Model\Messages\GetForeignKeyRelationsRequestMessage.cs" />
+    <Compile Include="Model\Messages\GetForeignKeyRelationsResponseMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -60,10 +60,6 @@
     <ProjectReference Include="..\BD2.Conv\BD2.Conv.csproj">
       <Project>{CFC2FE19-A495-44D1-9B56-E0FB316A6414}</Project>
       <Name>BD2.Conv</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Generic\BD2.Conv.Generic.csproj">
-      <Project>{3AABD676-FFEA-4912-A1F2-ED4535961699}</Project>
-      <Name>BD2.Conv.Generic</Name>
     </ProjectReference>
     <ProjectReference Include="..\BD2.Conv.Generic.DataTranslator\BD2.Conv.Generic.DataTranslator.csproj">
       <Project>{0E351074-E71D-449C-990C-93D93953D949}</Project>

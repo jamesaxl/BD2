@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -26,7 +26,6 @@
  * */
 using System;
 using System.Collections.Generic;
-using BSO;
 using BD2.Frontend.Table.Model;
 using BD2.Core;
 
@@ -54,38 +53,44 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		Column[] childColumns;
+		Model.Column[] childColumns;
 
-		public override IEnumerator<Column> ChildColumns {
+		public override IEnumerator<Model.Column> ChildColumns {
 			get {
-				foreach (Column column in childColumns)
+				foreach (Model.Column column in childColumns)
 					yield return column;
 			}
 		}
 
-		public override void Serialize (System.IO.BinaryWriter Stream)
+		public Relation (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, IndexBase[] parentColumns, Model.Column[] childColumns)
+			:base (frontendInstanceBase,objectID, chunkID)
+		{
+			if (parentColumns == null)
+				throw new ArgumentNullException ("parentColumns");
+			if (childColumns == null)
+				throw new ArgumentNullException ("childColumns");
+			this.parentColumns = parentColumns;
+			this.childColumns = childColumns;
+
+		}
+		#region implemented abstract members of Serializable
+		public override void Serialize (System.IO.Stream stream)
 		{
 			throw new NotImplementedException ();
 		}
-
-		public override BaseDataObject Drop ()
-		{
-			return new ObjectDrop (this);
-		}
-
-		Guid objectID;
-
-		public override Guid ObjectID {
+		#endregion
+		#region implemented abstract members of BaseDataObject
+		public override Guid ObjectType {
 			get {
-				return objectID;
+				return Guid.Parse ("bb346656-4812-4fb5-8dd0-abb75f9bab80");
 			}
 		}
-
-		public Relation (IndexBase[] ParentColumns, Column[] ChildColumns, Guid ObjectID)
+		#endregion
+		#region implemented abstract members of BaseDataObject
+		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			parentColumns = ParentColumns;
-			childColumns = ChildColumns;
-			objectID = ObjectID;
+			throw new NotImplementedException ();
 		}
+		#endregion
 	}
 }

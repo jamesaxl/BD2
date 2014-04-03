@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -26,57 +26,33 @@
  * */
 using System;
 using BD2.Daemon;
-using System.Collections.Generic;
 
 namespace BD2.Chunk.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("eacfc35a-cc3d-4d2c-a27f-669dd41894ee")]
-	[ObjectBusMessageDeserializerAttribute(typeof(RequestTopLevelChunkDeltaMessage), "Deserialize")]
-	public class RequestTopLevelChunkDeltaMessage : ObjectBusMessage
+	[ObjectBusMessageTypeIDAttribute("556709a3-fe93-413e-ad51-5e72d45468cd")]
+	[ObjectBusMessageDeserializerAttribute(typeof(ChunkRangesRequest), "Deserialize")]
+	public class ChunkRangesRequest : ObjectBusMessage
 	{
 		Guid id;
+		Guid ranges;
 
-		public Guid ID {
-			get {
-				return id;
-			}
-		}
-
-		SortedSet<IRangedFilter> filters;
-
-		public SortedSet<IRangedFilter> Filters {
-			get {
-				return new SortedSet<IRangedFilter> (filters);
-			}
-		}
-
-		public RequestTopLevelChunkDeltaMessage (Guid id, SortedSet<IRangedFilter> filters)
+		public ChunkRangesRequest (Guid id, Guid ranges)
 		{
-			if (filters == null)
-				throw new ArgumentNullException ("filters");
 			this.id = id;
-			this.filters = filters;
+			this.ranges = ranges;
 		}
 
-		public static ObjectBusMessage Deserialize (byte[]bytes)
+		public static ChunkRangesRequest Deserialize (byte[] bytes)
 		{
-
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
-				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					Guid ID = new Guid (BR.ReadBytes (16));
-					int FilterCount = BR.ReadInt32 ();
-					SortedSet<IRangedFilter> filters = new  SortedSet<IRangedFilter> ();
-					for (int n = 0; n != FilterCount; n++) {
-						string FilterTypeName = BR.ReadString ();
-						int filterLength = BR.ReadInt32 ();
-						switch (FilterTypeName) {
-						case "List":
-							filters.Add (RangedListFilter.Deserialize (BR.ReadBytes (filterLength)));
-							break;
-						}
+			Tuple<byte[],byte[]>[] ranges;
+			using (System.IO.MemoryStream MS  = new System.IO.MemoryStream (bytes,false)) {
+				using (System.IO.BinaryReader BR= new System.IO.BinaryReader(MS)) {
+					ranges = new Tuple<byte[], byte[]>[BR.ReadInt32 ()];
+					for (int n = 0; n != ranges.Length; n++) {
+						ranges [n] = new Tuple<byte[], byte[]> (BR.ReadBytes (BR.ReadInt32 ()), BR.ReadBytes (BR.ReadInt32 ()));
 					}
-					return new RequestTopLevelChunkDeltaMessage (ID, filters);
 				}
+				return new ChunkRangesRequest (ranges);
 			}
 		}
 		#region implemented abstract members of ObjectBusMessage
@@ -84,25 +60,17 @@ namespace BD2.Chunk.Daemon
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
-					BW.Write (id.ToByteArray ());
-					BW.Write (filters.Count);
-					foreach (IRangedFilter IRF in filters) {
-						byte[] filter = IRF.GetMessageBody ();
-						BW.Write (IRF.FilterTypeName);
-						BW.Write (filter.Length);
-						BW.Write (filter);
-					}
+					BW.Write (ranges.ToByteArray ());
 					return MS.GetBuffer ();
 				}
-			} 
+			}
 		}
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("eacfc35a-cc3d-4d2c-a27f-669dd41894ee");
+				return Guid.Parse ("556709a3-fe93-413e-ad51-5e72d45468cd");
 			}
 		}
 		#endregion
 	}
 }
-

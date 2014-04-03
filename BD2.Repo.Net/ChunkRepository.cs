@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -33,7 +33,7 @@ namespace BD2.Repo.Net
 {
 	public class Repository : ChunkRepository
 	{
-		stream peer;
+		Stream peer;
 
 		public Repository (Stream peer)
 		{
@@ -73,48 +73,59 @@ namespace BD2.Repo.Net
 			return dependencies;
 		}
 		#region implemented abstract members of ChunkRepository
-		public override void Push (byte[] chunkID, byte[] data, byte[][] dependencies)
+		public override void Push (byte[] chunkId, byte[] data, byte[][] dependencies)
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override byte[] PullData (byte[] chunkID)
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override byte[][] PullDependencies (byte[] chunkID)
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override void Pull (byte[] chunkID, out byte[] data, out byte[][] dependencies)
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override IEnumerable<byte[]> Enumerate ()
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override IEnumerable<byte[]> EnumerateTopLevels ()
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateDependencies ()
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateTopLevelDependencies ()
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override int GetLeastCost (int currentMinimum, byte[] chunkID)
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override int GetMaxCostForAny ()
 		{
+			throw new NotImplementedException ();
 		}
 
 		public override Guid ID {
 			get {
+				throw new NotImplementedException ();
 			}
 		}
 		#endregion

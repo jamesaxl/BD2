@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -49,17 +49,26 @@ namespace BD2.Daemon
 			}
 		}
 
-		public ServiceRequestMessage (Guid id, Guid serviceID)
+		byte[] parameters;
+
+		public byte[] Parameters {
+			get {
+				return parameters;
+			}
+		}
+
+		public ServiceRequestMessage (Guid id, Guid serviceID, byte[] parameters)
 		{
 			this.id = id;
 			this.serviceID = serviceID;
+			this.parameters = parameters;
 		}
 
 		public static ObjectBusMessage Deserialize (byte[] bytes)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new ServiceRequestMessage (new Guid (BR.ReadBytes (16)), new Guid (BR.ReadBytes (16)));
+					return new ServiceRequestMessage (new Guid (BR.ReadBytes (16)), new Guid (BR.ReadBytes (16)), BR.ReadBytes (BR.ReadInt32 ()));
 				}
 			}
 		}
@@ -70,6 +79,12 @@ namespace BD2.Daemon
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
 					BW.Write (serviceID.ToByteArray ());
+					if (parameters == null)
+						BW.Write (0);
+					else {
+						BW.Write (parameters.Length);
+						BW.Write (parameters);
+					}
 					return MS.GetBuffer ();
 				}
 			}

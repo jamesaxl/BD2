@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -26,9 +26,8 @@
  * */
 using System;
 using System.Collections.Generic;
-using BSO;
 using BD2.Core;
-using BD2.Core.Model;
+using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
@@ -42,16 +41,17 @@ namespace BD2.Frontend.Table
 				yield return indexColumn;
 		}
 
-		public MultiColumnIndex (bool Unique, IndexColumnBase[] IndexColumns)
+		public MultiColumnIndex (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, bool unique, IndexColumnBase[] indexColumns)
+		:base(frontendInstanceBase,objectID,chunkID)
 		{
-			if (IndexColumns == null)
-				throw new ArgumentNullException ("IndexColumn");
-			foreach (IndexColumnBase IC in IndexColumns) {
+			if (indexColumns == null)
+				throw new ArgumentNullException ("indexColumn");
+			foreach (IndexColumnBase IC in indexColumns) {
 				if (IC == null)
 					throw new ArgumentException ("IndexColumn must not contain null enteries.", "IndexColumn");
 			}
-			unique = Unique;
-			indexColumns = ((IndexColumnBase[])IndexColumns.Clone ());
+			unique = unique;
+			indexColumns = ((IndexColumnBase[])indexColumns.Clone ());
 			objectID = Guid.NewGuid ();
 		}
 
@@ -62,23 +62,23 @@ namespace BD2.Frontend.Table
 				return unique;
 			}
 		}
+		#region implemented abstract members of BaseDataObject
+		#endregion
 		#region implemented abstract members of Serializable
-		public override void Serialize (System.IO.BinaryWriter Stream)
+		public override void Serialize (System.IO.Stream stream)
 		{
 			throw new NotImplementedException ();
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
-		public override BaseDataObject Drop ()
+		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			return new BD2.ObjectDrop (Guid.NewGuid (), this);
+			throw new NotImplementedException ();
 		}
 
-		Guid objectID;
-
-		public override Guid ObjectID {
+		public override Guid ObjectType {
 			get {
-				return objectID;
+				throw new NotImplementedException ();
 			}
 		}
 		#endregion

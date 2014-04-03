@@ -36,364 +36,380 @@ using System.Collections.Generic;
 
 namespace LevelDB
 {
-    /// <remarks>
-    /// This type is thread safe.
-    ///
-    /// Concurrency:
-    /// A database may only be opened by one process at a time. The leveldb
-    /// implementation acquires a lock from the operating system to prevent
-    /// misuse. Within a single process, the same DB object may be safely
-    /// shared by multiple concurrent threads. I.e., different threads may
-    /// write into or fetch iterators or call Get on the same database without
-    /// any external synchronization (the leveldb implementation will
-    /// automatically do the required synchronization). However other objects
-    /// (like Iterator and WriteBatch) may require external synchronization.
-    /// If two threads share such an object, they must protect access to it
-    /// using their own locking protocol.
-    /// </remarks>
-    public class DB : IDisposable, IEnumerable<KeyValuePair<byte[], byte[]>>, IEnumerable<KeyValuePair<string, string>>
-    {
-        /// <summary>
-        /// Native handle
-        /// </summary>
-        public IntPtr Handle { get; private set; }
-        Options Options { get; set; }
-        public bool Disposed { get; private set; }
-        System.Text.Encoding encoding = System.Text.Encoding.Default;
- 
-        public System.Text.Encoding Encoding {
-            get {
-                return encoding;
-            }
-        }
+	/// <remarks>
+	/// This type is thread safe.
+	///
+	/// Concurrency:
+	/// A database may only be opened by one process at a time. The leveldb
+	/// implementation acquires a lock from the operating system to prevent
+	/// misuse. Within a single process, the same DB object may be safely
+	/// shared by multiple concurrent threads. I.e., different threads may
+	/// write into or fetch iterators or call Get on the same database without
+	/// any external synchronization (the leveldb implementation will
+	/// automatically do the required synchronization). However other objects
+	/// (like Iterator and WriteBatch) may require external synchronization.
+	/// If two threads share such an object, they must protect access to it
+	/// using their own locking protocol.
+	/// </remarks>
+	public class DB : IDisposable, IEnumerable<KeyValuePair<byte[], byte[]>>, IEnumerable<KeyValuePair<string, string>>
+	{
+		/// <summary>
+		/// Native handle
+		/// </summary>
+		public IntPtr Handle { get; private set; }
 
-        public byte[] this[byte[] key] {
-            get {
-                return GetRaw(null, key);
-            }
-            set {
-                Put(null, key, value);
-            }
-        }
+		Options Options { get; set; }
 
-		public string this[string key] {
-            get {
-                return Get(null, key);
-            }
-            set {
-                Put(null, key, value);
-            }
-        }
+		public bool Disposed { get; private set; }
 
-        public DB(Options options, string path, System.Text.Encoding encoding)
-        {
-            if (path == null)
-                throw new ArgumentNullException ("path");
-            if (encoding == null)
-                throw new ArgumentNullException ("encoding");
-            if (options == null) {
-                options = new Options();
-            }
-            // keep a reference to options as it might contain a cache object
-            // which needs to stay alive as long as the DB is not closed
-            Options = options;
-            Handle = Native.leveldb_open(options.Handle, path);
-        }
+		System.Text.Encoding encoding = System.Text.Encoding.Default;
 
-        public DB(Options options, string path)
+		public System.Text.Encoding Encoding {
+			get {
+				return encoding;
+			}
+		}
+
+		public byte[] this [byte[] key] {
+			get {
+				return GetRaw (null, key);
+			}
+			set {
+				Put (null, key, value);
+			}
+		}
+
+		public string this [string key] {
+			get {
+				return Get (null, key);
+			}
+			set {
+				Put (null, key, value);
+			}
+		}
+
+		public DB (Options options, string path, System.Text.Encoding encoding)
+		{
+			if (path == null)
+				throw new ArgumentNullException ("path");
+			if (encoding == null)
+				throw new ArgumentNullException ("encoding");
+			if (options == null) {
+				options = new Options ();
+			}
+			// keep a reference to options as it might contain a cache object
+			// which needs to stay alive as long as the DB is not closed
+			Options = options;
+			Handle = Native.leveldb_open (options.Handle, path);
+		}
+
+		public DB (Options options, string path)
             : this(options, path, System.Text.Encoding.Default)
-        { }
+		{
+		}
 
-        ~DB()
-        {
-            Dispose(false);
-        }
+		~DB ()
+		{
+			Dispose (false);
+		}
 
-        protected virtual void Dispose(bool disposing)
-        {
-            var disposed = Disposed;
-            if (disposed) {
-                return;
-            }
-            Disposed = true;
+		protected virtual void Dispose (bool disposing)
+		{
+			var disposed = Disposed;
+			if (disposed) {
+				return;
+			}
+			Disposed = true;
 
-            if (disposing) {
-                // free managed
-                Options = null;
-            }
-            // free unmanaged
-            var handle = Handle;
-            if (handle != IntPtr.Zero) {
-                Handle = IntPtr.Zero;
-                Native.leveldb_close(handle);
-            }
-        }
+			if (disposing) {
+				// free managed
+				Options = null;
+			}
+			// free unmanaged
+			var handle = Handle;
+			if (handle != IntPtr.Zero) {
+				Handle = IntPtr.Zero;
+				Native.leveldb_close (handle);
+			}
+		}
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+		public void Dispose ()
+		{
+			Dispose (true);
+			GC.SuppressFinalize (this);
+		}
 
-        public static DB Open(Options options, string path)
-        {
-            return new DB(options, path);
-        }
+		public static DB Open (Options options, string path)
+		{
+			return new DB (options, path);
+		}
 
-        public static void Repair(Options options, string path)
-        {
-            if (path == null) {
-                throw new ArgumentNullException("path");
-            }
-            if (options == null) {
-                options = new Options();
-            }
-            Native.leveldb_repair_db(options.Handle, path);
-        }
+		public static void Repair (Options options, string path)
+		{
+			if (path == null) {
+				throw new ArgumentNullException ("path");
+			}
+			if (options == null) {
+				options = new Options ();
+			}
+			Native.leveldb_repair_db (options.Handle, path);
+		}
 
-        public static void Destroy(Options options, string path)
-        {
-            if (path == null) {
-                throw new ArgumentNullException("path");
-            }
-            if (options == null) {
-                options = new Options();
-            }
-            Native.leveldb_destroy_db(options.Handle, path);
-        }
+		public static void Destroy (Options options, string path)
+		{
+			if (path == null) {
+				throw new ArgumentNullException ("path");
+			}
+			if (options == null) {
+				options = new Options ();
+			}
+			Native.leveldb_destroy_db (options.Handle, path);
+		}
 
-        public void Put(WriteOptions options, byte[] key, byte[] value)
-        {
-            CheckDisposed();
-            if (options == null) {
-                options = new WriteOptions();
-            }
-            Native.leveldb_put(Handle, options.Handle, key, value);
-        }
+		public void Put (WriteOptions options, byte[] key, byte[] value)
+		{
+			CheckDisposed ();
+			if (options == null) {
+				options = new WriteOptions ();
+			}
+			Native.leveldb_put (Handle, options.Handle, key, value);
+		}
 
-        public void Put(WriteOptions options, string key, string value)
-        {
-            CheckDisposed();
-            if (options == null) {
-                options = new WriteOptions();
-            }
-            Native.leveldb_put(Handle, options.Handle, key, value, encoding);
-        }
+		public void Put (WriteOptions options, string key, string value)
+		{
+			CheckDisposed ();
+			if (options == null) {
+				options = new WriteOptions ();
+			}
+			Native.leveldb_put (Handle, options.Handle, key, value, encoding);
+		}
 
-        public void Put(byte[] key, byte[] value)
-        {
-            Put(null, key, value);
-        }
+		public void Put (byte[] key, byte[] value)
+		{
+			Put (null, key, value);
+		}
 
-        public void Put(string key, string value)
-        {
-            Put(null, key, value);
-        }
+		public void Put (string key, string value)
+		{
+			Put (null, key, value);
+		}
 
-        public void Delete(WriteOptions options, byte[] key)
-        {
-            CheckDisposed();
-            if (options == null) {
-                options = new WriteOptions();
-            }
-            Native.leveldb_delete(Handle, options.Handle, key);
-        }
+		public void Put (string key, byte[] value)
+		{
+			Put (null, encoding.GetBytes (key), value);
+		}
 
-        public void Delete(WriteOptions options, string key)
-        {
-            CheckDisposed();
-            if (options == null) {
-                options = new WriteOptions();
-            }
-            Native.leveldb_delete(Handle, options.Handle, key, encoding);
-        }
+		public void Put (System.Text.Encoding encoding, string key, byte[] value)
+		{
+			if (encoding == null)
+				throw new ArgumentNullException ("encoding");
+			Put (encoding.GetBytes (key), value);
+		}
 
-        public void Delete(byte[] key)
-        {
-            Delete(null, key);
-        }
+		public void Delete (WriteOptions options, byte[] key)
+		{
+			CheckDisposed ();
+			if (options == null) {
+				options = new WriteOptions ();
+			}
+			Native.leveldb_delete (Handle, options.Handle, key);
+		}
 
-        public void Delete(string key)
-        {
-            Delete(null, key);
-        }
+		public void Delete (WriteOptions options, string key)
+		{
+			CheckDisposed ();
+			if (options == null) {
+				options = new WriteOptions ();
+			}
+			Native.leveldb_delete (Handle, options.Handle, key, encoding);
+		}
 
-        public void Write(WriteOptions writeOptions, WriteBatch writeBatch)
-        {
-            CheckDisposed();
-            if (writeOptions == null) {
-                writeOptions = WriteOptions.Default;
-            }
-            if (writeBatch == null) {
-                throw new ArgumentNullException("writeBatch");
-            }
-            Native.leveldb_write(Handle, writeOptions.Handle, writeBatch.Handle);
-        }
+		public void Delete (byte[] key)
+		{
+			Delete (null, key);
+		}
 
-        public void Write(WriteBatch writeBatch)
-        {
-            Write(null, writeBatch);
-        }
+		public void Delete (string key)
+		{
+			Delete (null, key);
+		}
 
-        public Slice GetSlice(ReadOptions options, byte[] key)
-        {
-            CheckDisposed();
-            if (options == null) {
-                options = new ReadOptions();
-            }
-            return Native.leveldb_get_slice(Handle, options.Handle, key);
-        }
+		public void Write (WriteOptions writeOptions, WriteBatch writeBatch)
+		{
+			CheckDisposed ();
+			if (writeOptions == null) {
+				writeOptions = WriteOptions.Default;
+			}
+			if (writeBatch == null) {
+				throw new ArgumentNullException ("writeBatch");
+			}
+			Native.leveldb_write (Handle, writeOptions.Handle, writeBatch.Handle);
+		}
 
-        public byte[] GetRaw(ReadOptions options, byte[] key)
-        {
-            CheckDisposed();
-            if (options == null) {
-                options = new ReadOptions();
-            }
-            return Native.leveldb_get_raw(Handle, options.Handle, key);
-        }
+		public void Write (WriteBatch writeBatch)
+		{
+			Write (null, writeBatch);
+		}
 
-        public byte[] GetRaw(ReadOptions options, string key)
-        {
-            CheckDisposed();
-            if (options == null) {
-                options = new ReadOptions();
-            }
-            return Native.leveldb_get_raw(Handle, options.Handle, key, encoding);
-        }
+		public Slice GetSlice (ReadOptions options, byte[] key)
+		{
+			CheckDisposed ();
+			if (options == null) {
+				options = new ReadOptions ();
+			}
+			return Native.leveldb_get_slice (Handle, options.Handle, key);
+		}
 
-        public string Get(ReadOptions options, byte[] key)
-        {
-            CheckDisposed();
-            if (options == null) {
-                options = new ReadOptions();
-            }
-            return Native.leveldb_get(Handle, options.Handle, key, encoding);
-        }
+		public byte[] GetRaw (ReadOptions options, byte[] key)
+		{
+			CheckDisposed ();
+			if (options == null) {
+				options = new ReadOptions ();
+			}
+			return Native.leveldb_get_raw (Handle, options.Handle, key);
+		}
 
-        public string Get(ReadOptions options, string key)
-        {
-            CheckDisposed();
-            if (options == null) {
-                options = new ReadOptions();
-            }
-            return Native.leveldb_get(Handle, options.Handle, key, encoding);
-        }
+		public byte[] GetRaw (ReadOptions options, string key)
+		{
+			CheckDisposed ();
+			if (options == null) {
+				options = new ReadOptions ();
+			}
+			return Native.leveldb_get_raw (Handle, options.Handle, key, encoding);
+		}
 
-        public string Get(byte[] key)
-        {
-            return Get(null, key);
-        }
+		public string Get (ReadOptions options, byte[] key)
+		{
+			CheckDisposed ();
+			if (options == null) {
+				options = new ReadOptions ();
+			}
+			return Native.leveldb_get (Handle, options.Handle, key, encoding);
+		}
 
-        public string Get(string key)
-        {
-            return Get(null, key);
-        }
+		public string Get (ReadOptions options, string key)
+		{
+			CheckDisposed ();
+			if (options == null) {
+				options = new ReadOptions ();
+			}
+			return Native.leveldb_get (Handle, options.Handle, key, encoding);
+		}
 
-        public byte[] GetRaw(byte[] key)
-        {
-            return GetRaw(null, key);
-        }
+		public string Get (byte[] key)
+		{
+			return Get (null, key);
+		}
 
-        public byte[] GetRaw(string key)
-        {
-            return GetRaw(null, key);
-        }
+		public string Get (string key)
+		{
+			return Get (null, key);
+		}
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+		public byte[] GetRaw (byte[] key)
+		{
+			return GetRaw (null, key);
+		}
 
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
-        {
-            CheckDisposed();
-            return new Iterator(this, null);
-        }
+		public byte[] GetRaw (string key)
+		{
+			return GetRaw (null, key);
+		}
 
-        IEnumerator<KeyValuePair<byte[], byte[]>> IEnumerable<KeyValuePair<byte[], byte[]>>.GetEnumerator ()
-        {
-            CheckDisposed();
-            return new Iterator(this, null);
-        }
+		IEnumerator IEnumerable.GetEnumerator ()
+		{
+			return GetEnumerator ();
+		}
 
-        public IEnumerator<KeyValuePair<byte[], byte[]>> GetRawEnumerator ()
-        {
-            return ((IEnumerable<KeyValuePair<byte[], byte[]>>)this).GetEnumerator();
-        }
+		public IEnumerator<KeyValuePair<string, string>> GetEnumerator ()
+		{
+			CheckDisposed ();
+			return new Iterator (this, null);
+		}
 
-        public Snapshot CreateSnapshot()
-        {
-            CheckDisposed();
-            return new Snapshot(this);
-        }
+		IEnumerator<KeyValuePair<byte[], byte[]>> IEnumerable<KeyValuePair<byte[], byte[]>>.GetEnumerator ()
+		{
+			CheckDisposed ();
+			return new Iterator (this, null);
+		}
 
-        /// <summary>
-        /// Compacts the entire database.
-        /// </summary>
-        /// <seealso cref="M:DB.CompactRange"/>
-        public void Compact()
-        {
-            CompactRangeRaw(null, null);
-        }
+		public IEnumerator<KeyValuePair<byte[], byte[]>> GetRawEnumerator ()
+		{
+			return ((IEnumerable<KeyValuePair<byte[], byte[]>>)this).GetEnumerator ();
+		}
 
-        /// <summary>
-        /// Compact the underlying storage for the key range [startKey,limitKey].
-        /// In particular, deleted and overwritten versions are discarded,
-        /// and the data is rearranged to reduce the cost of operations
-        /// needed to access the data.  This operation should typically only
-        /// be invoked by users who understand the underlying implementation.
-        /// </summary>
-        /// <remarks>
-        /// CompactRange(null, null) will compact the entire database
-        /// </remarks>
-        /// <param name="startKey">
-        /// null is treated as a key before all keys in the database
-        /// </param>
-        /// <param name="limitKey">
-        /// null is treated as a key after all keys in the database
-        /// </param>
-        public void CompactRangeRaw(byte[] startKey, byte[] limitKey)
-        {
-            CheckDisposed();
-            Native.leveldb_compact_range_raw(Handle, startKey, limitKey);
-        }
+		public Snapshot CreateSnapshot ()
+		{
+			CheckDisposed ();
+			return new Snapshot (this);
+		}
 
-        public void CompactRange(string startKey, string limitKey)
-        {
-            CheckDisposed();
-            Native.leveldb_compact_range(Handle, startKey, limitKey);
-        }
+		/// <summary>
+		/// Compacts the entire database.
+		/// </summary>
+		/// <seealso cref="M:DB.CompactRange"/>
+		public void Compact ()
+		{
+			CompactRangeRaw (null, null);
+		}
 
-        /// <summary>
-        /// DB implementations can export properties about their state via this
-        /// method.  If "property" is a valid property understood by this DB
-        /// implementation, it returns its current value. Otherwise it returns
-        /// null.
-        ///
-        /// Valid property names include:
-        ///  "leveldb.num-files-at-level<N>" - return the number of files at level <N>,
-        ///     where <N> is an ASCII representation of a level number (e.g. "0").
-        ///  "leveldb.stats" - returns a multi-line string that describes statistics
-        ///     about the internal operation of the DB.
-        ///  "leveldb.sstables" - returns a multi-line string that describes all
-        ///     of the sstables that make up the db contents.
-        /// </summary>
-        public string GetProperty(string property)
-        {
-            CheckDisposed();
-            if (property == null) {
-                throw new ArgumentNullException("property");
-            }
-            return Native.leveldb_property_value(Handle, property);
-        }
+		/// <summary>
+		/// Compact the underlying storage for the key range [startKey,limitKey].
+		/// In particular, deleted and overwritten versions are discarded,
+		/// and the data is rearranged to reduce the cost of operations
+		/// needed to access the data.  This operation should typically only
+		/// be invoked by users who understand the underlying implementation.
+		/// </summary>
+		/// <remarks>
+		/// CompactRange(null, null) will compact the entire database
+		/// </remarks>
+		/// <param name="startKey">
+		/// null is treated as a key before all keys in the database
+		/// </param>
+		/// <param name="limitKey">
+		/// null is treated as a key after all keys in the database
+		/// </param>
+		public void CompactRangeRaw (byte[] startKey, byte[] limitKey)
+		{
+			CheckDisposed ();
+			Native.leveldb_compact_range_raw (Handle, startKey, limitKey);
+		}
 
-        void CheckDisposed()
-        {
-            if (!Disposed) {
-                return;
-            }
-            throw new ObjectDisposedException(this.GetType().Name);
-        }
-    }
+		public void CompactRange (string startKey, string limitKey)
+		{
+			CheckDisposed ();
+			Native.leveldb_compact_range (Handle, startKey, limitKey);
+		}
+
+		/// <summary>
+		/// DB implementations can export properties about their state via this
+		/// method.  If "property" is a valid property understood by this DB
+		/// implementation, it returns its current value. Otherwise it returns
+		/// null.
+		///
+		/// Valid property names include:
+		///  "leveldb.num-files-at-level<N>" - return the number of files at level <N>,
+		///     where <N> is an ASCII representation of a level number (e.g. "0").
+		///  "leveldb.stats" - returns a multi-line string that describes statistics
+		///     about the internal operation of the DB.
+		///  "leveldb.sstables" - returns a multi-line string that describes all
+		///     of the sstables that make up the db contents.
+		/// </summary>
+		public string GetProperty (string property)
+		{
+			CheckDisposed ();
+			if (property == null) {
+				throw new ArgumentNullException ("property");
+			}
+			return Native.leveldb_property_value (Handle, property);
+		}
+
+		void CheckDisposed ()
+		{
+			if (!Disposed) {
+				return;
+			}
+			throw new ObjectDisposedException (this.GetType ().Name);
+		}
+	}
 }

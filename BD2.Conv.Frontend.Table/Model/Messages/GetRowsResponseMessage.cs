@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,23 +25,90 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
+using BD2.Daemon;
 
 namespace BD2.Conv.Frontend.Table
 {
-	public class GetRowsResponseMessage : BD2.Daemon.ObjectBusMessage
+	[ObjectBusMessageTypeIDAttribute("d9065150-70dd-4143-842e-4b30ce424568")]
+	[ObjectBusMessageDeserializerAttribute(typeof(GetRowsResponseMessage), "Deserialize")]
+	public class GetRowsResponseMessage : ObjectBusMessage
 	{
-		public GetRowsResponseMessage ()
+		Guid requestID;
+
+		public Guid RequestID {
+			get {
+				return requestID;
+			}
+		}
+
+		Guid responseStreamID;
+
+		public Guid ResponseStreamID {
+			get {
+				return responseStreamID;
+			}
+		}
+
+		Exception exception;
+
+		public Exception Exception {
+			get {
+				return exception;
+			}
+		}
+
+		public GetRowsResponseMessage (Guid requestID, Guid responseStreamID, Exception exception)
 		{
+			this.requestID = requestID;
+			this.responseStreamID = responseStreamID;
+			this.exception = exception;
+		}
+
+		public static ObjectBusMessage Deserialize (byte[] bytes)
+		{
+			Guid requestID;
+			Guid responseStreamID;
+			Exception exception;
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					requestID = new Guid (BR.ReadBytes (16));
+					responseStreamID = new Guid (BR.ReadBytes (16));
+					if (MS.ReadByte () == 1) {
+						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+						object deserializedObject = BF.Deserialize (MS);
+						if (deserializedObject is Exception) {
+							exception = (Exception)deserializedObject;
+						} else {
+							throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
+						}
+					} else
+						exception = null;
+					return new GetRowsResponseMessage (requestID, responseStreamID, exception);
+				}
+			}
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
 		{
-			throw new NotImplementedException ();
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (requestID.ToByteArray ());
+					BW.Write (responseStreamID.ToByteArray ());
+					if (exception == null) {
+						MS.WriteByte (0);
+					} else {
+						MS.WriteByte (1);
+						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
+						BF.Serialize (MS, exception);
+					}
+					return MS.GetBuffer ();
+				}
+			}
 		}
 
 		public override Guid TypeID {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("d9065150-70dd-4143-842e-4b30ce424568");
 			}
 		}
 		#endregion

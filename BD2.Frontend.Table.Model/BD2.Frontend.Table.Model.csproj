@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D89F122B-1806-4D93-8973-6A6C6DE34E88}</ProjectGuid>
+    <ProjectGuid>{A4059B19-5E63-468E-9AE0-6D55AFD9775E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>BD2.Frontend.Table.Model</RootNamespace>
     <AssemblyName>BD2.Frontend.Table.Model</AssemblyName>
@@ -21,7 +21,7 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
@@ -32,7 +32,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Column.cs" />
     <Compile Include="ColumnSet.cs" />
     <Compile Include="IndexBase.cs" />
@@ -40,9 +40,18 @@
     <Compile Include="Relation.cs" />
     <Compile Include="Row.cs" />
     <Compile Include="Table.cs" />
-    <Compile Include="UserDefinedColumn.cs" />
-    <Compile Include="ColumnSetOffsetHandler.cs" />
-    <Compile Include="Frontend.cs" />
+    <Compile Include="ValueSet.cs" />
+    <Compile Include="RowDrop.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
+      <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
+      <Name>BD2.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Core\BD2.Core.csproj">
+      <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
+      <Name>BD2.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

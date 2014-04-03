@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -33,12 +33,11 @@ namespace BD2.Core
 	public sealed class Database
 	{
 		string name;
-		SortedDictionary<SnapshotDescriptor, SortedSet<byte[]>> savedSnapshots = new SortedDictionary<SnapshotDescriptor, SortedSet<byte[]>> ();
 		object snapState = new object ();
 		SortedSet<Snapshot> snapshots = new SortedSet<Snapshot> ();
-		SortedSet<Snapshot> aliveSnapshots = new SortedSet<Snapshot> ();
 		ChunkRepositoryCollection backends;
-		FrontendCollection frontends;
+		SortedSet<FrontendInstanceBase> frontendInstances = new SortedSet<FrontendInstanceBase> ();
+		Snapshot primary;
 
 		public ChunkRepositoryCollection Backends {
 			get {
@@ -46,16 +45,21 @@ namespace BD2.Core
 			}
 		}
 
-		internal FrontendCollection Frontends {
+		internal IEnumerable<FrontendInstanceBase> FrontendInstances {
 			get {
-				return frontends;
+				return new SortedSet<FrontendInstanceBase> (FrontendInstances);
 			}
 		}
 
 		public Database ()
 		{
 			backends = new ChunkRepositoryCollection ();
-			frontends = new FrontendCollection (this);
+		}
+
+		public Database (string name)
+		:this()
+		{
+			this.name = name;
 		}
 
 		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends)
@@ -63,17 +67,24 @@ namespace BD2.Core
 			this.backends = new ChunkRepositoryCollection ();
 			foreach (ChunkRepository CR in backends)
 				this.backends.AddRepository (CR);
-			this.frontends = new FrontendCollection (this);
-			foreach (Frontend FR in frontends)
-				this.frontends.AddFrontend (FR);
+			primary = CreateSnapshot ("Primary");
+			foreach (Frontend Frontend in frontends)
+				this.frontendInstances.Add (Frontend.CreateInstanse (primary));
 		}
 
-		internal void HandleChunkInserted (ChunkData CD)
+		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends, string name)
+			:this(backends,frontends)
 		{
-			//frontends.
-			foreach (Frontend frontend in frontends) {
-				frontend.HandleTransaction (CD);
+			this.name = name;
+		}
+
+		public Database (DatabaseConfiguration databaseConfiguration)
+		{
+			foreach (var Tuple in databaseConfiguration.Backends) {
+				ChunkRepository repo = (ChunkRepository)(Type.GetType (Tuple.Item1).Assembly.GetType ("Repository").GetConstructor (new Type[] { typeof(string) }).Invoke (null, new object[] { Tuple.Item2 }));
+				this.backends.AddRepository (repo);
 			}
+			primary = CreateSnapshot ("Primary");
 		}
 
 		public string Name {
@@ -82,53 +93,25 @@ namespace BD2.Core
 			}
 		}
 
-		internal void CommitTransaction (Transaction transaction)
-		{
-			ChunkData CD = ChunkData.FromTransaction (transaction);
-			lock (transaction) {
-				lock (transaction.Objects) {
-					foreach (Snapshot snap in aliveSnapshots)
-						if (snap != transaction.Snapshot) {
-							snap.AddTransaction (transaction);
-						}
-
-				}
-			}
-		}
-
-		public SortedSet<SnapshotDescriptor> GetSnapshots ()
+		public SortedSet<Snapshot> GetSnapshots ()
 		{
 			lock (snapshots) {
-				return new SortedSet<SnapshotDescriptor> (snapshots);
+				return new SortedSet<Snapshot> (snapshots);
 			}
 		}
 
-		public Snapshot CreateSnapshot (string Name, bool Static)
+		public Snapshot CreateSnapshot (string name)
 		{
-			int SyncStatus;
+			if (name == null)
+				throw new ArgumentNullException ("name");
+			Snapshot snap;
 			lock (snapState) {
-				backends.Sync (out SyncStatus);
-				Snapshot snap = new Snapshot (this, Name, this.backends.Enumerate (), Static);
+				snap = new Snapshot (this, name, backends.Enumerate ());
 				lock (snapshots) {
-					lock (aliveSnapshots) {
-						aliveSnapshots.Add (snap);
-					}
 					snapshots.Add (snap);
-					if (!Static) {
-						snap.GoneStatic += snap_GoneStatic;
-					}
 				}
-				return snap;
 			}
-		}
-
-		void snap_GoneStatic (object sender, EventArgs e)
-		{
-			Snapshot snap = (Snapshot)sender;
-			lock (snapState) {
-				aliveSnapshots.Remove (snap);
-				snap.GoneStatic -= snap_GoneStatic;
-			}
+			return snap;
 		}
 	}
 }

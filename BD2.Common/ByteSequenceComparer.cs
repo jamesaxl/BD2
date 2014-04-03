@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,14 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
+using System.Collections.Generic;
 
-namespace BD2.Conv.Frontend.Table
+namespace BD2.Common
 {
-	public class GetDependenciesRequestMessage : BD2.Daemon.ObjectBusMessage
+	public sealed class  ByteSequenceComparer : IComparer<byte[]>
 	{
-		public GetDependenciesRequestMessage ()
-		{
+		static ByteSequenceComparer shared = new ByteSequenceComparer ();
+
+		public static ByteSequenceComparer Shared {
+			get {
+				return shared;
+			}
 		}
+		#region IComparer implementation
+		public int Compare (byte[] x, byte[] y)
+		{
+			if (x == null)
+				throw new ArgumentNullException ("x");
+			if (y == null)
+				throw new ArgumentNullException ("y");
+			int L = Math.Min (y.Length, x.Length);
+			int R;
+			for (int n = 0; n != L; n++) {
+				R = y [n].CompareTo (x [n]);
+				if (R != 0) {
+					return R;
+				}
+			}
+			if (x.Length == 0) {
+				return 0;
+			}
+			if (y.Length > x.Length) {
+				return 1;
+			}
+			return 0;
+		}
+		#endregion
 	}
 }
 

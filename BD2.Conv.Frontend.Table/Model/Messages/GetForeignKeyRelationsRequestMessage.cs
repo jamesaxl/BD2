@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,62 +25,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
-using System.Collections.Generic;
-using BD2.LockManager;
+using BD2.Daemon;
 
-namespace BD2.Core
+namespace BD2.Conv.Frontend.Table
 {
-	public abstract class BaseDataObjectStateTracker
+	[ObjectBusMessageTypeIDAttribute("54db5187-2230-4a99-8314-31c56ac6faff")]
+	[ObjectBusMessageDeserializerAttribute(typeof(GetForeignKeyRelationsRequestMessage), "Deserialize")]
+	public class GetForeignKeyRelationsRequestMessage : ObjectBusMessage
 	{
-		BaseDataObject bdo;
-		FrontendInstanceBase fib;
-		SortedDictionary<byte[], BaseDataObjectState> states;
-		BaseDataObjectState currentState;
+		Guid id;
 
-		protected BaseDataObjectState CurrentState {
+		public Guid ID {
 			get {
-				return currentState;
+				return id;
 			}
 		}
 
-		internal BaseDataObject Bdo {
-			get {
-				return bdo;
-			}
-		}
-
-		internal FrontendInstanceBase Fib {
-			get {
-				return fib;
-			}
-		}
-
-		private void Assert ()
+		public GetForeignKeyRelationsRequestMessage (Guid id)
 		{
-			LockState ls = null;
-			try {
-				//FIXME: remove this stupid assertion stub.
-				ls = LockManager.LockManager.CreateLock (this);
-				LockGroup LG = new LockGroup (new LockState[] { ls });
-				LockRequest LR = new LockRequest (TimeSpan.FromSeconds (15), () => {
+			this.id = id;
+		}
 
-				});
-				LockManager.LockManager.ProcessRequest (LR);
-				if (bdo.Frontend.LockManager)
-				if (bdo.GetTrackerFor (fib) != this) {
-					throw new SystemException ("BaseDataObjectStateTracker assertien failed, memory management error detected.");
+		public static ObjectBusMessage Deserialize (byte[] bytes)
+		{
+			Guid id;
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					id = new Guid (BR.ReadBytes (16));
 				}
-			} catch {
-				throw new SystemException ("BaseDataObjectStateTracker assertien failed, seriously unexpected memory management error detected.");
-			} finally {
-				if (ls != null)
-					ls.Release ();
+				return new GetForeignKeyRelationsRequestMessage (id);
+			}
+		}
+		#region implemented abstract members of ObjectBusMessage
+		public override byte[] GetMessageBody ()
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (id.ToByteArray ());
+				}
+				return MS.GetBuffer ();
 			}
 		}
 
-		public bool Valid {
-			get;
-			set;
+		public override Guid TypeID {
+			get {
+				return Guid.Parse ("54db5187-2230-4a99-8314-31c56ac6faff");
+			}
 		}
+		#endregion
 	}
 }
+

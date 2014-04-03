@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -36,7 +36,7 @@ namespace BD2.Chunk.Daemon
 	{
 		Guid id;
 		bool requestData;
-		SortedSet<byte[]> chunkIDs;
+		Guid chunkIDs;
 
 		public Guid ID {
 			get {
@@ -50,27 +50,22 @@ namespace BD2.Chunk.Daemon
 			}
 		}
 
-		public PollChunksRequestMessage (Guid id, IEnumerable<byte[]> chunkIDs, bool requestData)
+		public PollChunksRequestMessage (Guid id, Guid chunkIDs, bool requestData)
 		{
-			if (chunkIDs == null)
-				throw new ArgumentNullException ("chunkIDs");
 			this.id = id;
 			this.requestData = requestData;
-			this.chunkIDs = new SortedSet<byte[]> (chunkIDs);
+			this.chunkIDs = chunkIDs;
 		}
 
 		public static PollChunksRequestMessage Deserialize (byte[] bytes)
 		{
 			Guid id;
-			byte[][] chunkIDs;
+			Guid chunkIDs;
 			bool requestData;
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					id = new Guid (BR.ReadBytes (16));
-					chunkIDs = new byte[BR.ReadInt32 ()][];
-					for (int n = 0; n != chunkIDs.Length; n++) {
-						chunkIDs [n] = BR.ReadBytes (BR.ReadInt32 ());
-					}
+					chunkIDs = new Guid (BR.ReadBytes (16));
 					requestData = BR.ReadBoolean ();
 				}
 			}
@@ -82,11 +77,7 @@ namespace BD2.Chunk.Daemon
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
-					BW.Write (chunkIDs.Count);
-					foreach (byte[] chunkID in chunkIDs) {
-						BW.Write (chunkID.Length);
-						BW.Write (chunkID);
-					}
+					BW.Write (chunkIDs.ToByteArray ());
 					BW.Write (requestData);
 				}
 				return MS.ToArray ();

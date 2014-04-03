@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -27,22 +27,40 @@
 using System;
 using System.Collections.Generic;
 using BD2.Chunk;
+using BD2.Common;
 
 namespace BD2.Core
 {
-	public sealed class Snapshot
+	public sealed class Snapshot : Serializable
 	{
-		public byte[] Serialize ()
-		{
 
+		public override void Serialize (System.IO.Stream stream)
+		{
+			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
+				BW.Write (name);
+				BW.Write (objects.Count);
+				foreach (byte[] objectID in objects)
+					BW.Write (objectID);
+			}
 		}
 
 		public static Snapshot Deserialize (Database database, byte[] buffer)
 		{
-			return new Snapshot ();
+			string name;
+			SortedSet<byte[]> objects = new SortedSet<byte[]> ();
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer,false)) {
+				using (System.IO.BinaryReader BR =  new System.IO.BinaryReader (MS)) {
+					name = BR.ReadString ();
+					int objectCount = BR.ReadInt32 ();
+					for (int n = 0; n != objectCount; n++) {
+						objects.Add (BR.ReadBytes (BR.ReadInt32 ()));
+					}
+				}
+				return new Snapshot (database, name, objects);
+			}
 		}
 
-		SortedDictionary<byte[], SortedSet<BaseDataObjectDescriptor>> ChunkDescriptors = new SortedDictionary<byte[], SortedSet<BaseDataObjectDescriptor>> ();
+		SortedSet<byte[]> objects = new SortedSet<byte[]> ();
 		Database database;
 
 		public Database Database {
@@ -59,54 +77,22 @@ namespace BD2.Core
 			}
 		}
 
-		Guid uniqueIdentifier;
-
-		public Guid UniqueIdentifier {
-			get {
-				return uniqueIdentifier;
-			}
-		}
-
 		public SortedSet<byte[]> GetChunks ()
 		{
-			lock (ChunkDescriptors) {
-				return new SortedSet<byte[]> (ChunkDescriptors.Keys);
+			lock (objects) {
+				return new SortedSet<byte[]> (objects);
 			}
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="BD2.Core.Snapshot"/> class.
-		/// </summary>
-		/// <param name='Database'>
-		/// Database to make an snopshot of.
-		/// </param>
-		/// <param name="Chunks">
-		/// chunks to have
-		/// </param>
-		/// <param name='Name'>
-		/// for convinience/debug porpuses only.
-		/// </param>
-		public Snapshot (Database Database, string Name, IEnumerable<BaseDataObject> objects)
+		public Snapshot (Database database, string name, IEnumerable<byte[]> objects)
 		{
-			if (Database == null)
-				throw new ArgumentNullException ("Database");
-			database = Database;
-			name = Name;
-			foreach (var obj in objects) {
-				ChunkObjects.Add (obj.ChunkDescriptor, new SortedSet<BaseDataObjectDescriptor> ());
-			}
-		}
-
-		SortedSet<FrontendInstanceBase> aliveInstances;
-
-		internal FrontendInstanceBase GetInstance (Frontend frontend)
-		{
-			if (frontend == null)
-				throw new ArgumentNullException ("frontend");
-			if (!database.Frontends.Contains (frontend)) {
-				throw new Exception ("Frontend must be registered before use.nothing may go wrong.it's just a pracaution");
-			}
-			return frontend.GetInstance (this);
+			if (database == null)
+				throw new ArgumentNullException ("database");
+			if (name == null)
+				throw new ArgumentNullException ("name");
+			this.database = database;
+			this.name = name;
+			this.objects = new SortedSet<byte[]> (objects);
 		}
 	}
 }

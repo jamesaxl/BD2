@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL Behrooz Amoozad BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,13 +28,13 @@ using System;
 
 namespace BD2.Conv.Frontend.Table
 {
-	public sealed class ForeignKeyRelation
+	public class ForeignKeyRelation
 	{
 		Guid[] childColumns;
 
 		public Guid[] ChildColumns {
 			get {
-				return childColumns;
+				return (Guid[])childColumns.Clone ();
 			}
 		}
 
@@ -42,7 +42,7 @@ namespace BD2.Conv.Frontend.Table
 
 		public Guid[] ParentColumns {
 			get {
-				return parentColumns;
+				return (Guid[])parentColumns.Clone ();
 			}
 		}
 
@@ -52,6 +52,8 @@ namespace BD2.Conv.Frontend.Table
 				throw new ArgumentNullException ("childColumns");
 			if (parentColumns == null)
 				throw new ArgumentNullException ("parentColumns");
+			if (childColumns.Length != parentColumns.Length)
+				throw new ArgumentException ("childColumns and parentColumns must have identical length");
 			this.childColumns = childColumns;
 			this.parentColumns = parentColumns;
 
@@ -59,17 +61,34 @@ namespace BD2.Conv.Frontend.Table
 
 		public static ForeignKeyRelation Deserialize (byte[] bytes)
 		{
+			int count;
+			Guid[] childColumns;
+			Guid[] parentColumns;
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					int count = BR.ReadInt32 ();
-					Guid[] childColumns = new Guid[count];
-					Guid[] parentColumns = new Guid[count];
+					count = BR.ReadInt32 ();
+					childColumns = new Guid[count];
+					parentColumns = new Guid[count];
 					for (int n = 0; n != count; n++) {
 						childColumns [n] = new Guid (BR.ReadBytes (16));
 						parentColumns [n] = new Guid (BR.ReadBytes (16));
 					}
-					return new ForeignKeyRelation (childColumns, parentColumns);
 				}
+			}
+			return new ForeignKeyRelation (childColumns, parentColumns);
+		}
+
+		public byte[] Serialize ()
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (childColumns.Length);
+					for (int n = 0; n != childColumns.Length; n++) {
+						BW.Write (childColumns [n].ToByteArray ());
+						BW.Write (parentColumns [n].ToByteArray ());
+					}
+				}
+				return MS.ToArray ();
 			}
 		}
 	}

@@ -59,10 +59,6 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Certificate\BD2.Certificate.csproj">
-      <Project>{21BD725B-9821-4060-8C52-2AD018EADB25}</Project>
-      <Name>BD2.Certificate</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Repo.LevelDB\BD2.Repo.Leveldb.csproj">
       <Project>{AD303744-084C-4FC6-84C9-46F6179C670C}</Project>
       <Name>BD2.Repo.Leveldb</Name>

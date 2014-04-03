@@ -36,7 +36,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="RawProxyv1.cs" />
-    <Compile Include="ProxyCombination.cs" />
+    <Compile Include="RawProxyAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
