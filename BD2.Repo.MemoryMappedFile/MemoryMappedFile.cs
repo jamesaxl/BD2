@@ -18,7 +18,6 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 using System;
 using BSO;
 using System.IO;
@@ -26,24 +25,28 @@ using BD2.Core;
 
 namespace BD2.Repo.MemoryMappedFile
 {
-	
 	public class MemoryMappedFile : ChunkData
 	{
-		string path; public string Path { get { return path; } }
+		string path;
+
+		public string Path { get { return path; } }
+
 		MemoryMappedFileRepository repo;
-		public MemoryMappedFile(ChunkDescriptor ChunkDescriptor, MemoryMappedFileRepository Repo, string Path)
+
+		public MemoryMappedFile (ChunkDescriptor ChunkDescriptor, MemoryMappedFileRepository Repo, string Path)
 			:base (ChunkDescriptor)
 		{
 			if (ChunkDescriptor == null)
 				throw new ArgumentNullException ("ChunkDescriptor");
-			if(Repo == null)
-				throw new ArgumentNullException("Repo");
-			if(Path == null)
-				throw new ArgumentNullException("Path");
+			if (Repo == null)
+				throw new ArgumentNullException ("Repo");
+			if (Path == null)
+				throw new ArgumentNullException ("Path");
 			repo = Repo;
 			path = Path;
 		}
-		public MemoryMappedFile(ChunkDescriptor ChunkDescriptor, MemoryMappedFileRepository Repo, string Path, byte[] Data)
+
+		public MemoryMappedFile (ChunkDescriptor ChunkDescriptor, MemoryMappedFileRepository Repo, string Path, byte[] Data)
 			:base(ChunkDescriptor)
 		{
 			if (ChunkDescriptor == null)
@@ -56,10 +59,11 @@ namespace BD2.Repo.MemoryMappedFile
 				throw new ArgumentNullException ("Repo");
 			repo = Repo;
 			path = Path;
-		 	System.IO.File.WriteAllBytes(Path, Data);
-			Init();
+			System.IO.File.WriteAllBytes (Path, Data);
+			Init ();
 		}
-		public MemoryMappedFile(ChunkDescriptor ChunkDescriptor, MemoryMappedFileRepository Repo, string Path, Stream Stream)
+
+		public MemoryMappedFile (ChunkDescriptor ChunkDescriptor, MemoryMappedFileRepository Repo, string Path, Stream Stream)
 			:base(ChunkDescriptor)
 		{
 			if (ChunkDescriptor == null)
@@ -70,35 +74,35 @@ namespace BD2.Repo.MemoryMappedFile
 				throw new ArgumentNullException ("Repo");
 			repo = Repo;
 			path = Path;
-			 Stream OStream = System.IO.File.OpenWrite(path);
+			Stream OStream = System.IO.File.OpenWrite (path);
 			long Count = ((Stream.Length - 1) >> 20) + 1;
 			for (long n = 0; n != Count; n++) {
-				byte[] Bytes = new byte[1 << 20] ;
-				Stream.Read(Bytes, 0, 1 << 20);
-				OStream.Write(Bytes, 0, 1 << 20);
+				byte[] Bytes = new byte[1 << 20];
+				Stream.Read (Bytes, 0, 1 << 20);
+				OStream.Write (Bytes, 0, 1 << 20);
 			}
-			Init();
+			Init ();
 		}
+
 		System.IO.MemoryMappedFiles.MemoryMappedFile MMF;
-		void Init()
+
+		void Init ()
 		{
-			MMF = System.IO.MemoryMappedFiles.MemoryMappedFile.OpenExisting(
+			MMF = System.IO.MemoryMappedFiles.MemoryMappedFile.OpenExisting (
 				path, System.IO.MemoryMappedFiles.MemoryMappedFileRights.Read,
 				HandleInheritability.None);
 		}
+
 		public override Stream GetRawData (int Offset, int Count  = -1)
 		{
 			//TODO: TEST
-			return MMF.CreateViewStream(Offset, Count);
+			return MMF.CreateViewStream (Offset, Count);
 		}
+
 		public override bool IsAvailable {
 			get {
-				return System.IO.File.Exists(path);//enough for now
+				return System.IO.File.Exists (path);//enough for now
 			}
-		}
-		public override void Dispose ()
-		{
-			throw new System.NotImplementedException ();
 		}
 	}
 }

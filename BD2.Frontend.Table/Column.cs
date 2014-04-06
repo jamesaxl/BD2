@@ -35,68 +35,20 @@ namespace BD2.Frontend.Table
 	[ObjectBusMessageDeserializer(typeof(Column), "Deserialize")]
 	public class Column : Model.Column
 	{
-		#region implemented abstract members of BaseDataObject
-		public override IEnumerable<BaseDataObject> GetDependenies ()
+		public Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, long typeID, bool allowNull, long length)
+			:base(frontendInstanceBase, chunkID, name, typeID, allowNull, length)
 		{
-			yield return table;
-		}
-		#endregion
-		Table table;
-
-		public Table Table {
-			get {
-				return table;
-			}
-		}
-
-		string name;
-
-		public override string Name { get { return name; } }
-
-		long typeID;
-
-		public long TypeID {
-			get {
-				return typeID;
-			}
-		}
-
-		bool? allowNull;
-
-		public override bool AllowNull { get { return allowNull.Value; } }
-
-		long length;
-
-		public Column (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, Table table, string name, long typeID, bool allowNull, long length)
-			:base(frontendInstanceBase, objectID, chunkID)
-		{
-			if (table == null)
-				throw new ArgumentNullException ("Table");
-			if (name == null)
-				throw new ArgumentNullException ("Name");
-			this.table = table;
-			this.name = name;
-			this.typeID = typeID;
-			this.allowNull = allowNull;
-			this.length = length;
 		}
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{
-
+			base.Serialize (stream);
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
 		public override Guid ObjectType {
 			get {
 				return Guid.Parse ("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60");
-			}
-		}
-		#endregion
-		#region implemented abstract members of Column
-		public override long Length {
-			get {
-				return length;
 			}
 		}
 		#endregion

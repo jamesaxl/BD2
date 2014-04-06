@@ -27,18 +27,59 @@
 using System;
 using System.Collections.Generic;
 using BD2.Core;
+using BD2.Common;
 
 namespace BD2.Frontend.Table.Model
 {
 	public abstract class Relation : BaseDataObject
 	{
-		protected Relation (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID)
-		: base (frontendInstanceBase, objectID, chunkID)
+		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
+			yield return parentColumns;
+			yield return childTable;
+			foreach (Column c in childColumns) {
+				yield return c;
+			}
+			foreach (BaseDataObject bdo in  base.GetDependenies ()) {
+				yield return bdo;
+			}
 		}
 
-		public abstract IEnumerator<IndexBase> ParentColumns { get; }
+		IndexBase parentColumns;
+		Column[] childColumns;
+		Table childTable;
 
-		public abstract IEnumerator<Column> ChildColumns { get; }
+		protected Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, IndexBase parentColumns, Table childTable, Column[] childColumns)
+		: base (frontendInstanceBase, chunkID)
+		{
+			if (parentColumns == null)
+				throw new ArgumentNullException ("parentColumns");
+			if (childTable == null)
+				throw new ArgumentNullException ("childTable");
+			if (childColumns == null)
+				throw new ArgumentNullException ("childColumns");
+			this.parentColumns = parentColumns;
+			this.childColumns = childColumns;
+			this.childTable = childTable;
+		}
+
+		public IndexBase ParentColumns { get { return parentColumns; } }
+
+		public Table ChildTable { get { return childTable; } }
+
+		public Column[] ChildColumns { get { return childColumns; } }
+		#region implemented abstract members of Serializable
+		public override void Serialize (System.IO.Stream stream)
+		{
+			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
+				BW.Write (parentColumns.ObjectID);
+				BW.Write (childTable.ObjectID);
+				BW.Write (childColumns.Length);
+				for (int n = 0; n != childColumns.Length; n++) {
+					BW.Write (childColumns [n].ObjectID);
+				}
+			}
+		}
+		#endregion
 	}
 }

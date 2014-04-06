@@ -25,48 +25,51 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using BD2.Core;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Daemon
 {
-	public sealed class RowDrop : BaseDataObject
+	public sealed class TransparentAgent : ServiceAgent
 	{
-		Row row;
+		byte[] parameters;
 
-		public Row RowID {
+		public byte[] Parameters {
 			get {
-				return row;
+				return parameters;
 			}
 		}
 
-		public RowDrop (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Row  row)
-			:base (frontendInstanceBase, chunkID)
+		public TransparentAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, byte[] parameters)
+			: base(serviceAgentMode, objectBusSession, flush, false)
 		{
-			if (row == null)
-				throw new ArgumentNullException ("row");
-			this.row = row;
+			this.parameters = parameters;
 		}
-		#region implemented abstract members of Serializable
-		public override void Serialize (System.IO.Stream stream)
+
+		public static ServiceAgent CreateAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, Byte[] parameters)
 		{
-			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
-				BW.Write (row.ObjectID);
-			}
+			return new TransparentAgent (serviceAgentMode, objectBusSession, flush, parameters);
 		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override Guid ObjectType {
-			get {
-				return Guid.Parse ("1ede8774-cdd5-4d88-bce2-daa9af54aa51");
-			}
-		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override System.Collections.Generic.IEnumerable<BaseDataObject> GetDependenies ()
+
+		public void RegisterType (Type type, Action<ObjectBusMessage> action)
 		{
-			yield return row;
+			ObjectBusSession.RegisterType (type, action);
 		}
-		#endregion
+
+		public new Guid CreateStream (System.IO.Stream backendStream)
+		{
+			return base.CreateStream (backendStream);
+		}
+
+		public new TransparentStream OpenStream (Guid streamID)
+		{
+			return base.OpenStream (streamID);
+		}
+
+		public void SendMessage (ObjectBusMessage message)
+		{
+			if (message == null)
+				throw new ArgumentNullException ("message");
+			ObjectBusSession.SendMessage (message);
+		}
 	}
 }
 

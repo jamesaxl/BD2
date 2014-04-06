@@ -32,36 +32,32 @@ namespace BD2.Frontend.Table.Model
 {
 	public abstract class Column : BaseDataObject
 	{
-		protected Column (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID)
-			:base (frontendInstanceBase, objectID, chunkID)
+		string name;
+
+		public string Name { get { return name; } }
+
+		long typeID;
+
+		public long TypeID { get { return typeID; } }
+
+		long length;
+
+		public long Length { get { return length; } }
+
+		bool? allowNull;
+
+		public bool AllowNull { get { return allowNull.Value; } }
+
+		protected Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, long typeID, bool allowNull, long length)
+			:base (frontendInstanceBase, chunkID)
 		{
-		}
+			if (name == null)
+				throw new ArgumentNullException ("name");
+			this.name = name;
+			this.typeID = typeID;
+			this.allowNull = allowNull;
+			this.length = length;
 
-		public abstract string Name { get; }
-
-		public abstract long Length { get; }
-
-		public abstract bool AllowNull { get; }
-
-		int HashCode;
-
-		public override int GetHashCode ()
-		{
-			//atomic
-			if (HashCode == 0) {
-				HashCode = Name.GetHashCode () ^ ((int)(Length >> 32)) ^ ((int)Length) ^ (AllowNull ? 0x7C3B9473 : 0);
-			}
-			return HashCode;
-		}
-
-		public  bool TypeEquals (object obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException ("obj");
-			Column OtherColumn = obj as Column;
-			if (OtherColumn == null)
-				throw new ArgumentException ("obj must be of type Column.", "obj");
-			return  (OtherColumn.AllowNull == this.AllowNull) && (OtherColumn.Length == this.Length);
 		}
 	}
 }

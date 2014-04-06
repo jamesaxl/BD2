@@ -41,8 +41,8 @@ namespace BD2.Frontend.Table
 			return rawData.Clone ();
 		}
 
-		internal Row (FrontendInstanceBase  frontendInstanceBase, Guid objectID, byte[] chunkID, ColumnSet columnSet, byte[] rawData)
-			: base(frontendInstanceBase, objectID, chunkID, columnSet)
+		internal Row (FrontendInstanceBase  frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet, byte[] rawData)
+			: base(frontendInstanceBase, chunkID, table, columnSet)
 		{
 			if (rawData == null)
 				throw new ArgumentNullException ("RawData");
@@ -53,26 +53,30 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{
-			throw new NotImplementedException ();
+			base.Serialize (stream);
+			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
+				BW.Write (rawData.Length);
+				BW.Write (rawData);
+			}
 		}
 		#endregion
 		#region implemented abstract members of Row
-		public override ValueSet GetValues ()
+		public override Model.ValueSet GetValues ()
 		{
-			throw new NotImplementedException ();
+			return new ValueSet (this, rawData);
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
 		public override Guid ObjectType {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("10ec2d31-3291-43ae-96fe-da8537b22af6");
 			}
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			throw new NotImplementedException ();
+			return base.GetDependenies ();
 		}
 		#endregion
 	}

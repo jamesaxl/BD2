@@ -26,7 +26,7 @@
  * */
 using System;
 
-namespace BD2.Core
+namespace BD2.Common
 {
 	public class TamperSafeByteArray : ICloneable
 	{

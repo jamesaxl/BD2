@@ -37,11 +37,11 @@ namespace BD2.Conv.Daemon.MSSQL
 	{
 		readonly string[] tfqns = new string[2] { "System.Int32", "System.Byte" };
 		string connectionString;
-		SortedDictionary<Guid, Table> tables;
-		SortedDictionary<Guid, Column> columns;
+		SortedDictionary<Guid, Table> tables = new SortedDictionary<Guid, Table> ();
+		SortedDictionary<Guid, Column> columns = new SortedDictionary<Guid, Column> ();
 
 		ServiceAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, ServiceParameters parameters)
-			:base(serviceAgentMode, objectBusSession, flush)
+			:base(serviceAgentMode, objectBusSession, flush, false)
 		{
 			if (serviceAgentMode != ServiceAgentMode.Server)
 				throw new Exception ("This service agent can only be run in server mode.");
@@ -57,24 +57,10 @@ namespace BD2.Conv.Daemon.MSSQL
 		{
 			return new ServiceAgent (serviceAgentMode, objectBusSession, flush, ServiceParameters.Deserialize (parameters));
 		}
-		#region implemented abstract members of ServiceAgent
-		protected override void Run ()
-		{
-			throw new NotImplementedException ();
-		}
 
-		public override void DestroyRequestReceived ()
+		void GetTablesRequestMessageReceived (ObjectBusMessage obj)
 		{
-			throw new NotImplementedException ();
-		}
-
-		public override void SessionDisconnected ()
-		{
-			throw new NotImplementedException ();
-		}
-		#endregion
-		void GetTablesRequestMessageReceived (BD2.Daemon.ObjectBusMessage obj)
-		{
+			Console.WriteLine ("GetTablesRequestMessageReceived()");
 			GetTablesRequestMessage request = (GetTablesRequestMessage)obj;
 			GetTablesResponseMessage response;
 			try {
@@ -87,15 +73,14 @@ namespace BD2.Conv.Daemon.MSSQL
 
 		void GetColumnsRequestMessageReceived (ObjectBusMessage obj)
 		{
+			Console.WriteLine ("GetColumnsRequestMessageReceived()");
 			GetColumnsRequestMessage request = (GetColumnsRequestMessage)obj;
 			GetColumnsResponseMessage response;
 			Table table;
-			SortedSet<Column> columns;
 			try {
 				lock (tables)
 					table = tables [request.TableID];
-				columns = getColumns (table.SqlTableID);
-				response = new GetColumnsResponseMessage (request.ID, (new List <Column> (columns)).ToArray (), null);
+				response = new GetColumnsResponseMessage (request.ID, (new List <Column> (getColumns (table.SqlTableID))).ToArray (), null);
 			} catch (Exception ex) {
 				response = new GetColumnsResponseMessage (request.ID, new Column[0] { }, ex);			
 			}
@@ -121,6 +106,7 @@ namespace BD2.Conv.Daemon.MSSQL
 
 		private SortedSet<Table> getTables ()
 		{
+			Console.WriteLine ("getTables()");
 			SortedSet<Table> tables = new SortedSet<Table> ();
 			const string FetchTable = "SELECT * FROM {0}";
 			if (tables.Count != 0) {
@@ -139,6 +125,7 @@ namespace BD2.Conv.Daemon.MSSQL
 							int TableId = reader_tables.GetInt32 (IdFieldOrdinal_tables);
 							string TableName = reader_tables.GetString (NameFieldOrdinal_tables);
 							Table table = new Table (Guid.NewGuid (), TableName, TableId);
+							Console.WriteLine ("table name: {0}",TableName);
 							tables.Add (table);
 							lock(this.tables)
 								this.tables.Add (table.ID, table);
@@ -162,12 +149,16 @@ namespace BD2.Conv.Daemon.MSSQL
 					comm_columns.CommandText = ListColumnsQuery;
 					comm_columns.Parameters.Add (param_id_columns);
 					using (IDataReader reader_columns = comm_columns.ExecuteReader ()) {
+						int OrderFieldOrdinal_Columns = reader_columns.GetOrdinal ("column_id");
 						int NameFieldOrdinal_Columns = reader_columns.GetOrdinal ("name");
 						int NullableFieldOrdinal_Columns = reader_columns.GetOrdinal ("is_nullable");
+						int LengthFieldOrdinal_Columns = reader_columns.GetOrdinal ("max_length");
 						while (reader_columns.Read ()) {
+							int ColumnOrder = reader_columns.GetInt32 (OrderFieldOrdinal_Columns);
 							string ColumnName = reader_columns.GetString (NameFieldOrdinal_Columns);
 							bool ColumnNullable = reader_columns.GetBoolean (NullableFieldOrdinal_Columns);
-							columns.Add (new Column (Guid.NewGuid (), ColumnName, !ColumnNullable, 0, null));
+							short ColumnLength = reader_columns.GetInt16 (LengthFieldOrdinal_Columns);
+							columns.Add (new Column (Guid.NewGuid (), ColumnName, !ColumnNullable, ColumnLength, "TFQN not resolved", ColumnOrder));
 							Console.Write (ColumnName + "\t");
 						}
 						Console.WriteLine ();

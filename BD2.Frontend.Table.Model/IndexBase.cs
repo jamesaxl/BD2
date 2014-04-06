@@ -32,50 +32,23 @@ namespace BD2.Frontend.Table.Model
 {
 	public abstract class IndexBase : BaseDataObject
 	{
+		Table table;
+		bool unique;
 
-		protected IndexBase (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID)
-		:base (frontendInstanceBase, objectID, chunkID)
+		protected IndexBase (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, bool unique)
+		:base (frontendInstanceBase, chunkID)
 		{
+			if (table == null)
+				throw new ArgumentNullException ("table");
+			this.table = table;
+			this.unique = unique; 
 		}
+
+		public Table Table { get { return table; } }
 
 		public abstract IEnumerator<IndexColumnBase> GetIndexColumns ();
 
-		public abstract bool Unique { get; }
-
-		int HashCode;
-
-		public override int GetHashCode ()
-		{
-			if (HashCode == 0) {
-				int index = 1;
-				IEnumerator <IndexColumnBase> IndexColumns = GetIndexColumns ();
-				while (IndexColumns.MoveNext()) {
-					HashCode ^= (IndexColumns.Current.GetHashCode () * (index++));
-				}
-			}
-			return HashCode;
-		}
-
-		public override bool Equals (object obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException ("obj");
-			IndexBase OtherIndex = obj as IndexBase;
-			if (OtherIndex == null) {
-				throw new ArgumentException ("obj must be of type Index", "obj");
-			}
-			if (HashCode == OtherIndex.HashCode) {
-				IEnumerator<IndexColumnBase> OtherIndexColumns = OtherIndex.GetIndexColumns ();
-				IEnumerator<IndexColumnBase> ThisIndexColumns = GetIndexColumns ();
-				while (OtherIndexColumns.MoveNext () && ThisIndexColumns.MoveNext()) {
-					if (!ThisIndexColumns.Current.Equals (OtherIndexColumns.Current))
-						return false;
-				}
-				return true;
-			} else {
-				return false;
-			}
-		}
+		public bool Unique { get { return unique; } }
 	}
 }
 

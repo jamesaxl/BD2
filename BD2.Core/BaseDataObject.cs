@@ -6,7 +6,10 @@ namespace BD2.Core
 {
 	public abstract class BaseDataObject : Serializable, IComparable<BaseDataObject>
 	{
-		public abstract IEnumerable<BaseDataObject> GetDependenies ();
+		public virtual IEnumerable<BaseDataObject> GetDependenies ()
+		{
+			yield break;
+		}
 
 		public bool IsVolatile {
 			get {
@@ -16,14 +19,13 @@ namespace BD2.Core
 
 		byte[] chunkID;
 		FrontendInstanceBase frontendInstanceBase;
-		Guid objectID;
+		byte[] objectID;
 
-		protected BaseDataObject (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID)
+		protected BaseDataObject (FrontendInstanceBase frontendInstanceBase, byte[] chunkID)
 		{
 			if (frontendInstanceBase == null)
 				throw new ArgumentNullException ("frontendInstanceBase");
 			this.frontendInstanceBase = frontendInstanceBase;
-			this.objectID = objectID;
 			this.chunkID = chunkID;
 		}
 
@@ -64,8 +66,17 @@ namespace BD2.Core
 		//for de/serialization purposes
 		public abstract Guid ObjectType { get; }
 
-		public Guid ObjectID {
+		byte[] GetPersistentUniqueObjectID ()
+		{
+			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
+			Serialize (MS);
+			return MS.ToArray ().SHA256 ();
+		}
+
+		public byte[] ObjectID {
 			get {
+				if (objectID == null)
+					objectID = GetPersistentUniqueObjectID ();
 				return objectID;
 			}
 		}

@@ -55,7 +55,7 @@ namespace BD2.Test.Daemon.Chat
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
 			#endif
 			ChatMessage chatMessace = (ChatMessage)message;
-			//Console.WriteLine (chatMessace.Text);
+			Console.WriteLine (chatMessace.Text);
 		}
 
 		void SendMessage (string text)
@@ -88,7 +88,7 @@ namespace BD2.Test.Daemon.Chat
 			}
 		}
 
-		public override void DestroyRequestReceived ()
+		protected override void DestroyRequestReceived ()
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -96,7 +96,7 @@ namespace BD2.Test.Daemon.Chat
 			Thread.Abort ();
 		}
 
-		public override void SessionDisconnected ()
+		protected override void SessionDisconnected ()
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));

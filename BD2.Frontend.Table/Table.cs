@@ -33,7 +33,6 @@ namespace BD2.Frontend.Table
 {
 	public class Table : Model.Table
 	{
-		SortedDictionary<Snapshot, Row> rows;
 
 		public class Comparer : IComparer<Table>
 		{
@@ -58,12 +57,9 @@ namespace BD2.Frontend.Table
 
 		public override string Name { get { return name; } }
 
-		Snapshot snapshot;
-
-		public Table (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, Snapshot snapshot, string name)
-			:base(frontendInstanceBase, objectID, chunkID)
+		public Table (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name)
+			:base(frontendInstanceBase, chunkID)
 		{
-			this.snapshot = snapshot; 
 			this.name = name;
 		}
 
@@ -71,18 +67,20 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{
-			throw new NotImplementedException ();
+			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
+				BW.Write (name);
+			}
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			throw new NotImplementedException ();
+			yield break;
 		}
 
 		public override Guid ObjectType {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("3be06a16-6727-4639-b702-060b522af660");
 			}
 		}
 		#endregion

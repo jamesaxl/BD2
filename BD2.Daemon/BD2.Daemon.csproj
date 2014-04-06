@@ -19,6 +19,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -85,6 +86,7 @@
     <Compile Include="TransparentStream\TransparentStreamSeekRequestMessage.cs" />
     <Compile Include="TransparentStream\TransparentStreamSeekResponseMessage.cs" />
     <Compile Include="ObjectBus\ObjectBusMessageDeserializerAttribute.cs" />
+    <Compile Include="TransparentAgent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

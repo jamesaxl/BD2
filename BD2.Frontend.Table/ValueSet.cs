@@ -26,39 +26,31 @@
   * */
 using System;
 using BD2.Frontend.Table.Model;
+using System.Collections.Generic;
 
 namespace BD2.Frontend.Table
 {
-	public class RowValueSet : ValueSet
+	public class ValueSet : BD2.Frontend.Table.Model.ValueSet
 	{
+		SortedDictionary<Model.Column, object> values = new SortedDictionary<Model.Column, object> ();
 
-		ColumnSet columnSet;
-
-		public ColumnSet ColumnSet {
-			get {
-				return columnSet;
-			}
-		}
-
-		public RowValueSet (Row row, ColumnSet columnSet)
+		public ValueSet (Row row, byte[] rawData)
 			: base(row)
 		{
-			if (columnSet == null)
-				throw new ArgumentNullException ("columnSet");
-			this.columnSet = columnSet;
-
+			System.IO.MemoryStream MS = new System.IO.MemoryStream (rawData, false);
+			System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
+			IValueDeserializer des = ((FrontendInstance)row.FrontendInstanceBase).ValueDeserializer;
+			foreach (BD2.Frontend.Table.Model.Column col in row.ColumnSet.Columns) {
+				//As bad is it can get :P
+				//TODO: have the column to provide it's own length|length of it's length+a value to be added with the length read from the database, 
+				//note that such value should be subtracted before serialization 
+				des.Deserialize (col.TypeID, BR.ReadBytes (BR.ReadInt32 ()));
+			}
 		}
 		#region implemented abstract members of ValueSet
-		public override object GetValue (BD2.Frontend.Table.Model.Column column)
+		public override object GetValue (Model.Column column)
 		{
-			throw new NotImplementedException ();
-			//return ((FrontendInstance)(Row.FrontendInstanceBase)).ValueDeserializer.Deserialize ();
-			//if(columnSet
-		}
-
-		public override System.Collections.Generic.IEnumerator<Tuple<BD2.Frontend.Table.Model.Column, object>> GetValues ()
-		{
-			throw new NotImplementedException ();
+			return values [column];
 		}
 		#endregion
 	}

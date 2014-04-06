@@ -34,22 +34,22 @@ namespace BD2.Chunk.Daemon
 	public class ChunkAgent : ServiceAgent
 	{
 		ConcurrentQueue<TopLevelChunksRequestMessage> pendingRemoteRequests = new ConcurrentQueue<TopLevelChunksRequestMessage> ();
-		ConcurrentQueue<TopLevelChunksRequestMessage> pendingLocalRequests = new ConcurrentQueue<TopLevelChunksRequestMessage> ();
-		int requestQueueLengthThresholdMin = 64;
-		int requestQueueLengthThresholdMax = 512;
-		SortedSet<byte[]> requests = new SortedSet<byte[]> ();
-		SortedSet<byte[]> pendingRequests = new SortedSet<byte[]> ();
+		//ConcurrentQueue<TopLevelChunksRequestMessage> pendingLocalRequests = new ConcurrentQueue<TopLevelChunksRequestMessage> ();
+		//int requestQueueLengthThresholdMin = 64;
+		//int requestQueueLengthThresholdMax = 512;
+		//SortedSet<byte[]> requests = new SortedSet<byte[]> ();
+		//SortedSet<byte[]> pendingRequests = new SortedSet<byte[]> ();
 		ChunkRepository repository;
 
 		public ChunkAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, ChunkRepository repository)
-			:base(serviceAgentMode, objectBusSession, flush)
+			:base(serviceAgentMode, objectBusSession, flush, false)
 		{
 			if (repository == null)
 				throw new ArgumentNullException ("repository");
 			this.repository = repository;
 			objectBusSession.RegisterType (typeof(TopLevelChunksRequestMessage), RequestTopLevelChunkDeltaMessageReceived);
 			objectBusSession.RegisterType (typeof(TopLevelChunksRequestMessage), RequestTopLevelChunkDeltaMessageReceived);
-
+			this.repository.Enumerate ();
 		}
 
 		public static ServiceAgent CreateAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, ChunkRepository repository)
@@ -66,24 +66,6 @@ namespace BD2.Chunk.Daemon
 			TopLevelChunksRequestMessage requestTopLevelChunkDeltaMessage = (TopLevelChunksRequestMessage)message;
 			pendingRemoteRequests.Enqueue (requestTopLevelChunkDeltaMessage);
 		}
-		#region implemented abstract members of ServiceAgent
-		protected override void Run ()
-		{
-			//we may need another thread to answer the other side, network cannot wait for our disk i/o.
-			//a bunch of method calls like this
-			Flush ();
-		}
-
-		public override void DestroyRequestReceived ()
-		{
-
-		}
-
-		public override void SessionDisconnected ()
-		{
-
-		}
-		#endregion
 	}
 }
 

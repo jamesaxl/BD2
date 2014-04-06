@@ -31,6 +31,11 @@ namespace BD2.LockManager
 {
 	public sealed class LockManagerScheduler_RoundRobin : LockManagerScheduler
 	{
+		public LockManagerScheduler_RoundRobin (Action<LockGroup> timedOut, Action<LockGroup> perform)
+			:base(timedOut, perform)
+		{
+		}
+
 		System.Collections.Generic.Queue<LockGroup> LGs = new Queue<LockGroup> ();
 		#region implemented abstract members of LockManagerScheduler
 		internal override void Schedule (LockGroup lockGroup)

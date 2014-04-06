@@ -29,21 +29,33 @@ using System.Collections.Generic;
 
 namespace BD2.Core
 {
-	public abstract class FrontendInstanceBase : IDisposable
+	public abstract class FrontendInstanceBase
 	{
 		Snapshot snapshot;
-		System.Threading.Thread initializationThread;
 
-		protected FrontendInstanceBase (Snapshot snapshot)
-		{
-			if (snapshot == null)
-				throw new ArgumentNullException ("snapshot");
-			this.snapshot = snapshot;
-			initializationThread = new System.Threading.Thread (initialize);
-			initializationThread.Start ();
+		public Snapshot Snapshot {
+			get {
+				return snapshot;
+			}
 		}
 
-		void initialize ()
+		Frontend frontend;
+
+		public Frontend Frontend {
+			get {
+				return frontend;
+			}
+		}
+
+		protected FrontendInstanceBase (Snapshot snapshot, Frontend frontend)
+		{
+			if (frontend == null)
+				throw new ArgumentNullException ("frontend");
+			this.snapshot = snapshot;
+			this.frontend = frontend;
+		}
+
+		protected void Initialize ()
 		{
 			foreach (byte[] chunks in snapshot.GetChunks ()) {
 				//something like this
@@ -52,23 +64,14 @@ namespace BD2.Core
 			}
 		}
 
-		public void WaitForInitialization ()
-		{
-			initializationThread.Join ();
-		}
-
 		public string Name { get { return snapshot.Name; } }
-
-		public abstract Frontend Frontend { get; }
 
 		protected abstract void CreateObject (byte[] bytes);
 
 		protected abstract IEnumerable<BaseDataObject> GetVolatileObjects ();
 
-		protected abstract IEnumerable<BaseDataObject> GetObjectsWithID (Guid id);
-		#region IDisposable implementation
-		public abstract void Dispose ();
-		#endregion
+		protected abstract IEnumerable<BaseDataObject> GetObjectWithID (byte[] objectID);
+
 		internal void GetVolatileData (System.IO.BinaryWriter binaryWriter)
 		{
 			SortedSet<BaseDataObject> baseDataObjects = new SortedSet<BaseDataObject> ();

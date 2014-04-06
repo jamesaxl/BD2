@@ -35,12 +35,23 @@ namespace BD2.Chunk.Daemon
 	public class PushChunksRequestMessage : ObjectBusMessage
 	{
 		Guid id;
+
+		public Guid ID {
+			get {
+				return id;
+			}
+		}
+
 		Guid chunks;
+
+		public Guid Chunks {
+			get {
+				return chunks;
+			}
+		}
 
 		public PushChunksRequestMessage (Guid id, Guid chunks)
 		{
-			if (chunks == null)
-				throw new ArgumentNullException ("chunkData");
 			this.id = id;
 			this.chunks = chunks;
 		}

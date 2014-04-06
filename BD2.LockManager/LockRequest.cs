@@ -30,7 +30,6 @@ namespace BD2.LockManager
 {
 	public sealed class LockRequest
 	{
-		Guid id;
 		DateTime timeRequested;
 		DateTime timeAcquired;
 		TimeSpan timeout;
@@ -40,12 +39,6 @@ namespace BD2.LockManager
 		internal LockGroup LockGroup {
 			get {
 				return lockGroup;
-			}
-		}
-
-		public Guid Id {
-			get {
-				return id;
 			}
 		}
 
@@ -73,12 +66,15 @@ namespace BD2.LockManager
 			}
 		}
 
-		public LockRequest (TimeSpan Timeout, Action<LockRequest> Acquired)
+		public LockRequest (TimeSpan Timeout, Action<LockRequest> Acquired, LockGroup lockGroup)
 		{
 			if (Acquired == null)
 				throw new ArgumentNullException ("Acquired");
+			if (lockGroup == null)
+				throw new ArgumentNullException ("lockGroup");
 			acquired = Acquired;
 			timeout = Timeout;
+			this.lockGroup = lockGroup;
 			timeRequested = DateTime.UtcNow;
 			timeAcquired = DateTime.MinValue;
 		}

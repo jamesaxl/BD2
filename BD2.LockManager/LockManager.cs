@@ -49,7 +49,6 @@ namespace BD2.LockManager
 		{
 			if (lockRequest == null)
 				throw new ArgumentNullException ("lockRequest");
-			LockGroup testLockGroup;
 			lock (requests) {
 				if (requests.Contains (lockRequest)) {
 					requests.Remove (lockRequest);
@@ -63,7 +62,7 @@ namespace BD2.LockManager
 
 		private LockState NextPendingLockState {
 			get {
-				lock (lock_access) {
+				lock (lockAccess) {
 					//return first object in pendingLocks
 					throw new NotImplementedException ();
 				}
@@ -90,7 +89,7 @@ namespace BD2.LockManager
 			}
 		}
 
-		SortedSet<LockGroup> lockGroups;
+		SortedSet<LockGroup> lockGroups = new SortedSet<LockGroup> ();
 
 		public SortedSet<LockGroup> LockGroups {
 			get {
@@ -100,11 +99,11 @@ namespace BD2.LockManager
 			}
 		}
 
-		object lock_access;
+		object lockAccess;
 
-		public object Lock_access {
+		public object LockAccess {
 			get {
-				return lock_access;
+				return lockAccess;
 			}
 		}
 
@@ -112,15 +111,15 @@ namespace BD2.LockManager
 		{
 			pendingLocks = new  SortedSet<LockState> ();
 			locks = new SortedDictionary<LockState, Action<LockState>> ();
-			lock_access = new object ();
+			lockAccess = new object ();
 		}
 
-		public LockState CreateLock (LockType type, LockableBase[] BaseDataObjectStateTrackers, int TimeoutMilliSeconds, Action<LockState> StateChanged)
+		public LockState CreateLock (LockType type, LockableBase[] baseDataObjectStateTrackers, int timeoutMilliSeconds, Action<LockState> stateChanged)
 		{
 			//TODO: aqcuire lock here or provide option to do so later and make a call-back for it.
 			try {
-				LockState ls = new LockState (this, type, BaseDataObjectStateTrackers, NotifyStateChanged, ReportStale, TimeSpan.FromMilliseconds (TimeoutMilliSeconds));
-				lock (lock_access) {
+				LockState ls = new LockState (this, type, baseDataObjectStateTrackers, NotifyStateChanged, ReportStale, TimeSpan.FromMilliseconds (timeoutMilliSeconds));
+				lock (lockAccess) {
 					pendingLocks.Add (ls);
 				}
 				return ls;
@@ -145,13 +144,13 @@ namespace BD2.LockManager
 
 		private void ReportStale (LockState lockState)
 		{
-			lock (lock_access)
+			lock (lockAccess)
 				staleLocks.Add (lockState);
 		}
 
 		public LockStatus StatusOf (LockState lockState)
 		{
-			lock (lock_access) {
+			lock (lockAccess) {
 				if (staleLocks.Contains (lockState)) {
 					return LockStatus.Locked;//not sure
 				}

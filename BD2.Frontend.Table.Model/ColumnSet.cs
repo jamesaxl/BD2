@@ -33,14 +33,6 @@ namespace BD2.Frontend.Table.Model
 {
 	public sealed class ColumnSet : BaseDataObject
 	{
-		Table table;
-
-		public Table Table {
-			get {
-				return table;
-			}
-		}
-
 		Column[] columns;
 
 		public Column[] Columns {
@@ -49,41 +41,36 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		public ColumnSet (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, Table table, Column[] columns)
-			: base(frontendInstanceBase, objectID, chunkID)
+		public ColumnSet (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Column[] columns)
+			: base(frontendInstanceBase, chunkID)
 		{
-			if (table == null)
-				throw new ArgumentNullException ("table");
 			if (columns == null)
 				throw new ArgumentNullException ("columns");
-			this.table = table;
 			this.columns = columns;
 		}
 		#region implemented abstract members of Serializable
 		public override void Serialize (Stream stream)
 		{
 			using (BinaryWriter BW =  new BinaryWriter (stream)) {
-				BW.Write (table.ObjectID.ToByteArray ());
 				BW.Write (columns.Length);
 				for (int n = 0; n != columns.Length; n++) {
-					BW.Write (columns [n].ObjectID.ToByteArray ());
+					BW.Write (columns [n].ObjectID);
 				}
-			}
-		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override Guid ObjectType {
-			get {
-				return Guid.Parse ("b7138176-bdf7-4a80-9944-c8fd2ee16e94");
 			}
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			yield return table;
 			foreach (Column column in columns)
 				yield return column;
+		}
+		#endregion
+		#region implemented abstract members of BaseDataObject
+		public override Guid ObjectType {
+			get {
+				return Guid.Parse ("bca848f2-70b8-476d-86af-77cde2fdc5fd");
+			}
 		}
 		#endregion
 	}

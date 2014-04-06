@@ -38,9 +38,18 @@ namespace BD2.Frontend.Table
 			}
 		}
 
+		IValueDeserializer valueDeserializer;
+
+		public Frontend (IValueDeserializer valueDeserializer)
+		{
+			if (valueDeserializer == null)
+				throw new ArgumentNullException ("valueDeserializer");
+			this.valueDeserializer = valueDeserializer;
+		}
+
 		public override BD2.Core.FrontendInstanceBase CreateInstanse (BD2.Core.Snapshot snapshot)
 		{
-			throw new NotImplementedException ();
+			return new BD2.Frontend.Table.FrontendInstance (snapshot, this, valueDeserializer);
 		}
 		#endregion
 	}

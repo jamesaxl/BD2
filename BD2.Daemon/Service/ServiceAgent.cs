@@ -97,7 +97,7 @@ namespace BD2.Daemon
 			flush ();
 		}
 
-		protected ServiceAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush)
+		protected ServiceAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, bool run)
 		{
 			if (!Enum.IsDefined (typeof(ServiceAgentMode), serviceAgentMode)) {
 				throw new ArgumentException ("Invalid value for argument 'serviceAgentMode'", "serviceAgentMode");
@@ -109,7 +109,6 @@ namespace BD2.Daemon
 			this.serviceAgentMode = serviceAgentMode;
 			this.objectBusSession = objectBusSession;
 			this.flush = flush;
-			thread = new System.Threading.Thread (Run);
 			objectBusSession.RegisterType (typeof(TransparentStreamCanReadRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamCanReadResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamCanSeekRequestMessage), TransparentStreamServerMessageReceived);
@@ -144,7 +143,10 @@ namespace BD2.Daemon
 			objectBusSession.RegisterType (typeof(TransparentStreamSetWriteTimeoutResponseMessage), TransparentStreamMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamWriteRequestMessage), TransparentStreamServerMessageReceived);
 			objectBusSession.RegisterType (typeof(TransparentStreamWriteResponseMessage), TransparentStreamMessageReceived);
-			thread.Start ();
+			if (run) {
+				thread = new System.Threading.Thread (Run);
+				thread.Start ();
+			}
 		}
 
 		public void Destroy ()
@@ -152,11 +154,27 @@ namespace BD2.Daemon
 			ObjectBusSession.Destroy ();
 		}
 
-		protected abstract void Run ();
+		protected virtual void Run ()
+		{
+		}
 
-		public abstract void DestroyRequestReceived ();
+		internal void CallDestroyRequestReceived ()
+		{
+			DestroyRequestReceived ();
+		}
 
-		public abstract void SessionDisconnected ();
+		protected virtual void DestroyRequestReceived ()
+		{
+		}
+
+		internal void CallSessionDisconnected ()
+		{
+			SessionDisconnected ();
+		}
+
+		protected virtual void SessionDisconnected ()
+		{
+		}
 
 		void TransparentStreamServerMessageReceived (ObjectBusMessage objectBusMessage)
 		{

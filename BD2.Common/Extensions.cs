@@ -88,6 +88,11 @@ namespace BD2.Common
 				BinaryWriter.Write (Param.ToByteArray ());
 			}
 		}
+
+		public static byte[] SHA256 (this byte[] buffer)
+		{
+			return System.Security.Cryptography.SHA256.Create ().ComputeHash (buffer);
+		}
 	}
 }
 

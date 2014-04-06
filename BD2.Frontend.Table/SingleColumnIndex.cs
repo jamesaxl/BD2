@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using BD2.Frontend.Table.Model;
 using BD2.Core;
 
-namespace BD2
+namespace BD2.Frontend.Table
 {
 	public sealed class SingleColumnIndex : IndexBase
 	{
@@ -40,32 +40,29 @@ namespace BD2
 			yield return indexColumn;
 		}
 
-		public SingleColumnIndex (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, bool Unique, IndexColumnBase IndexColumn)
-		: base(frontendInstanceBase, objectID, chunkID)
+		public SingleColumnIndex (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Model.Table table, bool unique, IndexColumnBase indexColumn)
+		: base(frontendInstanceBase, chunkID, table, unique)
 		{
-			if (IndexColumn == null)
+			if (indexColumn == null)
 				throw new ArgumentNullException ("IndexColumn");
-			indexColumn = IndexColumn;
-			unique = Unique;
-		}
-
-		bool unique;
-
-		public override bool Unique {
-			get {
-				return unique;
-			}
+			this.indexColumn = indexColumn;
 		}
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{
-			throw new NotImplementedException ();
+			base.Serialize (stream);
+			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
+				BW.Write (indexColumn.ObjectID);
+			}
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			throw new NotImplementedException ();
+			foreach (BaseDataObject bdo in base.GetDependenies ()) {
+				yield return bdo;
+			}
+			yield return indexColumn;
 		}
 
 		public override Guid ObjectType {

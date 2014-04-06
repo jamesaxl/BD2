@@ -30,9 +30,29 @@ namespace BD2.Conv.Daemon.MSSQL
 {
 	public sealed class Column : BD2.Conv.Frontend.Table.Column
 	{
-		public Column (Guid id, string name, bool mandatory, long size, string tfqn)
+		int order;
+
+		public int Order {
+			get {
+				return order;
+			}
+		}
+
+		public Column (Guid id, string name, bool mandatory, long size, string tfqn, int order)
 			: base(id, name, mandatory, size, tfqn)
 		{
+			this.order = order;
+		}
+
+		public override int CompareTo (object obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException ("obj");
+			Column otherRef = (Column)obj;
+			int R = Order.CompareTo (otherRef.Order);
+			if (R == 0)
+				R = base.CompareTo (obj);
+			return R;
 		}
 	}
 }

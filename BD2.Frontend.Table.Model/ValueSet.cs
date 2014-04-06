@@ -21,8 +21,6 @@ namespace BD2.Frontend.Table.Model
 		}
 
 		public abstract object GetValue (Column column);
-
-		public abstract System.Collections.Generic.IEnumerator<Tuple<Column,object>> GetValues ();
 	}
 }
 

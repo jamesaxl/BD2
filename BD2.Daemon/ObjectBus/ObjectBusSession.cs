@@ -33,7 +33,7 @@ namespace BD2.Daemon
 	{
 		Guid sessionID;
 
-		public Guid SessionID{ get { return sessionID; } }
+		public Guid SessionID { get { return sessionID; } }
 
 		Action<ObjectBusMessage,  ObjectBusSession> sendMessageCallback;
 		Action<ObjectBusSession> destroyCallback;

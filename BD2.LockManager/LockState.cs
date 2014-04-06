@@ -35,6 +35,13 @@ namespace BD2.LockManager
 		TimeSpan defaultTimeout;
 		Guid staticID = Guid.NewGuid ();
 		SortedSet<LockState> properSubsets = new SortedSet<LockState> ();
+		//stub, to avoid a 'warning as error'
+		private SortedSet<LockState> ProperSubsets {
+			get {
+				return properSubsets;
+			}
+		}
+
 		LockManager lockManager;
 		/// <summary>
 		/// object to Exchange when trying to change states
@@ -166,7 +173,7 @@ namespace BD2.LockManager
 		{
 			lock (lock_status) {
 				if (Status == LockStatus.Unlocked) {
-					lock (lockManager.Lock_access) {
+					lock (lockManager.LockAccess) {
 						foreach (var LockState in lockManager.Locks) {
 							if (LockState.Key != this)
 							if (!LockState.Key.CanCoexistWith (this)) {

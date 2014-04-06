@@ -31,7 +31,10 @@ namespace BD2.Common
 {
 	public abstract class Serializable
 	{
-		public abstract void Serialize (Stream stream);
+		public virtual void Serialize (Stream stream)
+		{
+			throw new Exception ("THIS METHOD SHOULD NOT BE CALLED. EVER.");
+		}
 
 		public static void WritePrimitive (BinaryWriter binaryWriter, object obj)
 		{

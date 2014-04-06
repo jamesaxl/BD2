@@ -28,7 +28,7 @@ using System;
 
 namespace BD2.Conv.Daemon.MSSQL
 {
-	public sealed class Table:BD2.Conv.Frontend.Table.Table
+	public sealed class Table : BD2.Conv.Frontend.Table.Table
 	{
 		int sqlTableID;
 

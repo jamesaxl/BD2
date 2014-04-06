@@ -61,7 +61,7 @@ namespace BD2.RawProxy.crypto
 
 		static cryptov1 ()
 		{
-			string StoragePath = BD2.Common.Configuration.GetConfig (null, "RawProxy.Crypto", "StorageConfiguration");
+			string StoragePath = BD2.Common.Configuration.GetConfig (null, "RawProxy.Crypto", "StorageConfiguration", new System.Type[0] { }, (A,C) => "Change this path.");
 			storage = new DB (new Options () { Compression = CompressionType.SnappyCompression }, StoragePath, System.Text.Encoding.Unicode);
 		}
 		#region implemented abstract members of BD2.RawProxy.RawProxyv1
@@ -73,7 +73,7 @@ namespace BD2.RawProxy.crypto
 
 		public override byte[] Encode (byte[] Input)
 		{
-			Encode (Input, DefaultEncoder);
+			return Encode (Input, DefaultEncoder);
 		}
 
 		public override byte[] Encode (byte[] Input, byte[] Attributes)
@@ -87,13 +87,13 @@ namespace BD2.RawProxy.crypto
 			if (Attributes.Length == 0)
 				throw new ArgumentException ("Attributes cannot be empty.", "Attributes");
 			MemoryStream MS = new MemoryStream ();
-			MS.Write (Input);
+			MS.Write (Input, 0, Input.Length);
 			MS.Seek (0, SeekOrigin.Begin);
 			System.Security.Cryptography.Aes aes = System.Security.Cryptography.Aes.Create ();
 			aes.Mode = System.Security.Cryptography.CipherMode.CBC;
 			aes.Key = Attributes;
-			System.Security.Cryptography.CryptoStream cs = new System.Security.Cryptography.CryptoStream (MS, aes.CreateEncryptor (), System.Security.Cryptography.CryptoStreamMode.Write);
-			
+			System.Security.Cryptography.CryptoStream cs = new System.Security.Cryptography.CryptoStream (MS, aes.CreateEncryptor (), System.Security.Cryptography.CryptoStreamMode.Read);
+
 		}
 
 		byte[] defaultEncoder;
@@ -113,10 +113,11 @@ namespace BD2.RawProxy.crypto
 				throw new ArgumentNullException ("hash");
 			if (hash.Length == 0)
 				throw new ArgumentException ("hash cannot be empty.", "Input");
-			System.Security.Cryptography.X509Certificates.X509Certificate2 cert = GetCertificate (hash);//load certificate into memory
+			X509Certificate2 cert = GetCertificate (hash);//load certificate into memory
 			defaultEncoder = hash;
 		}
 		#endregion
+
 		public void AddCertificate (X509Certificate2 cert)
 		{
 			if (cert == null)
@@ -154,6 +155,15 @@ namespace BD2.RawProxy.crypto
 				throw new ArgumentException ("No certificate associated with given hash", "hash");
 			return ret;
 		}
+
+		#region implemented abstract members of RawProxyv1
+
+		public override byte[] Serialize ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		#endregion
 	}
 }
 

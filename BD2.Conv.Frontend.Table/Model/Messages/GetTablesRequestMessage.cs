@@ -41,18 +41,9 @@ namespace BD2.Conv.Frontend.Table
 			}
 		}
 
-		bool refresh;
-
-		public bool Refresh {
-			get {
-				return refresh;
-			}
-		}
-
-		public GetTablesRequestMessage (Guid id, bool refresh)
+		public GetTablesRequestMessage (Guid id)
 		{
 			this.id = id;
-			this.refresh = refresh;
 		}
 
 		public static ObjectBusMessage Deserialize (byte[] bytes)
@@ -60,8 +51,7 @@ namespace BD2.Conv.Frontend.Table
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					Guid requestID = new Guid (BR.ReadBytes (16));
-					bool refresh = BR.ReadBoolean ();
-					return new GetTablesRequestMessage (requestID, refresh);
+					return new GetTablesRequestMessage (requestID);
 				}
 			}
 		}
@@ -71,7 +61,6 @@ namespace BD2.Conv.Frontend.Table
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
-					BW.Write (refresh);
 					return MS.GetBuffer ();
 				}
 			}

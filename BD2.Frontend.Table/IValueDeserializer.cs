@@ -28,7 +28,7 @@ using System;
 
 namespace BD2.Frontend.Table
 {
-	public interface IValueDesrializer
+	public interface IValueDeserializer
 	{
 		object Deserialize (long typeID, byte[] bytes);
 

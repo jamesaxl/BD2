@@ -41,8 +41,8 @@ namespace BD2.Frontend.Table
 				yield return indexColumn;
 		}
 
-		public MultiColumnIndex (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, bool unique, IndexColumnBase[] indexColumns)
-		:base(frontendInstanceBase,objectID,chunkID)
+		public MultiColumnIndex (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Model.Table table, bool unique, IndexColumnBase[] indexColumns)
+		:base(frontendInstanceBase, chunkID, table, unique)
 		{
 			if (indexColumns == null)
 				throw new ArgumentNullException ("indexColumn");
@@ -50,20 +50,8 @@ namespace BD2.Frontend.Table
 				if (IC == null)
 					throw new ArgumentException ("IndexColumn must not contain null enteries.", "IndexColumn");
 			}
-			unique = unique;
 			indexColumns = ((IndexColumnBase[])indexColumns.Clone ());
-			objectID = Guid.NewGuid ();
 		}
-
-		bool unique;
-
-		public override bool Unique {
-			get {
-				return unique;
-			}
-		}
-		#region implemented abstract members of BaseDataObject
-		#endregion
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{
@@ -73,7 +61,12 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of BaseDataObject
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			throw new NotImplementedException ();
+			foreach (BaseDataObject bdo in base.GetDependenies ()) {
+				yield return bdo;
+			}
+			foreach (BaseDataObject bdo in indexColumns) {
+				yield return bdo;
+			}
 		}
 
 		public override Guid ObjectType {

@@ -41,7 +41,7 @@ namespace BD2.Frontend.Table
 				throw new ArgumentException ("obj must be of type IndexValue.", "obj");
 			if (!OtherIV.index.Equals (index))
 				throw new ArgumentException ("obj must have the same index signature", "obj");
-			Row OtherRow = OtherIV.row;
+			//Row OtherRow = OtherIV.row;
 			IEnumerator<IndexColumnBase> OtherIndices = OtherIV.index.GetIndexColumns ();
 			IEnumerator<IndexColumnBase> ThisIndices = this.index.GetIndexColumns ();
 			while (ThisIndices.MoveNext () && OtherIndices.MoveNext ()) {

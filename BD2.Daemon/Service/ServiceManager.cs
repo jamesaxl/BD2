@@ -33,7 +33,7 @@ namespace BD2.Daemon
 	{
 		ObjectBus objectBus;
 		SortedDictionary<Guid, ServiceAnnounceMessage> localServices = new SortedDictionary<Guid, ServiceAnnounceMessage> ();
-		SortedDictionary<ServiceAnnounceMessage, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent>> localServiceAgents = new SortedDictionary<ServiceAnnounceMessage, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent>> ();
+		SortedDictionary<ServiceAnnounceMessage, Func<ServiceAgentMode , ObjectBusSession, Action, Byte[], ServiceAgent>> localServiceAgents = new SortedDictionary<ServiceAnnounceMessage, Func<ServiceAgentMode , ObjectBusSession, Action, Byte[], ServiceAgent>> ();
 		SortedSet<ServiceAnnounceMessage> remoteServices = new SortedSet<ServiceAnnounceMessage> ();
 		SortedDictionary<Guid, Tuple<ServiceRequestMessage, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent>> requests = new SortedDictionary<Guid, Tuple<ServiceRequestMessage, System.Threading.ManualResetEvent, System.Threading.ManualResetEvent>> ();
 		SortedDictionary<Guid, ServiceResponseMessage> pendingResponses = new SortedDictionary<Guid, ServiceResponseMessage> ();
@@ -93,14 +93,14 @@ namespace BD2.Daemon
 			if (!(message is ServiceRequestMessage))
 				throw new ArgumentException (string.Format ("message type is not valid, must be of type {0}", typeof(ServiceRequestMessage).FullName));
 			ServiceRequestMessage serviceRequest = (ServiceRequestMessage)message;
-			Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> agentFunc;
+			Func<ServiceAgentMode , ObjectBusSession, Action, Byte[], ServiceAgent> agentFunc;
 			lock (localServices)
 				lock (localServiceAgents)
 					agentFunc = localServiceAgents [localServices [serviceRequest.ServiceID]];
 			Guid responseID = Guid.NewGuid ();
 			ObjectBusSession session = objectBus.CreateSession (responseID, SessionDisconnected);
 			ServiceResponseMessage response = new ServiceResponseMessage (responseID, serviceRequest.ID, ServiceResponseStatus.Accepted);
-			ServiceAgent agent = agentFunc.Invoke (ServiceAgentMode.Server, session, objectBus.Flush);
+			ServiceAgent agent = agentFunc.Invoke (ServiceAgentMode.Server, session, objectBus.Flush, serviceRequest.Parameters);
 			lock (sessionAgents)
 				sessionAgents.Add (session.SessionID, agent);
 			objectBus.SendMessage (response);
@@ -113,7 +113,7 @@ namespace BD2.Daemon
 			#endif
 
 			lock (sessionAgents)
-				sessionAgents [session.SessionID].SessionDisconnected ();
+				sessionAgents [session.SessionID].CallSessionDisconnected ();
 		}
 
 		void ServiceDestroyReceived (ObjectBusMessage message)
@@ -129,7 +129,7 @@ namespace BD2.Daemon
 			}
 			ServiceDestroyMessage serviceDestroy = (ServiceDestroyMessage)message;
 			lock (sessionAgents)
-				sessionAgents [serviceDestroy.SessionID].DestroyRequestReceived ();
+				sessionAgents [serviceDestroy.SessionID].CallDestroyRequestReceived ();
 			objectBus.DestroySession (serviceDestroy);
 
 		}
@@ -143,7 +143,7 @@ namespace BD2.Daemon
 				return new SortedSet<ServiceAnnounceMessage> (remoteServices);
 		}
 
-		public void AnnounceService (ServiceAnnounceMessage serviceAnnouncement, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> func)
+		public void AnnounceService (ServiceAnnounceMessage serviceAnnouncement, Func<ServiceAgentMode , ObjectBusSession, Action, byte[], ServiceAgent> func)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -161,7 +161,7 @@ namespace BD2.Daemon
 			objectBus.SendMessage (serviceAnnouncement);
 		}
 
-		public ServiceAgent RequestService (ServiceAnnounceMessage remoteServiceAnnouncement, byte[] parameters, Func<ServiceAgentMode , ObjectBusSession, Action, ServiceAgent> func)
+		public ServiceAgent RequestService (ServiceAnnounceMessage remoteServiceAnnouncement, byte[] parameters, Func<ServiceAgentMode , ObjectBusSession, Action, Byte[], ServiceAgent> func, Byte[] localAgentParameters)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -182,7 +182,7 @@ namespace BD2.Daemon
 			ServiceResponseMessage response = pendingResponses [request.ID];
 			lock (pendingResponses)
 				pendingResponses.Remove (response.RequestID);
-			ServiceAgent agent = func (ServiceAgentMode.Client, objectBus.CreateSession (response.ID, SessionDisconnected), objectBus.Flush);
+			ServiceAgent agent = func (ServiceAgentMode.Client, objectBus.CreateSession (response.ID, SessionDisconnected), objectBus.Flush, localAgentParameters);
 			sessionAgents.Add (response.ID, agent);
 			mre_done.Set ();
 			return agent;

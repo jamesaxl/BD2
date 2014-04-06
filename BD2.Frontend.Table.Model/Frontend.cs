@@ -25,48 +25,14 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
-	public sealed class RowDrop : BaseDataObject
+	public abstract class Frontend : BD2.Core.Frontend
 	{
-		Row row;
-
-		public Row RowID {
-			get {
-				return row;
-			}
-		}
-
-		public RowDrop (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Row  row)
-			:base (frontendInstanceBase, chunkID)
+		public Frontend ()
 		{
-			if (row == null)
-				throw new ArgumentNullException ("row");
-			this.row = row;
 		}
-		#region implemented abstract members of Serializable
-		public override void Serialize (System.IO.Stream stream)
-		{
-			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
-				BW.Write (row.ObjectID);
-			}
-		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override Guid ObjectType {
-			get {
-				return Guid.Parse ("1ede8774-cdd5-4d88-bce2-daa9af54aa51");
-			}
-		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override System.Collections.Generic.IEnumerable<BaseDataObject> GetDependenies ()
-		{
-			yield return row;
-		}
-		#endregion
 	}
 }
 

@@ -31,7 +31,6 @@ namespace BD2.LockManager
 	public abstract class LockableBase
 	{
 
-		volatile int locked = 0;
 		System.Collections.Generic.SortedSet<LockState> managers = new System.Collections.Generic.SortedSet<LockState> ();
 
 		void AddLockStateTracker (LockState state)

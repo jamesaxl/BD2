@@ -60,7 +60,12 @@ namespace BD2.RawProxy.compress
 				throw new NotSupportedException ("Invalid/Unsupported compression algorithm.");
 			}
 		}
-
+		#region implemented abstract members of RawProxyv1
+		public override byte[] Serialize ()
+		{
+			throw new NotImplementedException ();
+		}
+		#endregion
 		public override byte[] Encode (byte[] Input)
 		{
 			System.IO.Compression.GZipStream gzs = new System.IO.Compression.GZipStream (new System.IO.MemoryStream (Input), System.IO.Compression.CompressionMode.Compress);

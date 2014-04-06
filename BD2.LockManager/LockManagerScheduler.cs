@@ -32,12 +32,29 @@ namespace BD2.LockManager
 	public abstract class LockManagerScheduler
 	{
 		Action<LockGroup> timedOut;
+
+		protected Action<LockGroup> TimedOut {
+			get {
+				return timedOut;
+			}
+		}
+
 		Action<LockGroup> perform;
 
 		protected Action<LockGroup> Perform {
 			get {
 				return perform;
 			}
+		}
+
+		protected LockManagerScheduler (Action<LockGroup> timedOut, Action<LockGroup> perform)
+		{
+			if (timedOut == null)
+				throw new ArgumentNullException ("timedOut");
+			if (perform == null)
+				throw new ArgumentNullException ("perform");
+			this.timedOut = timedOut;
+			this.perform = perform;
 		}
 
 		internal abstract void Schedule (LockGroup lockGroup);
@@ -47,7 +64,10 @@ namespace BD2.LockManager
 
 	sealed class LockManagerScheduler_Deadline : LockManagerScheduler
 	{
-
+		public LockManagerScheduler_Deadline (Action<LockGroup> timedOut, Action<LockGroup> perform)
+			:base(timedOut, perform)
+		{
+		}
 		#region implemented abstract members of LockManagerScheduler
 		internal override void Schedule (LockGroup lockGroup)
 		{
@@ -63,6 +83,11 @@ namespace BD2.LockManager
 
 	sealed class LockManagerScheduler_CFQ : LockManagerScheduler
 	{
+		public LockManagerScheduler_CFQ (Action<LockGroup> timedOut, Action<LockGroup> perform)
+			:base(timedOut, perform)
+		{
+		}
+
 		class comparer_CFQ : IComparer<LockGroup>
 		{
 			LockGroup current;
@@ -79,8 +104,6 @@ namespace BD2.LockManager
 			#endregion
 		}
 
-		comparer_CFQ comparer = null;
-		LockGroup Current = null;
 		List<LockGroup> LGs = new List<LockGroup> (128);
 		#region implemented abstract members of LockManagerScheduler
 		internal override void Schedule (LockGroup lockGroup)

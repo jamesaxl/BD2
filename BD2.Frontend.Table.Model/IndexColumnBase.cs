@@ -39,14 +39,6 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		ColumnSet columnSet;
-
-		public ColumnSet ColumnSet {
-			get {
-				return columnSet;
-			}
-		}
-
 		bool sortAscending;
 
 		public bool SortAscending {
@@ -55,35 +47,24 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		int HashCode;
+		IndexBase indexBase;
 
-		public override int GetHashCode ()
-		{
-			return HashCode;
-		}
-
-		protected IndexColumnBase (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, Column column, ColumnSet columnSet, bool sortAscending = true)
-			:base (frontendInstanceBase, objectID, chunkID)
-		{
-			if (column == null)
-				throw new ArgumentNullException ("column");
-			this.column = column;
-			this.columnSet = columnSet;
-			this.sortAscending = sortAscending;
-			HashCode = column.GetHashCode ();
-			if (!sortAscending) {
-				HashCode ^= 0x12345678; 
+		public IndexBase IndexBase {
+			get {
+				return indexBase;
 			}
 		}
 
-		public override bool Equals (object obj)
+		protected IndexColumnBase (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, IndexBase indexBase, Column column, bool sortAscending = true)
+			:base (frontendInstanceBase, chunkID)
 		{
-			if (obj == null)
-				throw new ArgumentNullException ("obj");
-			IndexColumnBase OtherIndexColumn = obj as IndexColumnBase;
-			if (OtherIndexColumn == null)
-				throw new ArgumentException ("obj must be of type IndexColumn.", "obj");
-			return  (OtherIndexColumn.sortAscending == this.sortAscending) && (OtherIndexColumn.column.TypeEquals (this.column));
+			if (indexBase == null)
+				throw new ArgumentNullException ("indexBase");
+			this.indexBase = indexBase;
+			if (column == null)
+				throw new ArgumentNullException ("column");
+			this.column = column;
+			this.sortAscending = sortAscending;
 		}
 	}
 }

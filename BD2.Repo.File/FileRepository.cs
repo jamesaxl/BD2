@@ -83,6 +83,13 @@ namespace BD2.Repo.File
 		Mono.Data.Sqlite.SqliteConnection Base;
 		string path;
 		string name;
+
+		public string Name {
+			get {
+				return name;
+			}
+		}
+
 		Guid id;
 
 		public Repository (IEnumerable<ChunkRepositoryCollection> Repos, string Path, string Name)

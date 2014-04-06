@@ -20,6 +20,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -78,6 +79,34 @@
     <ProjectReference Include="..\BD2.Chunk.Daemon.BloomFilter\BD2.Chunk.Daemon.BloomFilter.csproj">
       <Project>{8167365B-7849-434A-A5EA-62BE332F523C}</Project>
       <Name>BD2.Chunk.Daemon.BloomFilter</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv.Frontend.Table\BD2.Conv.Frontend.Table.csproj">
+      <Project>{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}</Project>
+      <Name>BD2.Conv.Frontend.Table</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv\BD2.Conv.csproj">
+      <Project>{CFC2FE19-A495-44D1-9B56-E0FB316A6414}</Project>
+      <Name>BD2.Conv</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv.Daemon.MSSQL\BD2.Conv.Daemon.MSSQL.csproj">
+      <Project>{84598FAA-8E5D-47A9-9463-AFB5A5FAD28F}</Project>
+      <Name>BD2.Conv.Daemon.MSSQL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Daemon\BD2.Daemon.csproj">
+      <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>
+      <Name>BD2.Daemon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Frontend.Table\BD2.Frontend.Table.csproj">
+      <Project>{285B9E10-0FC7-4D60-9D1D-5068E8963988}</Project>
+      <Name>BD2.Frontend.Table</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj">
+      <Project>{A4059B19-5E63-468E-9AE0-6D55AFD9775E}</Project>
+      <Name>BD2.Frontend.Table.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Core\BD2.Core.csproj">
+      <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
+      <Name>BD2.Core</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

@@ -43,8 +43,8 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract IEnumerable<ColumnSet> GetColumnSets ();
 
-		protected Table (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID)
-			:base (frontendInstanceBase, objectID, chunkID)
+		protected Table (FrontendInstanceBase frontendInstanceBase, byte[] chunkID)
+			:base (frontendInstanceBase, chunkID)
 		{
 		}
 	}

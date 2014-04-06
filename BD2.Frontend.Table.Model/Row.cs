@@ -41,12 +41,40 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		protected Row (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, ColumnSet columnSet)
-			:base (frontendInstanceBase, objectID, chunkID)
+		Table table;
+
+		public Table Table {
+			get {
+				return table;
+			}
+		}
+
+		protected Row (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet)
+			:base (frontendInstanceBase, chunkID)
 		{
+			if (table == null)
+				throw new ArgumentNullException ("table");
+			if (columnSet == null)
+				throw new ArgumentNullException ("columnSet");
 			this.columnSet = columnSet;
+			this.table = table;
 		}
 
 		public abstract ValueSet GetValues ();
+
+		public override IEnumerable<BaseDataObject> GetDependenies ()
+		{
+			yield return table;
+			yield return columnSet;
+		}
+		#region implemented abstract members of Serializable
+		public override void Serialize (System.IO.Stream stream)
+		{
+			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
+				BW.Write (table.ObjectID);
+				BW.Write (columnSet.ObjectID);
+			}
+		}
+		#endregion
 	}
 }

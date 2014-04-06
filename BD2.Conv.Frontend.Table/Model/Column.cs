@@ -28,7 +28,7 @@ using System;
 
 namespace BD2.Conv.Frontend.Table
 {
-	public class Column
+	public class Column : IComparable
 	{
 		Guid id;
 
@@ -106,6 +106,15 @@ namespace BD2.Conv.Frontend.Table
 				return MS.ToArray ();
 			}
 		}
+		#region IComparable implementation
+		public virtual int CompareTo (object obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException ("obj");
+			Column otherRef = (Column)obj;
+			return Name.CompareTo (otherRef.Name);
+		}
+		#endregion
 	}
 }
 

@@ -37,9 +37,9 @@ namespace BD2.Frontend.Table
 		SortedSet<Relation> relations;
 		SortedSet<Column> columns;
 		SortedSet<BD2.Frontend.Table.Model.ColumnSet> columnSets;
-		IValueDesrializer valueDeserializer;
+		IValueDeserializer valueDeserializer;
 
-		internal IValueDesrializer ValueDeserializer {
+		internal IValueDeserializer ValueDeserializer {
 			get {
 				return valueDeserializer;
 			}
@@ -47,25 +47,12 @@ namespace BD2.Frontend.Table
 
 		Frontend frontend;
 
-		public FrontendInstance (Snapshot snapshot, Frontend frontend, IValueDesrializer valueDeserializer):
-			base(snapshot)
+		public FrontendInstance (Snapshot snapshot, Frontend frontend, IValueDeserializer valueDeserializer):
+			base(snapshot,frontend)
 		{
 			if (valueDeserializer == null)
 				throw new ArgumentNullException ("valueDeserializer");
-			this.frontend = frontend;
 			this.valueDeserializer = valueDeserializer;
-		}
-
-		public override BD2.Core.Frontend Frontend {
-			get {
-				return frontend;
-			}
-		}
-
-		public Snapshot Snapshot {
-			get {
-				return null;
-			}
 		}
 		#region implemented abstract members of FrontendInstanceBase
 		protected override void CreateObject (byte[] bytes)
@@ -78,12 +65,7 @@ namespace BD2.Frontend.Table
 			throw new NotImplementedException ();
 		}
 
-		protected override IEnumerable<BaseDataObject> GetObjectsWithID (Guid id)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override void Dispose ()
+		protected override IEnumerable<BaseDataObject> GetObjectWithID (byte[] objectID)
 		{
 			throw new NotImplementedException ();
 		}

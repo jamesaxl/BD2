@@ -10,8 +10,14 @@ namespace BD2.BloomFilter
 
 		public Filter (byte[] first, byte[] last)
 		{
+			if (first == null)
+				throw new ArgumentNullException ("first");
+			if (last == null)
+				throw new ArgumentNullException ("last");
+			this.first = first;
+			this.last = last;
 		}
-		#region IRangedFilter implementation
+
 		public float Contains (byte[] chunkID)
 		{
 			throw new NotImplementedException ();
@@ -24,28 +30,26 @@ namespace BD2.BloomFilter
 
 		public string FilterTypeName {
 			get {
-				throw new NotImplementedException ();
+				return "Bloom";
 			}
 		}
 
 		public byte[] FirstChunk {
 			get {
-				throw new NotImplementedException ();
+				return first;
 			}
 		}
 
 		public byte[] LastChunk {
 			get {
-				throw new NotImplementedException ();
+				return last;
 			}
 		}
-		#endregion
-		#region IComparable implementation
+
 		public int CompareTo (object obj)
 		{
 			throw new NotImplementedException ();
 		}
-		#endregion
 	}
 }
 

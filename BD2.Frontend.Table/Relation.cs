@@ -33,50 +33,16 @@ namespace BD2.Frontend.Table
 {
 	public sealed class Relation : Model.Relation
 	{
-		public class Comparer : IComparer<Relation>
+
+		public Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, IndexBase parentColumns, Model.Table childTable, Model.Column[] childColumns)
+			:base (frontendInstanceBase, chunkID,parentColumns,childTable,childColumns)
 		{
-			public int Compare (Relation x, Relation y)
-			{
-				int hashCompare = x.GetHashCode ().CompareTo (y.GetHashCode ());
-				if (hashCompare != 0)
-					return hashCompare;
-				throw new NotImplementedException ();
-			}
-		}
-
-		IndexBase[] parentColumns;
-
-		public override IEnumerator<IndexBase> ParentColumns {
-			get {
-				foreach (IndexBase index in parentColumns)
-					yield return index;
-			}
-		}
-
-		Model.Column[] childColumns;
-
-		public override IEnumerator<Model.Column> ChildColumns {
-			get {
-				foreach (Model.Column column in childColumns)
-					yield return column;
-			}
-		}
-
-		public Relation (FrontendInstanceBase frontendInstanceBase, Guid objectID, byte[] chunkID, IndexBase[] parentColumns, Model.Column[] childColumns)
-			:base (frontendInstanceBase,objectID, chunkID)
-		{
-			if (parentColumns == null)
-				throw new ArgumentNullException ("parentColumns");
-			if (childColumns == null)
-				throw new ArgumentNullException ("childColumns");
-			this.parentColumns = parentColumns;
-			this.childColumns = childColumns;
-
+		
 		}
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{
-			throw new NotImplementedException ();
+			base.Serialize (stream);
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
@@ -89,7 +55,9 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of BaseDataObject
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			throw new NotImplementedException ();
+			foreach (BaseDataObject bdo in base.GetDependenies ()) {
+				yield return bdo;
+			}
 		}
 		#endregion
 	}
