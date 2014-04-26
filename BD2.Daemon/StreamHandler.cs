@@ -31,9 +31,6 @@ using System.Collections.Concurrent;
 
 namespace BD2.Daemon
 {
-	/// <summary>
-	/// Daemon class can be used to serve any connection, remote or otherwise
-	/// </summary>
 	public class StreamHandler
 	{
 	

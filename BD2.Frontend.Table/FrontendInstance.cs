@@ -32,11 +32,11 @@ namespace BD2.Frontend.Table
 {
 	public class FrontendInstance : FrontendInstanceBase
 	{
-		SortedSet<Row> rows;
-		SortedSet<Table> tables;
-		SortedSet<Relation> relations;
-		SortedSet<Column> columns;
-		SortedSet<BD2.Frontend.Table.Model.ColumnSet> columnSets;
+		SortedDictionary<byte[], Row> rows;
+		SortedDictionary<byte[], Table> tables;
+		SortedDictionary<byte[], Relation> relations;
+		SortedDictionary<byte[], Column> columns;
+		SortedDictionary<byte[], BD2.Frontend.Table.Model.ColumnSet> columnSets;
 		IValueDeserializer valueDeserializer;
 
 		internal IValueDeserializer ValueDeserializer {
@@ -57,7 +57,11 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of FrontendInstanceBase
 		protected override void CreateObject (byte[] bytes)
 		{
-			throw new NotImplementedException ();
+			System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes);
+			byte[] buf = new byte[16];
+			MS.Read (buf, 0, 16);
+			switch (new Guid (buf)) {
+			}
 		}
 
 		protected override IEnumerable<BaseDataObject> GetVolatileObjects ()
@@ -101,6 +105,16 @@ namespace BD2.Frontend.Table
 			throw new NotImplementedException ();
 		}
 		#endregion
+		//to avoid duplicates
+		void GetColumn (string name, long typeID, bool allowNull, long length)
+		{
+			byte[] hash = Column.Hash (name, typeID, allowNull, length);
+			if (columns.ContainsKey (hash)) {
+
+			} else {
+
+			}
+		}
 	}
 }
 

@@ -26,22 +26,34 @@
   * */
 using System;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Conv.Daemon.Sqlite
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	public sealed class Column : BD2.Conv.Frontend.Table.Column
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
-		{
+		int order;
+
+		public int Order {
+			get {
+				return order;
+			}
 		}
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
+		public Column (Guid id, string name, bool mandatory, long size, string tfqn, int order)
+			: base(id, name, mandatory, size, tfqn)
+		{
+			this.order = order;
+		}
 
-		public abstract Column GetColumn (string name, Type type);
-
-		public abstract Table GetTable (string name);
-
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+		public override int CompareTo (object obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException ("obj");
+			Column otherRef = (Column)obj;
+			int R = Order.CompareTo (otherRef.Order);
+			if (R == 0)
+				R = base.CompareTo (obj);
+			return R;
+		}
 	}
 }
 

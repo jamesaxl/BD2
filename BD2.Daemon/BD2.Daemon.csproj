@@ -15,7 +15,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <DefineConstants>TRACE;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -87,11 +87,16 @@
     <Compile Include="TransparentStream\TransparentStreamSeekResponseMessage.cs" />
     <Compile Include="ObjectBus\ObjectBusMessageDeserializerAttribute.cs" />
     <Compile Include="TransparentAgent.cs" />
+    <Compile Include="TransparentStream\FifoStream\StreamPair.cs" />
+    <Compile Include="TransparentStream\FifoStream\IStream.cs" />
+    <Compile Include="TransparentStream\FifoStream\OStream.cs" />
+    <Compile Include="Service\ServiceManagerReadyMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="TransparentStream\" />
     <Folder Include="ObjectBus\" />
     <Folder Include="Service\" />
+    <Folder Include="TransparentStream\FifoStream\" />
   </ItemGroup>
 </Project>

@@ -60,7 +60,7 @@ namespace BD2.Conv.Frontend.Table
 			this.fields = fields;
 		}
 
-		public byte[] Serialize (Func<System.IO.Stream, byte[]> CreateStream)
+		public byte[] Serialize (Func<System.IO.Stream, byte[]> createStream)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (MS)) {
@@ -71,7 +71,7 @@ namespace BD2.Conv.Frontend.Table
 							BW.Write (1);
 						} else if (fields [n] is System.IO.Stream) {
 							BW.Write (2);
-							BW.Write (CreateStream ((System.IO.Stream)fields [n]));
+							BW.Write (createStream ((System.IO.Stream)fields [n]));
 						} else {
 							BW.Write (0);
 							BW.Write (((byte[])fields [n]).Length);

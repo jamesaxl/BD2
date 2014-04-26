@@ -30,6 +30,14 @@ namespace BD2.Conv.Frontend.Table
 {
 	public class ForeignKeyRelation
 	{
+		string name;
+
+		public string Name {
+			get {
+				return name;
+			}
+		}
+
 		Guid[] childColumns;
 
 		public Guid[] ChildColumns {
@@ -46,14 +54,17 @@ namespace BD2.Conv.Frontend.Table
 			}
 		}
 
-		public ForeignKeyRelation (Guid[] childColumns, Guid[] parentColumns)
+		public ForeignKeyRelation (string name, Guid[] childColumns, Guid[] parentColumns)
 		{
+			if (name == null)
+				throw new ArgumentNullException ("name");
 			if (childColumns == null)
 				throw new ArgumentNullException ("childColumns");
 			if (parentColumns == null)
 				throw new ArgumentNullException ("parentColumns");
 			if (childColumns.Length != parentColumns.Length)
 				throw new ArgumentException ("childColumns and parentColumns must have identical length");
+			this.name = name;
 			this.childColumns = childColumns;
 			this.parentColumns = parentColumns;
 
@@ -61,11 +72,13 @@ namespace BD2.Conv.Frontend.Table
 
 		public static ForeignKeyRelation Deserialize (byte[] bytes)
 		{
+			string name;
 			int count;
 			Guid[] childColumns;
 			Guid[] parentColumns;
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					name = BR.ReadString ();
 					count = BR.ReadInt32 ();
 					childColumns = new Guid[count];
 					parentColumns = new Guid[count];
@@ -75,13 +88,14 @@ namespace BD2.Conv.Frontend.Table
 					}
 				}
 			}
-			return new ForeignKeyRelation (childColumns, parentColumns);
+			return new ForeignKeyRelation (name, childColumns, parentColumns);
 		}
 
 		public byte[] Serialize ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (name);
 					BW.Write (childColumns.Length);
 					for (int n = 0; n != childColumns.Length; n++) {
 						BW.Write (childColumns [n].ToByteArray ());

@@ -128,16 +128,14 @@ namespace BD2.Repo.File
 						Comm.Parameters.AddWithValue ("p0", ID.ToByteArray ());
 						Comm.ExecuteNonQuery ();
 					}
-				} catch (Exception ex) {
+				} catch (Exception) {
 					if (Base != null) {
 						if (Base.State == System.Data.ConnectionState.Open) {
 							Base.Close ();
 						}
 						Base.Dispose ();
 					}
-					if (System.IO.File.Exists (FPath))
-						System.IO.File.Delete (FPath);
-					throw ex;
+					throw;
 				}
 			} else
 				Base.Open ();
@@ -203,5 +201,16 @@ namespace BD2.Repo.File
 				return id;
 			}
 		}
+		#region implemented abstract members of ChunkRepository
+		public override void PushIndex (byte[] index, byte[] value)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override byte[] PullIndex (byte[] index)
+		{
+			throw new NotImplementedException ();
+		}
+		#endregion
 	}
 }

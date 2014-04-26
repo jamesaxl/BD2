@@ -47,6 +47,13 @@
     <Compile Include="Model\Messages\GetRowsResponseMessage.cs" />
     <Compile Include="Model\Messages\GetForeignKeyRelationsRequestMessage.cs" />
     <Compile Include="Model\Messages\GetForeignKeyRelationsResponseMessage.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="Model\Messages\GetSupportedObjectTypesReqestMessage.cs" />
+    <Compile Include="Model\Messages\GetSupportedObjectTypesResponseMessage.cs" />
+    <Compile Include="Model\Messages\GetColumnSetsRequestMessage.cs" />
+    <Compile Include="Model\Messages\GetColumnSetsResponseMessage.cs" />
+    <Compile Include="Model\ColumnSet.cs" />
+    <Compile Include="Model\PreservingSchemaCollection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -69,6 +76,22 @@
     <ProjectReference Include="..\BD2.Conv.Generic.TableNameTranslator\BD2.Conv.Generic.TableNameTranslator.csproj">
       <Project>{DD766E91-87CB-432F-A0E5-065C5D8ADE30}</Project>
       <Name>BD2.Conv.Generic.TableNameTranslator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Core\BD2.Core.csproj">
+      <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
+      <Name>BD2.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
+      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
+      <Name>BD2.Chunk</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
+      <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
+      <Name>BD2.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj">
+      <Project>{A4059B19-5E63-468E-9AE0-6D55AFD9775E}</Project>
+      <Name>BD2.Frontend.Table.Model</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

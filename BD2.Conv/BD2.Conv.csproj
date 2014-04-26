@@ -6,7 +6,7 @@
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{CFC2FE19-A495-44D1-9B56-E0FB316A6414}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>BD2.Conv</RootNamespace>
     <AssemblyName>BD2.Conv</AssemblyName>
   </PropertyGroup>
@@ -35,18 +35,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Configuration\DestinationEngine.cs" />
-    <Compile Include="Configuration\DestinationEngineInstance.cs" />
-    <Compile Include="Configuration\LibraryConfiguration.cs" />
-    <Compile Include="Configuration\SourceEngine.cs" />
-    <Compile Include="Configuration\SourceEngineInstance.cs" />
-    <Compile Include="Configuration\SourceTransform.cs" />
-    <Compile Include="Configuration\SourceTransformStep.cs" />
-    <Compile Include="Configuration\TableNameTranslation.cs" />
-    <Compile Include="Configuration\Transform.cs" />
-    <Compile Include="Model\IDataTranslator.cs" />
-    <Compile Include="Model\ITableNameTranslator.cs" />
     <Compile Include="DatabaseConnectionAgent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

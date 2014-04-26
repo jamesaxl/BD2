@@ -26,22 +26,61 @@
   * */
 using System;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Frontend.Table
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	public class GenericValueDeserializer : IValueDeserializer
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
+		object IValueDeserializer.Deserialize (long typeID, byte[] bytes)
 		{
+			throw new NotImplementedException ();
 		}
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
+		void IValueDeserializer.Serialize (object obj, out int typeID, out byte[] bytes)
+		{
+//			typeIDs.Add (typeof(bool), 104);
+//			typeIDs.Add (typeof(char), 175);
+//			typeIDs.Add (typeof(byte), 48);
+//			typeIDs.Add (typeof(short), 52);
+//			typeIDs.Add (typeof(int), 56);
+//			typeIDs.Add (typeof(long), 127);
+//			typeIDs.Add (typeof(float), 62);
+//			typeIDs.Add (typeof(double), 106);
+//			typeIDs.Add (typeof(Guid), 36);
+//			typeIDs.Add (typeof(String), 231);
 
-		public abstract Column GetColumn (string name, Type type);
+			string TFQN = obj.GetType ().FullName;
+			switch (TFQN) {
+			case "System.Byte":
+			case "System.SByte":
+				typeID = 48;
+			
+				break;
+			case "System.Boolean":
+				break;
+			case "System.Int16":
+				break;
+			case "System.UInt16":
+				break;
+			case "System.Int32":
+				break;
+			case "System.UInt32":
+				break;
+			case "System.Int64":
+				break;
+			case "System.UInt64":
+				break;
+			case "System.String":
+				break;
+			case "System.Char":
+				break;
+			case "System.DateTime":
+				break;
+			
 
-		public abstract Table GetTable (string name);
+			}
+			bytes = null;
+			typeID = 0;
 
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+		}
 	}
 }
-

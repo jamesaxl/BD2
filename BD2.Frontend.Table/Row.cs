@@ -31,12 +31,11 @@ using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	public class Row : Model.Row
+	public sealed class Row : Model.Row
 	{
-
 		byte[] rawData;
 
-		object GetRawDataClone ()
+		public object GetRawDataClone ()
 		{
 			return rawData.Clone ();
 		}

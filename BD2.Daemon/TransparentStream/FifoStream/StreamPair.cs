@@ -25,23 +25,54 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using System.IO;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Daemon
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	/// <summary>
+	/// This class is NOT guaranteed to be thread-safe
+	/// </summary>
+	public sealed class StreamPair
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
+		
+		System.Collections.Concurrent.ConcurrentQueue<byte[]> buffer;
+		IStream iStream;
+		OStream oStream;
+
+		internal void Enqueue (byte[] bytes)
 		{
+			buffer.Enqueue (bytes);
 		}
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
+		internal byte[] Dequeue ()
+		{
+			byte[] bytes;
+			if (buffer.TryDequeue (out bytes)) {
+				return bytes;
+			}
+			iStream.Flush ();
+			if (buffer.TryDequeue (out bytes)) {
+				return bytes;
+			}
+			return null;
+		}
 
-		public abstract Column GetColumn (string name, Type type);
+		public IStream GetIStream ()
+		{
+			return iStream;
+		}
 
-		public abstract Table GetTable (string name);
+		public OStream GetOStream ()
+		{
+			return oStream;
+		}
 
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+		public StreamPair ()
+		{
+			buffer = new System.Collections.Concurrent.ConcurrentQueue<byte[]> ();
+			iStream = new IStream (this); 
+			oStream = new OStream (this);
+		}
 	}
 }
 

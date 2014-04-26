@@ -43,6 +43,12 @@ namespace BD2.Daemon
 			return tss.StreamID;
 		}
 
+		protected void DestroyStream (Guid index)
+		{
+			TransparentStreamServer tss;
+			streamServers.TryRemove (index, out tss);
+		}
+
 		protected TransparentStream OpenStream (Guid streamID)
 		{
 			TransparentStream ts = new TransparentStream (this, streamID, objectBusSession);

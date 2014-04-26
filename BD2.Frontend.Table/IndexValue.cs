@@ -47,12 +47,13 @@ namespace BD2.Frontend.Table
 			while (ThisIndices.MoveNext () && OtherIndices.MoveNext ()) {
 				int CompareValue;
 				//TODO:HACK:XXX
-				CompareValue = 0;//row.GetValue (ThisIndices.Current.Column).CompareTo (OtherRow.GetValue (OtherIndices.Current.Column));
-				if (CompareValue == 0)
-					continue;
-				if (ThisIndices.Current.SortAscending)
-					return CompareValue;
-				return -CompareValue;
+				throw new NotImplementedException ();
+//				CompareValue = row.GetValue (ThisIndices.Current.Column).CompareTo (OtherRow.GetValue (OtherIndices.Current.Column));
+//				if (CompareValue == 0)
+//					continue;
+//				if (ThisIndices.Current.SortAscending)
+//					return CompareValue;
+//				return -CompareValue;
 			}
 			return 0;
 		}

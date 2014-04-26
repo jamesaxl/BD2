@@ -83,6 +83,8 @@ namespace BD2.Conv.Frontend.Table
 						object deserializedObject = BF.Deserialize (MS);
 						if (deserializedObject is Exception) {
 							exception = (Exception)deserializedObject;
+						} else if (deserializedObject is string) {
+							exception = new Exception ((string)deserializedObject);
 						} else {
 							throw new Exception ("buffer contains an object of invalid type, expected System.Exception.");
 						}
@@ -109,7 +111,14 @@ namespace BD2.Conv.Frontend.Table
 					} else {
 						MS.WriteByte (1);
 						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
-						BF.Serialize (MS, exception);
+						long p = MS.Position;
+						try {
+							BF.Serialize (MS, exception);
+						} catch {
+							MS.Position = p;
+							BF.Serialize (MS, exception.ToString ());
+							MS.SetLength (MS.Position);
+						}
 					}
 					return MS.GetBuffer ();
 				}

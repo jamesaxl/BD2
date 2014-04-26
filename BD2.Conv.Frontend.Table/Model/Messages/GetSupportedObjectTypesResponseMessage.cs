@@ -25,23 +25,58 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using BD2.Daemon;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Conv.Frontend.Table
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	[ObjectBusMessageDeserializer(typeof(GetSupportedObjectTypesResponseMessage), "Deserialize")]
+	[ObjectBusMessageTypeID("87b1eac8-c18e-4e57-907d-158e02b9f91a")]
+	public class GetSupportedObjectTypesResponseMessage : ObjectBusMessage
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
-		{
+		Guid requestID;
+
+		public Guid RequestID {
+			get {
+				return requestID;
+			}
 		}
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
+		string[] names;
 
-		public abstract Column GetColumn (string name, Type type);
+		public string[] Names {
+			get {
+				return names;
+			}
+		}
 
-		public abstract Table GetTable (string name);
+		Exception exception;
 
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+		public Exception Exception {
+			get {
+				return exception;
+			}
+		}
+
+		public GetSupportedObjectTypesResponseMessage (Guid requestID, string[] names, Exception exception)
+		{
+			if (names == null)
+				throw new ArgumentNullException ("names");
+			this.requestID = requestID;
+			this.names = names;
+			this.exception = exception;
+		}
+		#region implemented abstract members of ObjectBusMessage
+		public override byte[] GetMessageBody ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override Guid TypeID {
+			get {
+				return Guid.Parse ("87b1eac8-c18e-4e57-907d-158e02b9f91a");
+			}
+		}
+		#endregion
 	}
 }
 

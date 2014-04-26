@@ -45,6 +45,7 @@
     <Compile Include="FrontendInstance.cs" />
     <Compile Include="ValueSet.cs" />
     <Compile Include="IValueDeserializer.cs" />
+    <Compile Include="GenericValueDeserializer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

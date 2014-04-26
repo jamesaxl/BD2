@@ -128,6 +128,16 @@ namespace BD2.Repo.Net
 				throw new NotImplementedException ();
 			}
 		}
+
+		public override void PushIndex (byte[] index, byte[] value)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override byte[] PullIndex (byte[] index)
+		{
+			throw new NotImplementedException ();
+		}
 		#endregion
 	}
 }

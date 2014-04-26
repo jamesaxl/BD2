@@ -76,7 +76,7 @@ namespace BD2.Test.Daemon.FileShare
 					while (files.TryDequeue (out fileShareMessace)) {
 						mre_fileReceived.Reset ();
 						Console.Write ("server has shared a file: ");
-						Console.WriteLine (fileShareMessace.Text);
+						 (fileShareMessace.Text);
 						using (TransparentStream s = OpenStream (fileShareMessace.StreamID)) {
 							Console.Write ("path to save: ");
 							s.CopyTo (File.OpenWrite (MainClass.ConsoleReadLine ()), 64, 512);	

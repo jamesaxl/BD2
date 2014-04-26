@@ -35,9 +35,11 @@ namespace BD2.Frontend.Table.Model
 	{
 		public abstract string Name { get; }
 
+		public abstract IEnumerable<Relation> GetParentRelations ();
+
 		public abstract IEnumerable<Row> GetRows ();
 
-		public abstract IEnumerable<Row> GetRows (IndexBase Index);
+		public abstract IEnumerable<Row> GetRows (IndexBase index);
 
 		public abstract IEnumerable<IndexBase> GetIndices ();
 

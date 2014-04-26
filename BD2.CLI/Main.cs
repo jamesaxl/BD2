@@ -34,11 +34,14 @@ namespace BD2.CLI
 	class MainClass
 	{
 		static object lock_query = new object ();
+		static Queue<string> initial = new Queue<string> ();
 
 		public static string Query (string message)
 		{
 			//yes, it's just this simple for now.
 			lock (lock_query) {
+				if (initial.Count != 0)
+					return initial.Dequeue ();
 				Console.Write (message + " ");
 				return Console.ReadLine ();
 			}
@@ -55,93 +58,34 @@ namespace BD2.CLI
 			return -1;
 		}
 
-		static void DoConvert (BD2.Daemon.TransparentAgent agent)
+		static SortedDictionary<string, BD2.Chunk.ChunkRepository> repositories;
+
+		static void OpenNetworkRepository (string[] commandParts)
 		{
-			string repoName = Query ("Destination repository");
-
-			BD2.Frontend.Table.Frontend frontend = new BD2.Frontend.Table.Frontend (null);
-			BD2.Core.Frontend[] frontends = new BD2.Core.Frontend[] { frontend };
-			BD2.Core.Database db = new BD2.Core.Database (new BD2.Chunk.ChunkRepository[] { repositories[repoName] }, frontends, repoName);
-			BD2.Core.Snapshot ss = db.CreateSnapshot ("Current");
-			BD2.Frontend.Table.FrontendInstance frontendInstance = (BD2.Frontend.Table.FrontendInstance)frontend.CreateInstanse (ss);
-			SortedDictionary<Table, List<Column>> tableColumns = new SortedDictionary<Table, List<Column>> ();
-			SortedDictionary<Guid, Tuple<Table, List<Column>>> tables = new SortedDictionary<Guid, Tuple<Table, List<Column>>> ();
-			SortedDictionary<Guid, Table> tableDataRequests = new SortedDictionary<Guid, Table> ();
-
-			System.Threading.ManualResetEvent MRE = new System.Threading.ManualResetEvent (false);
-			int pendingTables = -1;
-
-			agent.RegisterType (typeof(GetRowsRequestMessage), (message) => { });
-			agent.RegisterType (typeof(GetRowsResponseMessage), (message) => {
-				GetRowsResponseMessage GRRM = (GetRowsResponseMessage)message;
-				Table table = tableDataRequests [GRRM.RequestID];
-				//BD2.Frontend.Table.Table frontendTable = 
-				new BD2.Frontend.Table.Table (frontendInstance, null, table.Name);
-				foreach (Column c in tableColumns[table]) {
-					//BD2.Frontend.Table.Column frontendColumn = 
-					new BD2.Frontend.Table.Column (frontendInstance, null, c.Name, 0, !c.Mandatory, c.Size);
-					//TODO:Avoid creating duplicates,create columnsets for each table, Associate columnSets and tables, Add data to tables
-				}
-			});
-			agent.RegisterType (typeof(GetColumnsRequestMessage), (message) => { });
-			agent.RegisterType (typeof(GetColumnsResponseMessage), (message) => {
-				GetColumnsResponseMessage GCRM = (GetColumnsResponseMessage)message;
-				Console.WriteLine ("GetColumnsResponseMessage received");
-				if (GCRM.Exception != null) {
-					Console.WriteLine ("GCRM.Exception: ");
-					Console.WriteLine (GCRM.Exception);
-				}
-				lock (tables) {
-					Tuple<Table, List<Column>> tuple = tables [GCRM.RequestID];
-					Console.Write (tuple.Item1.Name);
-					foreach (Column c in GCRM.Columns) {
-						tuple.Item2.Add (c);
-						tableColumns [tuple.Item1].Add (c);
-						Console.WriteLine ("Name:{0}\t, Size:{1}\t, Mandatory:{2}\t, TFQN:{3}", c.Name, c.Size, c.Mandatory, c.TFQN);
-					}
-					pendingTables --;
-					if (pendingTables == 0)
-						MRE.Set ();
-				}
-			});
-			agent.RegisterType (typeof(GetTablesRequestMessage), (message) => { });
-			agent.RegisterType (typeof(GetTablesResponseMessage), (message) => {
-				GetTablesResponseMessage GTRM = (GetTablesResponseMessage)message;
-				Console.WriteLine ("GetTablesResponseMessage received");
-				if (GTRM.Exception != null) {
-					Console.WriteLine ("GTRM.Exception: ");
-					Console.WriteLine (GTRM.Exception);
-				}
-				lock (tables) {
-					foreach (Table t in  GTRM.Tables) {
-						Guid reqID = Guid.NewGuid ();
-						tables.Add (reqID, new Tuple<Table, List<Column>> (t, new List<Column> ()));
-						tableColumns.Add (t, new  List<Column> ());
-						agent.SendMessage (new GetColumnsRequestMessage (reqID, t.ID));
-						Console.WriteLine (t.Name);
-					}
-					pendingTables = tables.Count;
-				}
-			});
-			agent.SendMessage (new GetTablesRequestMessage (Guid.NewGuid ()));
-			MRE.WaitOne ();
-			MRE.Dispose ();
-
-
-			foreach (var tuple in tables) {
-				Table table = tuple.Value.Item1;
-				Guid reqID = Guid.NewGuid ();
-				tableDataRequests.Add (reqID, table);
-				agent.SendMessage (new GetRowsRequestMessage (reqID, table.ID));
-
-			}
+			string nick = commandParts [2];
+			string ip = commandParts [3];
+			string port = commandParts [4];
+			System.Net.Sockets.TcpClient TC = new System.Net.Sockets.TcpClient ();
+			TC.Connect (new System.Net.IPEndPoint (System.Net.IPAddress.Parse (ip), int.Parse (port)));
+			BD2.Chunk.ChunkRepository LRepo = new BD2.Repo.Net.Repository (TC.GetStream ());
+			lock (repositories)
+				repositories.Add (nick, LRepo);
 		}
 
-		static SortedDictionary<string, BD2.Chunk.ChunkRepository> repositories;
+		static void OpenLevelDBRepository (string[] commandParts)
+		{
+			string nick = commandParts [2];
+			string path = commandParts [3];
+			BD2.Chunk.ChunkRepository LRepo = new BD2.Repo.Leveldb.Repository (path);
+			lock (repositories)
+				repositories.Add (nick, LRepo);
+		}
 
 		public static void Main (string[] args)
 		{
-
+			if (args.Length == 1)
+				foreach (string str in System.IO.File.ReadAllLines (args[0]))
+					initial.Enqueue (str);
 			SortedDictionary<int, System.Threading.Thread> jobs = new SortedDictionary<int, System.Threading.Thread> ();
 			repositories = new SortedDictionary<string, BD2.Chunk.ChunkRepository> ();
 			Modifiers.Add ("async");
@@ -189,27 +133,36 @@ namespace BD2.CLI
 					switch (CommandParts [1]) {
 					case "LevelDB":
 						if (CommandParts.Length < 4) {
-							Console.Error.WriteLine ("File repository requires at least two parameter: [async] Open File <Repository Nick> <Repository Path>");
+							Console.Error.WriteLine ("LevelDB repository requires at least two parameter: [async] Open File <Repository Nick> <Repository> <Path>");
 							continue;
 						}
 						if (CommandModifiers.Contains ("async")) {
 							System.Threading.Thread t_addrepo = new System.Threading.Thread (() =>
 							{
-								string nick = CommandParts [2];
-								string path = CommandParts [3];
-								BD2.Chunk.ChunkRepository LRepo = new BD2.Repo.Leveldb.Repository (path);
-								lock (repositories)
-									repositories.Add (nick, LRepo);
+								OpenLevelDBRepository (CommandParts);
 							});
 							t_addrepo.Start ();
 							Console.WriteLine ("[{0}]", t_addrepo.ManagedThreadId);
 						} else {
-							BD2.Chunk.ChunkRepository LRepo = new BD2.Repo.Leveldb.Repository (CommandParts [3]);
-							lock (repositories)
-								repositories.Add (CommandParts [2], LRepo);
+							OpenLevelDBRepository (CommandParts);
 						}
 						break;//file
 					case "Network":
+						if (CommandParts.Length < 5) {
+							Console.Error.WriteLine ("Network repository requires at least three parameter: [async] Open File <Repository Nick> <Repository> <IPAddress> <Port>");
+							continue;
+						}
+						if (CommandModifiers.Contains ("async")) {
+							System.Threading.Thread t_addrepo = new System.Threading.Thread (() =>
+							{
+								OpenNetworkRepository (CommandParts);
+							});
+							t_addrepo.Start ();
+							Console.WriteLine ("[{0}]", t_addrepo.ManagedThreadId);
+						} else {
+							OpenNetworkRepository (CommandParts);
+						}
+
 						break;
 					case "Socket":
 						break;
@@ -237,8 +190,8 @@ namespace BD2.CLI
 						BD2.Daemon.StreamHandler SH = new BD2.Daemon.StreamHandler (NS);
 						BD2.Daemon.ObjectBus OB = new BD2.Daemon.ObjectBus (SH);
 						BD2.Daemon.ServiceManager SM = new BD2.Daemon.ServiceManager (OB);
-						Console.WriteLine ("Waiting 15 seconds for remote to anounce all it's services...");
-						System.Threading.Thread.Sleep (15000);
+						Console.WriteLine ("Waiting 5 seconds for remote to anounce all it's services...");
+						System.Threading.Thread.Sleep (5000);
 						Guid serviceType_SQL = Guid.Parse ("57ce8883-1010-41ec-96da-41d36c64d65d");
 						var RS = SM.EnumerateRemoteServices ();
 						BD2.Daemon.ServiceAnnounceMessage TSA = null;
@@ -250,12 +203,12 @@ namespace BD2.CLI
 						if (TSA == null) {
 							Console.WriteLine ("Required services for Table Conversion not found on remote host.");
 						}
-
 						BD2.Daemon.TransparentAgent agent = 
 							(BD2.Daemon.TransparentAgent)
 								SM.RequestService (TSA, (new BD2.Conv.Daemon.MSSQL.ServiceParameters (Query ("Connection String"))).Serialize (),
 						                     BD2.Daemon.TransparentAgent.CreateAgent, null);
-						DoConvert (agent);
+						Client CL = new Client (agent, repositories [Query ("Repository Name")], Query ("Database Name"));
+						CL.Convert ();
 						break;
 					}
 					break;
@@ -264,11 +217,29 @@ namespace BD2.CLI
 					int intJobID = int.Parse (jobID);
 					jobs [intJobID].Join ();
 					break;
+				case "Exit":
+					return;
 				default:
 					Console.Error.WriteLine (string.Format ("{0} is not a valid command.", CommandParts [0]));
 					break;
 				}
 			} while(true);
+		}
+
+		static void SourceDaemonListen (object para)
+		{
+			System.Net.Sockets.TcpListener TL = (System.Net.Sockets.TcpListener)para;
+			System.Net.Sockets.Socket sock;
+			while ((sock = TL.AcceptSocket ()) != null) {
+				System.Net.Sockets.NetworkStream NS = new System.Net.Sockets.NetworkStream (sock);
+				BD2.Daemon.StreamHandler SH = new BD2.Daemon.StreamHandler (NS);
+				BD2.Daemon.ObjectBus OB = new BD2.Daemon.ObjectBus (SH);
+				BD2.Daemon.ServiceManager SM = new BD2.Daemon.ServiceManager (OB);
+				Guid serviceType_SQL = Guid.Parse ("57ce8883-1010-41ec-96da-41d36c64d65d");
+				Console.WriteLine ("Waiting 1 second for remote to get ready...");
+				System.Threading.Thread.Sleep (1000);
+				SM.AnnounceService (new BD2.Daemon.ServiceAnnounceMessage (Guid.NewGuid (), serviceType_SQL, "Source"), BD2.Conv.Daemon.MSSQL.ServiceAgent.CreateAgent);
+			}
 		}
 
 		static void RunSourceDaemon ()
@@ -279,15 +250,8 @@ namespace BD2.CLI
 			System.Net.IPEndPoint IPEP = new System.Net.IPEndPoint (IPA, int.Parse (listenPort));
 			System.Net.Sockets.TcpListener TL = new System.Net.Sockets.TcpListener (IPEP);
 			TL.Start ();
-			System.Net.Sockets.Socket sock = TL.AcceptSocket ();
-			System.Net.Sockets.NetworkStream NS = new System.Net.Sockets.NetworkStream (sock);
-			BD2.Daemon.StreamHandler SH = new BD2.Daemon.StreamHandler (NS);
-			BD2.Daemon.ObjectBus OB = new BD2.Daemon.ObjectBus (SH);
-			BD2.Daemon.ServiceManager SM = new BD2.Daemon.ServiceManager (OB);
-			Guid serviceType_SQL = Guid.Parse ("57ce8883-1010-41ec-96da-41d36c64d65d");
-			Console.WriteLine ("Waiting 5 seconds for remote to get ready...");
-			System.Threading.Thread.Sleep (5000);
-			SM.AnnounceService (new BD2.Daemon.ServiceAnnounceMessage (Guid.NewGuid (), serviceType_SQL, "Source"), BD2.Conv.Daemon.MSSQL.ServiceAgent.CreateAgent);
+			System.Threading.Thread listenThread = new System.Threading.Thread (SourceDaemonListen);
+			listenThread.Start (TL);
 		}
 	}
 }

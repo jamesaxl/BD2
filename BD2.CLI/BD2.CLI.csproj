@@ -108,5 +108,21 @@
       <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
       <Name>BD2.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BD2.Repo.Net\BD2.Repo.Net.csproj">
+      <Project>{EB2ADDC8-0A70-47DD-881F-B836FD48DE5D}</Project>
+      <Name>BD2.Repo.Net</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Repo.File\BD2.Repo.File.csproj">
+      <Project>{7C75502F-DF43-42E9-95F4-F00B5D3774D3}</Project>
+      <Name>BD2.Repo.File</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv.Daemon.Sqlite\BD2.Conv.Daemon.Sqlite.csproj">
+      <Project>{436AE80B-3AE2-448F-B0A4-2676449B7AC8}</Project>
+      <Name>BD2.Conv.Daemon.Sqlite</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv.Daemon.DB4O\BD2.Conv.Daemon.DB4O.csproj">
+      <Project>{5B861B2E-347C-4E75-AC23-C05326E330C6}</Project>
+      <Name>BD2.Conv.Daemon.DB4O</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

@@ -66,6 +66,22 @@ namespace BD2.Frontend.Table.Model
 		{
 			yield return table;
 			yield return columnSet;
+			foreach (Relation rel in table.GetParentRelations ()) {
+				foreach (Column relCol in rel.ChildColumns) {
+					foreach (Column setCol in columnSet.Columns) {
+						if (relCol == setCol)
+							goto matchOne;
+					}
+					goto noMatch;
+					matchOne:
+					;
+				}
+				foreach (Row row in  rel.ParentColumns.Table.GetRows (rel.ParentColumns)) {
+					yield return row;
+				}
+				noMatch:
+				;
+			}
 		}
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)

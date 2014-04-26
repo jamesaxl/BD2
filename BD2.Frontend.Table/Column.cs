@@ -35,7 +35,7 @@ namespace BD2.Frontend.Table
 	[ObjectBusMessageDeserializer(typeof(Column), "Deserialize")]
 	public class Column : Model.Column
 	{
-		public Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, long typeID, bool allowNull, long length)
+		internal Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, long typeID, bool allowNull, long length)
 			:base(frontendInstanceBase, chunkID, name, typeID, allowNull, length)
 		{
 		}
@@ -52,5 +52,18 @@ namespace BD2.Frontend.Table
 			}
 		}
 		#endregion
+		internal static byte[] Hash (string name, long typeID, bool allowNull, long length)
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (name);
+					BW.Write (typeID);
+					BW.Write (allowNull);
+					BW.Write (length);
+				}
+				System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create ();
+				return sha.ComputeHash (MS.ToArray ());
+			}
+		}
 	}
 }

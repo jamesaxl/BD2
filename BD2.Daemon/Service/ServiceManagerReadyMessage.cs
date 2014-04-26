@@ -26,22 +26,30 @@
   * */
 using System;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Daemon
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	[ObjectBusMessageTypeIDAttribute("5cf3cbfe-32bb-4d03-85d0-237118fb6786")]
+	[ObjectBusMessageDeserializerAttribute(typeof(ServiceManagerReadyMessage), "Deserialize")]
+	public class ServiceManagerReadyMessage : ObjectBusMessage
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
+		public static ObjectBusMessage Deserialize (byte[] buffer)
 		{
+			if (buffer.Length != 0)
+				throw new ArgumentException ("buffer must be empty");
+			return new ServiceManagerReadyMessage ();
+		}
+		#region implemented abstract members of ObjectBusMessage
+		public override byte[] GetMessageBody ()
+		{
+			return new byte[0];
 		}
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
-
-		public abstract Column GetColumn (string name, Type type);
-
-		public abstract Table GetTable (string name);
-
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+		public override Guid TypeID {
+			get {
+				return Guid.Parse ("5cf3cbfe-32bb-4d03-85d0-237118fb6786");
+			}
+		}
+		#endregion
 	}
 }
 

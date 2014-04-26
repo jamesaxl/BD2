@@ -26,22 +26,34 @@
   * */
 using System;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Conv.Daemon.MSSQL
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	public class ForeignKeyRelation : BD2.Conv.Frontend.Table.ForeignKeyRelation, IComparable
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
+		public ForeignKeyRelation (string name, Guid[] childColumns, Guid[] parentColumns)
+			:base(name, childColumns, parentColumns)
 		{
 		}
-
-		public abstract ColumnSet GetColumnSet (Column[] columns);
-
-		public abstract Column GetColumn (string name, Type type);
-
-		public abstract Table GetTable (string name);
-
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+		#region IComparable implementation
+		int IComparable.CompareTo (object obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException ("obj");
+			ForeignKeyRelation other = obj as ForeignKeyRelation;
+			if (obj == null)
+				throw new ArgumentException ("obj must be of type BD2.Conv.Daemon.MSSQL.ForeignKeyRelation", "obj");
+			int CommonColumnCount = Math.Min (other.ChildColumns.Length, this.ChildColumns.Length);
+			int Index = 0;
+			int result;
+			while (Index < CommonColumnCount) {
+				result = other.ChildColumns [Index].CompareTo (ChildColumns [Index]);
+				if (result != 0)
+					return result;
+			}
+			//TODO: fall back to parent columns and or name if a non-match is not found in childs
+			return 0;
+		}
+		#endregion
 	}
 }
 

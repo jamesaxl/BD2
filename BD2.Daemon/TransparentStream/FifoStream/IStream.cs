@@ -25,23 +25,94 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using System.IO;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Daemon
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	/// <summary>
+	/// This class is NOT guaranteed to be thread-safe
+	/// </summary>
+	public sealed class IStream : Stream
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
-		{
+		StreamPair streamPair;
+		MemoryStream bufferStream = new MemoryStream ();
+
+		public StreamPair StreamPair {
+			get {
+				return streamPair;
+			}
 		}
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
+		internal IStream (StreamPair streamPair)
+		{
+			if (streamPair == null)
+				throw new ArgumentNullException ("streamPair");
+			this.streamPair = streamPair;
+		}
+		#region implemented abstract members of Stream
+		public override void Flush ()
+		{
+			byte[] bytes = bufferStream.ToArray ();
+			bufferStream = new MemoryStream ();
+			streamPair.Enqueue (bytes);
+		}
 
-		public abstract Column GetColumn (string name, Type type);
+		public override int Read (byte[] buffer, int offset, int count)
+		{
+			throw new NotSupportedException ();
+		}
 
-		public abstract Table GetTable (string name);
+		public override long Seek (long offset, SeekOrigin origin)
+		{
+			throw new NotSupportedException ();
+		}
 
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+		public override void SetLength (long value)
+		{
+			throw new NotSupportedException ();
+		}
+
+		public override void Write (byte[] buffer, int offset, int count)
+		{
+			bufferStream.Write (buffer, offset, count);
+			if (bufferStream.Position > 4096) {
+				Flush ();
+			}
+		}
+
+		public override bool CanRead {
+			get {
+				return false;
+			}
+		}
+
+		public override bool CanSeek {
+			get {
+				return false;
+			}
+		}
+
+		public override bool CanWrite {
+			get {
+				return true;
+			}
+		}
+
+		public override long Length {
+			get {
+				throw new NotSupportedException ();
+			}
+		}
+
+		public override long Position {
+			get {
+				throw new NotSupportedException ();
+			}
+			set {
+				throw new NotSupportedException ();
+			}
+		}
+		#endregion
 	}
 }
 

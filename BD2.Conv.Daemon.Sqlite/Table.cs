@@ -26,22 +26,23 @@
   * */
 using System;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Conv.Daemon.Sqlite
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	public sealed class Table : BD2.Conv.Frontend.Table.Table
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
-		{
+		int tableOrder;
+
+		public int TableOrder {
+			get {
+				return tableOrder;
+			}
 		}
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
-
-		public abstract Column GetColumn (string name, Type type);
-
-		public abstract Table GetTable (string name);
-
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+		public Table (Guid id, string name, int tableOrder)
+		:base(id, name)
+		{
+			this.tableOrder = tableOrder;
+		}
 	}
 }
 

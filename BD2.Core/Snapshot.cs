@@ -31,7 +31,7 @@ using BD2.Common;
 
 namespace BD2.Core
 {
-	public sealed class Snapshot : Serializable
+	public sealed class Snapshot : Serializable, IComparable<Snapshot>
 	{
 
 		public override void Serialize (System.IO.Stream stream)
@@ -94,5 +94,22 @@ namespace BD2.Core
 			this.name = name;
 			this.objects = new SortedSet<byte[]> (objects);
 		}
+		#region IComparable implementation
+		public int CompareTo (object obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException ("obj");
+			Snapshot snapshot = obj as Snapshot;
+			return snapshot.name.CompareTo (name);
+
+		}
+
+		int IComparable<Snapshot>.CompareTo (Snapshot other)
+		{
+			if (other == null)
+				throw new ArgumentNullException ("other");
+			return other.name.CompareTo (name);
+		}
+		#endregion
 	}
 }

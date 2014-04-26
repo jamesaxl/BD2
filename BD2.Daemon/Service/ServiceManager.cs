@@ -48,6 +48,7 @@ namespace BD2.Daemon
 			objectBus.RegisterType (typeof(ServiceResponseMessage), ServiceResponseReceived);
 			objectBus.RegisterType (typeof(ServiceRequestMessage), ServiceRequestReceived);
 			objectBus.RegisterType (typeof(ServiceDestroyMessage), ServiceDestroyReceived);
+			objectBus.RegisterType (typeof(ServiceManagerReadyMessage), ServiceManagerReadyMessageReceived);
 			objectBus.Start ();
 		}
 
@@ -159,6 +160,42 @@ namespace BD2.Daemon
 					localServiceAgents.Add (serviceAnnouncement, func);
 				}
 			objectBus.SendMessage (serviceAnnouncement);
+		}
+
+		public void AnounceReady ()
+		{
+			objectBus.SendMessage (new ServiceManagerReadyMessage ());
+		}
+
+		System.Threading.ManualResetEvent MREReady = new System.Threading.ManualResetEvent (false);
+		bool remoteReady;
+
+		public bool RemoteReady {
+			get {
+				return remoteReady;
+			}
+			private set {
+				remoteReady = value;
+				if (value)
+					MREReady.Set ();
+				else
+					MREReady.Reset ();
+			}
+		}
+
+		void ServiceManagerReadyMessageReceived (ObjectBusMessage message)
+		{
+			RemoteReady = true;
+		}
+
+		void WaitForRemoteReady ()
+		{
+			MREReady.WaitOne ();
+		}
+
+		void WaitForRemoteReady (int millisecondsTimeout)
+		{
+			MREReady.WaitOne (millisecondsTimeout);
 		}
 
 		public ServiceAgent RequestService (ServiceAnnounceMessage remoteServiceAnnouncement, byte[] parameters, Func<ServiceAgentMode , ObjectBusSession, Action, Byte[], ServiceAgent> func, Byte[] localAgentParameters)

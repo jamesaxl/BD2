@@ -6,7 +6,7 @@ namespace BD2.Conv
 	{
 		public static void Main (string[] args)
 		{
-			Console.WriteLine ("Hello World!");
+
 		}
 	}
 }

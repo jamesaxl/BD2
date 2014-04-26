@@ -63,7 +63,21 @@ namespace BD2.Frontend.Table
 			this.name = name;
 		}
 
-		internal SortedDictionary<Guid, SortedSet<Column>> ColumnSets;
+		SortedDictionary<Guid, SortedSet<Column>> columnSets;
+
+		internal SortedDictionary<Guid, SortedSet<Column>> ColumnSets {
+			get {
+				return new SortedDictionary<Guid, SortedSet<Column>> (columnSets);
+			}
+		}
+
+		SortedDictionary<Guid, BD2.Frontend.Table.Model.Relation> relations;
+
+		public SortedDictionary<Guid, BD2.Frontend.Table.Model.Relation> Relations {
+			get {
+				return new SortedDictionary<Guid, BD2.Frontend.Table.Model.Relation> (relations);
+			}
+		}
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{
@@ -85,12 +99,17 @@ namespace BD2.Frontend.Table
 		}
 		#endregion
 		#region implemented abstract members of Table
+		public override IEnumerable<BD2.Frontend.Table.Model.Relation> GetParentRelations ()
+		{
+			return Relations.Values;
+		}
+
 		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows ()
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (IndexBase Index)
+		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (IndexBase index)
 		{
 			throw new NotImplementedException ();
 		}

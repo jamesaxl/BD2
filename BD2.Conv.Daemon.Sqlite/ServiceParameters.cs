@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Behrooz Amoozad
+ * Copyright (c) 2014 Behrooz Amoozad
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,45 @@
  * */
 using System;
 
-namespace BD2.Conv
+namespace BD2.Conv.Daemon.Sqlite
 {
-	[Serializable]
-	public class DestinationEngine
+	public class ServiceParameters
 	{
-		public string LibraryName {
-			get;
-			set;
+		string connectionString;
+
+		public string ConnectionString {
+			get {
+				return connectionString;
+			}
 		}
 
-		public string ClassName { 
-			get;
-			set; 
+		public ServiceParameters (string connectionString)
+		{
+			if (connectionString == null)
+				throw new ArgumentNullException ("connectionString");
+			this.connectionString = connectionString;
+
 		}
 
-		public string Name {
-			get;
-			set;
+		public byte[] Serialize ()
+		{
+			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS, System.Text.Encoding.Unicode)) {
+					BW.Write (connectionString);
+				}
+				return MS.ToArray ();
+			}
+		}
+
+		public static ServiceParameters Deserialize (byte[] bytes)
+		{
+			string connectionString;
+			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (bytes,false)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS,System.Text.Encoding.Unicode)) {
+					connectionString = BR.ReadString ();
+				}
+			}
+			return new ServiceParameters (connectionString);
 		}
 	}
 }

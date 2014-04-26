@@ -25,23 +25,54 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using BD2.Daemon;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Conv.Frontend.Table
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	[ObjectBusMessageTypeID("aecfee23-340d-402b-bf41-979ce30b73a8")]
+	[ObjectBusMessageDeserializer(typeof(GetColumnSetsRequestMessage), "Deserialize")]
+	public class GetColumnSetsRequestMessage : ObjectBusMessage
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
-		{
+		Guid id;
+
+		public Guid ID {
+			get {
+				return id;
+			}
 		}
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
+		public GetColumnSetsRequestMessage (Guid id)
+		{
+			this.id = id;
+		}
 
-		public abstract Column GetColumn (string name, Type type);
+		public static ObjectBusMessage Deserialize (byte[] bytes)
+		{
+			Guid id;
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream(bytes, false)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
+					id = new  Guid (BR.ReadBytes (16));
+				}
+			}
+			return new GetColumnSetsRequestMessage (id);
+		}
+		#region implemented abstract members of ObjectBusMessage
+		public override byte[] GetMessageBody ()
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter(MS)) {
+					BW.Write (id.ToByteArray ());
+				}
+				return MS.ToArray ();
+			}
+		}
 
-		public abstract Table GetTable (string name);
-
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+		public override Guid TypeID {
+			get {
+				return Guid.Parse ("aecfee23-340d-402b-bf41-979ce30b73a8");
+			}
+		}
+		#endregion
 	}
 }
 

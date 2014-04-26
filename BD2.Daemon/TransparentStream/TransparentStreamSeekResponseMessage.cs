@@ -28,7 +28,7 @@ using System;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("7513d22b-54eb-4f90-bf25-c36982bf8f61")]
+	[ObjectBusMessageTypeIDAttribute("b13c5bc2-533a-4152-9798-b3b5b1477182")]
 	[ObjectBusMessageDeserializerAttribute(typeof(TransparentStreamSeekResponseMessage), "Deserialize")]
 	sealed class TransparentStreamSeekResponseMessage : TransparentStreamMessageBase
 	{
@@ -113,7 +113,7 @@ namespace BD2.Daemon
 
 		public override Guid TypeID {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("b13c5bc2-533a-4152-9798-b3b5b1477182");
 			}
 		}
 		#endregion

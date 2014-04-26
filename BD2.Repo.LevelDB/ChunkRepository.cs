@@ -38,7 +38,8 @@ namespace BD2.Repo.Leveldb
 		const string dataDirectoryName = "Data";
 		const string topLevelsDirectoryName = "TopLevel";
 		const string metaDirectoryName = "Meta";
-		LevelDB.DB ldependencies, ldata, ltopLevels, lmeta;
+		const string indexDirectoryName = "Index";
+		LevelDB.DB ldependencies, ldata, ltopLevels, lmeta, lindex;
 
 		LevelDB.DB OpenLevelDB (string directoryName)
 		{
@@ -59,6 +60,7 @@ namespace BD2.Repo.Leveldb
 			ldata = OpenLevelDB (dataDirectoryName);
 			ldependencies = OpenLevelDB (dependenciesDirectoryName);
 			ltopLevels = OpenLevelDB (topLevelsDirectoryName);
+			lindex = OpenLevelDB (indexDirectoryName);
 			if (lmeta.GetRaw ("Guid") == null)
 				lmeta.Put ("Guid", Guid.NewGuid ().ToByteArray ());
 		}
@@ -184,6 +186,23 @@ namespace BD2.Repo.Leveldb
 			get {
 				return new Guid (lmeta.GetRaw ("Guid"));
 			}
+		}
+		#endregion
+		#region implemented abstract members of ChunkRepository
+		public override void PushIndex (byte[] index, byte[] value)
+		{
+			if (index == null)
+				throw new ArgumentNullException ("index");
+			if (value == null)
+				throw new ArgumentNullException ("value");
+			lindex.Put (index, value);
+		}
+
+		public override byte[] PullIndex (byte[] index)
+		{
+			if (index == null)
+				throw new ArgumentNullException ("index");
+			return lindex.GetRaw (index);
 		}
 		#endregion
 	}

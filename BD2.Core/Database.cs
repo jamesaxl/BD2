@@ -57,7 +57,7 @@ namespace BD2.Core
 		}
 
 		public Database (string name)
-		:this()
+			: this()
 		{
 			this.name = name;
 		}
@@ -73,7 +73,7 @@ namespace BD2.Core
 		}
 
 		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends, string name)
-			:this(backends,frontends)
+			:this(backends, frontends)
 		{
 			this.name = name;
 		}
@@ -100,13 +100,13 @@ namespace BD2.Core
 			}
 		}
 
-		public Snapshot CreateSnapshot (string name)
+		public Snapshot CreateSnapshot (string snapshotName)
 		{
-			if (name == null)
+			if (snapshotName == null)
 				throw new ArgumentNullException ("name");
 			Snapshot snap;
 			lock (snapState) {
-				snap = new Snapshot (this, name, backends.Enumerate ());
+				snap = new Snapshot (this, snapshotName, backends.Enumerate ());
 				lock (snapshots) {
 					snapshots.Add (snap);
 				}
