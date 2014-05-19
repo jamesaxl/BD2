@@ -43,10 +43,6 @@ namespace BD2.Daemon
 
 		public void RegisterType (Type type, Action<ObjectBusMessage> action)
 		{
-			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
-			#endif
-
 			ObjectBusMessageDeserializerAttribute[] procAttribs = (ObjectBusMessageDeserializerAttribute[])type.GetCustomAttributes (typeof(ObjectBusMessageDeserializerAttribute), false);
 			ObjectBusMessageTypeIDAttribute[] idAttribs = (ObjectBusMessageTypeIDAttribute[])type.GetCustomAttributes (typeof(ObjectBusMessageTypeIDAttribute), false);
 			lock (deserializers) {
@@ -78,31 +74,73 @@ namespace BD2.Daemon
 			byte[] messageTypeBytes = new byte[16];
 			System.Buffer.BlockCopy (messageContents, 0, messageTypeBytes, 0, 16);
 			Guid MessageType = new Guid (messageTypeBytes);
+			if (MessageType == Guid.Parse ("cfbb5332-deee-4a6b-9a36-fbe3ee447bc2"))
+				Console.WriteLine ("Received the rows request");
+			if (MessageType == Guid.Parse ("8d5373ac-3b2b-42b5-8473-9db3cdead652"))
+				Console.WriteLine ("Received the CanRead request");
 			if (!deserializers.ContainsKey (MessageType)) {
 				throw new Exception (string.Format ("Deserializer for object type id '{0}' is not registered", MessageType));
 			}
 			ObjectBusMessageDeserializerAttribute obmda = deserializers [MessageType];
 			byte[] bytes = new byte[messageContents.Length - 16];
 			System.Buffer.BlockCopy (messageContents, 16, bytes, 0, messageContents.Length - 16);
+			if (MessageType == Guid.Parse ("cfbb5332-deee-4a6b-9a36-fbe3ee447bc2"))
+				Console.WriteLine ("Deserializing the message");
+			if (MessageType == Guid.Parse ("8d5373ac-3b2b-42b5-8473-9db3cdead652"))
+				Console.WriteLine ("Deserializing the CanRead request");
 			ObjectBusMessage messageObject = obmda.Deserialize (bytes);
-			lock (callbacks)
-				foreach (var ct in callbacks) {
-					if (ct.Key == messageObject.GetType ().ToString ()) {
-						ct.Value (messageObject);
-					}
+			Console.WriteLine ("A {0} byte {1} received from bus", messageContents.Length + 16, messageObject.GetType ().Name);
+			SortedDictionary <string,Action<ObjectBusMessage>> cbs;
+			lock (callbacks) {
+				cbs = new SortedDictionary <string,Action<ObjectBusMessage>> (callbacks);
+			}
+			foreach (var ct in cbs) {
+				if (ct.Key == messageObject.GetType ().ToString ()) {
+					if (MessageType == Guid.Parse ("cfbb5332-deee-4a6b-9a36-fbe3ee447bc2"))
+						Console.WriteLine ("Invoking the callback for object");
+					ct.Value (messageObject);
 				}
+			}
 		}
 
-		internal ObjectBusSession (Guid sessionID, Action<ObjectBusMessage, ObjectBusSession> sendMessageCallback, Action<Action<byte[]>, ObjectBusSession> registerStreamCallbackCallback, Action<ObjectBusSession> destroyCallback, Action<ObjectBusSession> busDisconnectedCallback)
+		Action<ObjectBusSession> anounceReady;
+
+		public void AnounceReady ()
+		{
+			anounceReady (this);
+		}
+
+		bool remoteReady = false;
+		System.Threading.ManualResetEvent mreRemoteReady = new System.Threading.ManualResetEvent (false);
+
+		public bool RemoteReady {
+			get {
+				return remoteReady;
+			}
+		}
+
+		internal void setRemoteReady ()
+		{
+			remoteReady = true;
+			mreRemoteReady.Set ();
+		}
+
+		public void WaitForRemoteReady ()
+		{
+			mreRemoteReady.WaitOne ();
+		}
+
+		internal ObjectBusSession (Guid sessionID, Action<ObjectBusMessage, ObjectBusSession> sendMessageCallback, Action<Action<byte[]>, ObjectBusSession> registerStreamCallbackCallback, Action<ObjectBusSession> destroyCallback, Action<ObjectBusSession> busDisconnectedCallback, Action<ObjectBusSession> anounceReady)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
 			#endif
-
+			Console.WriteLine ("Created session {0}", sessionID);
 			this.sessionID = sessionID;
 			this.sendMessageCallback = sendMessageCallback;
 			this.destroyCallback = destroyCallback;
 			this.busDisconnected = busDisconnectedCallback;
+			this.anounceReady = anounceReady;
 			registerStreamCallbackCallback (streamHandlerCallback, this);
 		}
 

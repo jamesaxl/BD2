@@ -26,13 +26,11 @@
   * */
 using System;
 
-namespace BD2.Frontend.Table
+namespace BD2.Frontend.Table.Model
 {
-	public interface IValueDeserializer
+	public abstract	class ColumnSetConverter
 	{
-		object Deserialize (long typeID, byte[] bytes);
-
-		void Serialize (object obj, out int typeID, out byte[] bytes);
+		public abstract object[] Convert (object[] data, ColumnSet inColumnSet, ColumnSet outColumnSet);
 	}
 }
 

@@ -186,6 +186,7 @@ namespace BD2.Daemon
 		{
 			if (objectBusMessage == null)
 				throw new ArgumentNullException ("objectBusMessage");
+			Console.WriteLine ("message received:{0}", objectBusMessage.GetType ());
 			TransparentStreamMessageBase transparentStreamMessageBase = objectBusMessage as TransparentStreamMessageBase;
 			if (transparentStreamMessageBase == null)
 				throw new ArgumentException ("objectBusMessage must be of type TransparentStreamMessageBase", "objectBusMessage");

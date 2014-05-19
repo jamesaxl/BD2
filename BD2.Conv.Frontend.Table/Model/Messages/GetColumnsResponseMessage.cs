@@ -111,7 +111,7 @@ namespace BD2.Conv.Frontend.Table
 						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
 						BF.Serialize (MS, exception);
 					}
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}

@@ -29,7 +29,7 @@ using BD2.Daemon;
 
 namespace BD2.Conv.Frontend.Table
 {
-	[ObjectBusMessageTypeIDAttribute("d9065150-70dd-4143-842e-4b30ce424568")]
+	[ObjectBusMessageTypeIDAttribute("cfbb5332-deee-4a6b-9a36-fbe3ee447bc2")]
 	[ObjectBusMessageDeserializerAttribute(typeof(GetRowsResponseMessage), "Deserialize")]
 	public class GetRowsResponseMessage : ObjectBusMessage
 	{
@@ -59,6 +59,7 @@ namespace BD2.Conv.Frontend.Table
 
 		public GetRowsResponseMessage (Guid requestID, Guid responseStreamID, Exception exception)
 		{
+			Console.WriteLine ("GetRowsResponseMessage..ctor()");
 			this.requestID = requestID;
 			this.responseStreamID = responseStreamID;
 			this.exception = exception;
@@ -66,6 +67,7 @@ namespace BD2.Conv.Frontend.Table
 
 		public static ObjectBusMessage Deserialize (byte[] bytes)
 		{
+			Console.WriteLine ("GetRowsResponseMessage.Deserialize()");
 			Guid requestID;
 			Guid responseStreamID;
 			Exception exception;
@@ -101,14 +103,14 @@ namespace BD2.Conv.Frontend.Table
 						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
 						BF.Serialize (MS, exception);
 					}
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("d9065150-70dd-4143-842e-4b30ce424568");
+				return Guid.Parse ("cfbb5332-deee-4a6b-9a36-fbe3ee447bc2");
 			}
 		}
 		#endregion

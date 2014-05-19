@@ -28,74 +28,80 @@ using System;
 using BD2.Daemon;
 using System.IO;
 
-namespace BD2.Test.Daemon.FileShare
+namespace BD2.Test.Daemon.StreamPair
 {
-	public class FileShareAgent : ServiceAgent
+	public class StreamPairAgent : ServiceAgent
 	{
-		System.Threading.ManualResetEvent mre_fileReceived = new System.Threading.ManualResetEvent (false);
-		System.Collections.Concurrent.ConcurrentQueue<FileShareMessage> files = new System.Collections.Concurrent.ConcurrentQueue<FileShareMessage> ();
 
-		FileShareAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, bool run)
-			:base(serviceAgentMode, objectBusSession, flush, run)
+		StreamPairAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, bool run)
+			: base(serviceAgentMode, objectBusSession, flush, run)
 		{
-			objectBusSession.RegisterType (typeof(FileShareMessage), FileShareMessageReceived);
+			#if TRACE
+			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
+			#endif
+			objectBusSession.RegisterType (typeof(StreamPairMessage), StreamPairMessageReceived);
 		}
 
 		public static ServiceAgent CreateAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, byte[] parameters)
 		{
-			return new FileShareAgent (serviceAgentMode, objectBusSession, flush, true);
+			#if TRACE
+			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
+			#endif
+			return new StreamPairAgent (serviceAgentMode, objectBusSession, flush, true);
 		}
 
-		void FileShareMessageReceived (ObjectBusMessage message)
+		void StreamPairMessageReceived (ObjectBusMessage message)
 		{
-			FileShareMessage fileShareMessace = (FileShareMessage)message;
-			files.Enqueue (fileShareMessace);
-			mre_fileReceived.Set ();
+			#if TRACE
+			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
+			#endif
+			StreamPairMessage StreamPairMessage = (StreamPairMessage)message;
+			Stream stream = OpenStream (StreamPairMessage.StreamID);
+			Console.WriteLine ("********************************************{0}", stream.CanRead);
 		}
 
-		void SendMessage (string text)
+		void SendStreamPairMessage (Stream stream)
 		{
-			ObjectBusSession.SendMessage (new FileShareMessage (text, CreateStream (File.Open (text, FileMode.Open))));
+			#if TRACE
+			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
+			#endif
+
+			ObjectBusSession.SendMessage (new StreamPairMessage (CreateStream (stream)));
 		}
 		#region implemented abstract members of ServiceAgent
 		protected override void Run ()
 		{
+			#if TRACE
+			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
+			#endif
+			ObjectBusSession.AnounceReady ();
+			ObjectBusSession.WaitForRemoteReady ();
 			try {
-				if (ServiceAgentMode == ServiceAgentMode.Server) {
-					while (true) {
-						Console.Write ("path for file to share: ");
-						string p = MainClass.ConsoleReadLine ();
-						if (p == "done")
-							return;
-						SendMessage (p);
-					}
-				}
-				while (true) {
-					FileShareMessage fileShareMessace;
-					mre_fileReceived.WaitOne (10);
-					while (files.TryDequeue (out fileShareMessace)) {
-						mre_fileReceived.Reset ();
-						Console.Write ("server has shared a file: ");
-						Console.WriteLine (fileShareMessace.Text);
-						using (TransparentStream s = OpenStream (fileShareMessace.StreamID)) {
-							bool CR = s.CanRead;
-							Console.Write ("path to save: ");
-							s.CopyTo (File.OpenWrite (MainClass.ConsoleReadLine ()), 64, 512);	
-						}
-					}
-				}
+
+				DateTime t1 = DateTime.UtcNow;
+				BD2.Daemon.StreamPair SP = new BD2.Daemon.StreamPair ();
+				SendStreamPairMessage (SP.GetOStream ());
+				Flush ();
+				Console.WriteLine ("Done in {0}", (DateTime.UtcNow - t1).TotalMilliseconds);
+				//Destroy ();
 			} catch (System.Threading.ThreadAbortException) {
 			}
 		}
 
 		protected override void DestroyRequestReceived ()
 		{
+			#if TRACE
+			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
+			#endif
 			Thread.Abort ();
 		}
 
 		protected override void SessionDisconnected ()
 		{
-			Thread.Abort ();
+			#if TRACE
+			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
+			#endif
+			DestroyRequestReceived ();
 		}
 		#endregion
 	}

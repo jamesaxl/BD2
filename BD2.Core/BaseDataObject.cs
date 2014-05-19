@@ -66,11 +66,16 @@ namespace BD2.Core
 		//for de/serialization purposes
 		public abstract Guid ObjectType { get; }
 
-		byte[] GetPersistentUniqueObjectID ()
+		byte[] puoid;
+
+		public byte[] GetPersistentUniqueObjectID ()
 		{
+			if (puoid != null)
+				return puoid;
 			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
 			Serialize (MS);
-			return MS.ToArray ().SHA256 ();
+			puoid = MS.ToArray ().SHA256 ();
+			return GetPersistentUniqueObjectID ();
 		}
 
 		public byte[] ObjectID {

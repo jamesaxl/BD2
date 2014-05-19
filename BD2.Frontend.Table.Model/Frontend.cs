@@ -25,13 +25,25 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
 	public abstract class Frontend : BD2.Core.Frontend
 	{
-		public Frontend ()
+		ValueSerializerBase valueDeserializer;
+
+		public ValueSerializerBase ValueDeserializer {
+			get {
+				return valueDeserializer;
+			}
+		}
+
+		protected Frontend (ValueSerializerBase valueDeserializer)
 		{
+			if (valueDeserializer == null)
+				throw new ArgumentNullException ("valueDeserializer");
+			this.valueDeserializer = valueDeserializer;
 		}
 	}
 }

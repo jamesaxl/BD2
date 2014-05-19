@@ -206,24 +206,33 @@ namespace BD2.Daemon
 
 		public IAsyncResult BeginCanRead ()
 		{
+			Console.WriteLine ("BeginCanRead()");
 			TransparentStreamCanReadRequestMessage request = new  TransparentStreamCanReadRequestMessage (Guid.NewGuid (), streamID);
 			TransparentStreamAsyncResult result = new TransparentStreamAsyncResult (null);
 			if (!pendingCanReadRequests.TryAdd (request.ID, result)) {
 				throw new Exception ("request failed before sending.");
 			}
+			Console.WriteLine ("BeginCanRead() message sent");
 			objectBusSession.SendMessage (request);
 			return result;
 		}
 
 		public bool EndCanRead (IAsyncResult asyncResult)
 		{
+			Console.WriteLine ("EndCanRead() message received 0");
 			if (asyncResult == null)
 				throw new ArgumentNullException ("asyncResult");
 			if (!(asyncResult is TransparentStreamAsyncResult)) {
 				throw new ArgumentException ("asyncResult must be of type TransparentStreamAsyncResult.");
 			}
+			Console.WriteLine ("EndCanRead() message received 1");
 			TransparentStreamAsyncResult result = (TransparentStreamAsyncResult)asyncResult;
+			Console.WriteLine ("EndCanRead() message received 2");
+			Console.WriteLine ((new System.Diagnostics.StackTrace ()));
+			Console.WriteLine ("Response type:{0}", result.Response.GetType ());
 			TransparentStreamCanReadResponseMessage response = (TransparentStreamCanReadResponseMessage)result.Response;
+			Console.WriteLine ("EndCanRead() message received 3");
+			Console.WriteLine ("CanRead={0}", response.CanRead);
 			if (response.Exception != null)
 				throw response.Exception;
 			return response.CanRead;
@@ -953,6 +962,13 @@ namespace BD2.Daemon
 			while (ars.Count != 0)
 				ars.Dequeue ().AsyncWaitHandle.WaitOne ();
 			destination.Flush ();
+		}
+
+		public bool Done {
+			get {
+				//todo: ask remote
+				return false;
+			}
 		}
 	}
 }

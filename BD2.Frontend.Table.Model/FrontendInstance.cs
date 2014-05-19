@@ -31,17 +31,19 @@ namespace BD2.Frontend.Table.Model
 	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
 	{
 		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot,frontend)
+			: base(snapshot, frontend)
 		{
 		}
 
 		public abstract ColumnSet GetColumnSet (Column[] columns);
 
-		public abstract Column GetColumn (string name, Type type);
+		public abstract Column GetColumn (string name, long typeID, bool allowNull, long length);
 
 		public abstract Table GetTable (string name);
 
 		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
+
+		public abstract ValueSerializerBase ValueSerializer { get; }
 	}
 }
 

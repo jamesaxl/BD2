@@ -61,7 +61,7 @@ namespace BD2.Test.Daemon.Chat
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (text);
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}

@@ -33,36 +33,48 @@ namespace BD2.Frontend.Table
 {
 	public sealed class Row : Model.Row
 	{
-		byte[] rawData;
+		object[] data;
 
 		public object GetRawDataClone ()
 		{
-			return rawData.Clone ();
+			return data.Clone ();
 		}
 
-		internal Row (FrontendInstanceBase  frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet, byte[] rawData)
+		internal Row (FrontendInstanceBase  frontendInstanceBase, byte[] chunkID, Model.Table table, ColumnSet columnSet, object[] data)
 			: base(frontendInstanceBase, chunkID, table, columnSet)
 		{
-			if (rawData == null)
-				throw new ArgumentNullException ("RawData");
+			if (table == null)
+				throw new ArgumentNullException ("table");
 			if (columnSet == null)
-				throw new ArgumentNullException ("Table");
-			this.rawData = rawData;
+				throw new ArgumentNullException ("columnSet");
+			if (data == null)
+				throw new ArgumentNullException ("data");
+			this.data = data;
 		}
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{
 			base.Serialize (stream);
 			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
-				BW.Write (rawData.Length);
-				BW.Write (rawData);
+				byte[] buf = ColumnSet.SerializeObjects (data);
+				BW.Write (buf.Length);
+				BW.Write (buf);
 			}
 		}
 		#endregion
 		#region implemented abstract members of Row
-		public override Model.ValueSet GetValues ()
+		public override object[] GetValues ()
 		{
-			return new ValueSet (this, rawData);
+			return data;
+		}
+
+		public override IEnumerable<KeyValuePair<BD2.Frontend.Table.Model.Column, object>> GetValuesWithColumns ()
+		{
+			int n = 0;
+			foreach (BD2.Frontend.Table.Model.Column col in this.ColumnSet.Columns) {
+				yield return new KeyValuePair<BD2.Frontend.Table.Model.Column, object> (col, data [n]);
+				n++;
+			}
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
@@ -71,8 +83,7 @@ namespace BD2.Frontend.Table
 				return Guid.Parse ("10ec2d31-3291-43ae-96fe-da8537b22af6");
 			}
 		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
+
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
 			return base.GetDependenies ();

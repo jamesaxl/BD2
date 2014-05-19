@@ -25,61 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
+using BD2.Daemon;
 
-namespace BD2.Conv.Frontend.Table
+namespace BD2.Test.Daemon.StreamPair
 {
-	public class Table : IComparable
+	[ObjectBusMessageTypeIDAttribute("7e152319-ee6f-4094-a55b-7ab222825c28")]
+	[ObjectBusMessageDeserializerAttribute(typeof(StreamPairMessage), "Deserialize")]
+	public class StreamPairMessage : ObjectBusMessage
 	{
-		Guid id;
 
-		public Guid ID {
+		Guid streamID;
+
+		public Guid StreamID {
 			get {
-				return id;
+				return streamID;
 			}
 		}
 
-		string name;
-
-		public string Name {
-			get {
-				return name;
-			}
-		}
-
-		public Table (Guid id, string name)
+		public StreamPairMessage (Guid streamID)
 		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
-			this.id = id;
-			this.name = name;
+			this.streamID = streamID;
 		}
 
-		public static Table Deserialize (byte[] bytes)
+		public static ObjectBusMessage Deserialize (byte[] bytes)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new Table (new Guid (BR.ReadBytes (16)), BR.ReadString ());
+					return new StreamPairMessage (new Guid (BR.ReadBytes (16)));
+				}
+			}
+		}
+		#region implemented abstract members of ObjectBusMessage
+		public override byte[] GetMessageBody ()
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (streamID.ToByteArray ());
+					return MS.ToArray ();
 				}
 			}
 		}
 
-		public byte[] Serialize ()
-		{
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
-				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
-					BW.Write (id.ToByteArray ());
-					BW.Write (name);
-				}
-				return MS.ToArray ();
+		public override Guid TypeID {
+			get {
+				return Guid.Parse ("7e152319-ee6f-4094-a55b-7ab222825c28");
 			}
-		}
-		#region IComparable implementation
-		int IComparable.CompareTo (object obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException ("obj");
-			Table otherRef = (Table)obj;
-			return otherRef.Name.CompareTo (Name);
 		}
 		#endregion
 	}

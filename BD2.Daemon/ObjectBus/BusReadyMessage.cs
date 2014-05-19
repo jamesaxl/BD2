@@ -25,93 +25,39 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using System.IO;
 
 namespace BD2.Daemon
 {
-	/// <summary>
-	/// This class is NOT guaranteed to be thread-safe
-	/// </summary>
-	public sealed class IStream : Stream
+	[ObjectBusMessageTypeIDAttribute("744d4d93-ea3a-487d-a4d6-9ea1d241e7a7")]
+	[ObjectBusMessageDeserializerAttribute(typeof(BusReadyMessage), "Deserialize")]
+	public class BusReadyMessage : ObjectBusMessage
 	{
-		StreamPair streamPair;
-		MemoryStream bufferStream = new MemoryStream ();
-
-		public StreamPair StreamPair {
-			get {
-				return streamPair;
-			}
-		}
-
-		internal IStream (StreamPair streamPair)
+		public static ObjectBusMessage Deserialize (byte[] buffer)
 		{
-			if (streamPair == null)
-				throw new ArgumentNullException ("streamPair");
-			this.streamPair = streamPair;
-		}
-		#region implemented abstract members of Stream
-		public override void Flush ()
-		{
-			Console.WriteLine ("IStream.Flush({0})", bufferStream.Position);
-			byte[] bytes = bufferStream.ToArray ();
-			bufferStream = new MemoryStream ();
-			streamPair.Enqueue (bytes);
+			return new BusReadyMessage (new Guid (buffer));
 		}
 
-		public override int Read (byte[] buffer, int offset, int count)
-		{
-			throw new NotSupportedException ();
-		}
+		Guid objectBusSessionID;
 
-		public override long Seek (long offset, SeekOrigin origin)
-		{
-			throw new NotSupportedException ();
-		}
-
-		public override void SetLength (long value)
-		{
-			throw new NotSupportedException ();
-		}
-
-		public override void Write (byte[] buffer, int offset, int count)
-		{
-			bufferStream.Write (buffer, offset, count);
-			if (bufferStream.Position > 4096) {
-				Flush ();
-			}
-		}
-
-		public override bool CanRead {
+		public Guid ObjectBusSessionID {
 			get {
-				Console.WriteLine ("****************************************************WRONG STREAM");
-				return false;
+				return objectBusSessionID;
 			}
 		}
 
-		public override bool CanSeek {
-			get {
-				return false;
-			}
+		public BusReadyMessage (Guid objectBusSessionID)
+		{
+			this.objectBusSessionID = objectBusSessionID;
+		}
+		#region implemented abstract members of ObjectBusMessage
+		public override byte[] GetMessageBody ()
+		{
+			return objectBusSessionID.ToByteArray ();
 		}
 
-		public override bool CanWrite {
+		public override Guid TypeID {
 			get {
-				return true;
-			}
-		}
-
-		public override long Length {
-			get {
-				throw new NotSupportedException ();
-			}
-		}
-
-		public override long Position {
-			get {
-				throw new NotSupportedException ();
-			}
-			set {
-				throw new NotSupportedException ();
+				return Guid.Parse ("744d4d93-ea3a-487d-a4d6-9ea1d241e7a7");
 			}
 		}
 		#endregion

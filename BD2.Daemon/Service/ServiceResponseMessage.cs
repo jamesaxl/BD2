@@ -83,7 +83,7 @@ namespace BD2.Daemon
 					BW.Write (id.ToByteArray ());
 					BW.Write (requestID.ToByteArray ());
 					BW.Write ((int)status);
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}

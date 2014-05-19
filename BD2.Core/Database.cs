@@ -39,7 +39,7 @@ namespace BD2.Core
 		SortedSet<FrontendInstanceBase> frontendInstances = new SortedSet<FrontendInstanceBase> ();
 		Snapshot primary;
 
-		public ChunkRepositoryCollection Backends {
+		internal ChunkRepositoryCollection Backends {
 			get {
 				return backends;
 			}
@@ -51,25 +51,37 @@ namespace BD2.Core
 			}
 		}
 
-		public Database ()
-		{
-			backends = new ChunkRepositoryCollection ();
-		}
-
-		public Database (string name)
-			: this()
-		{
-			this.name = name;
-		}
-
 		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends)
 		{
 			this.backends = new ChunkRepositoryCollection ();
 			foreach (ChunkRepository CR in backends)
 				this.backends.AddRepository (CR);
 			primary = CreateSnapshot ("Primary");
-			foreach (Frontend Frontend in frontends)
+			foreach (Frontend Frontend in frontends) {
+				Frontend.Database = this;
 				this.frontendInstances.Add (Frontend.CreateInstanse (primary));
+			}
+			Load ();
+		}
+
+		void Load ()
+		{
+			SortedSet<byte[]> pendingData = new SortedSet<byte[]> (backends.Enumerate ());
+			SortedSet<byte[]> loaded = new SortedSet<byte[]> ();
+			foreach (var tup in new SortedSet<byte[]>( pendingData)) {
+				byte[][] deps = backends.PullDependencies (tup);
+				foreach (byte[] dep in deps) {
+					if (!loaded.Contains (dep)) {
+						deps = null;
+						break;
+					}
+				}
+				if (deps == null)
+					continue;
+				foreach (FrontendInstanceBase fib in frontendInstances)
+					fib.CreateObjects (backends.PullData (tup));
+				pendingData.Remove (tup);
+			}
 		}
 
 		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends, string name)

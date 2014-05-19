@@ -30,7 +30,7 @@ using BD2.Core;
 
 namespace BD2
 {
-	internal sealed class BaseDataObjectTypeIdAttribute : Attribute
+	public sealed class BaseDataObjectTypeIdAttribute : Attribute
 	{
 		Guid id;
 
@@ -40,9 +40,47 @@ namespace BD2
 			}
 		}
 
-		public BaseDataObjectTypeIdAttribute (Guid id)
+		void ResolveMethod ()
 		{
+			deserialize = deserializerType.GetMethod (deserializerProcedureName);
+		}
+
+		System.Reflection.MethodInfo deserialize;
+
+		public BaseDataObject Deserialize (byte[] buffer)
+		{
+			if (deserialize == null) {
+				ResolveMethod ();
+			}
+			return (BaseDataObject)deserialize.Invoke (null, new object[] { buffer });
+		}
+
+		Type deserializerType;
+
+		public Type DeserializerType {
+			get {
+				return deserializerType;
+			}
+		}
+
+		string deserializerProcedureName;
+
+		public string DeserializerProcedureName {
+			get {
+				return deserializerProcedureName;
+			}
+		}
+
+		public BaseDataObjectTypeIdAttribute (Guid id, Type deserializerType, string deserializerProcedureName)
+		{
+			if (deserializerType == null)
+				throw new ArgumentNullException ("deserializerType");
+			if (deserializerProcedureName == null)
+				throw new ArgumentNullException ("deserializerProcedureName");
 			this.id = id;
+			this.deserializerType = deserializerType;
+			this.deserializerProcedureName = deserializerProcedureName;
+			ResolveMethod ();
 		}
 	}
 }

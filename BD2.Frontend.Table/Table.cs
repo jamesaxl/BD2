@@ -33,7 +33,6 @@ namespace BD2.Frontend.Table
 {
 	public class Table : Model.Table
 	{
-
 		public class Comparer : IComparer<Table>
 		{
 			public int Compare (Table x, Table y)
@@ -45,12 +44,12 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		SortedDictionary<Guid, Column> Columns = new SortedDictionary<Guid, Column> ();
-		SortedDictionary<Guid, Row> Rows = new SortedDictionary<Guid, Row> ();
+		SortedDictionary<byte[], Row> Rows = new SortedDictionary<byte[], Row> (new BD2.Common.ByteSequenceComparer ());
+		SortedDictionary<IndexBase, SortedDictionary<byte[], Row>> rowsByIndices = new SortedDictionary<IndexBase, SortedDictionary<byte[], Row>> ();
 
-		internal Row GetRowByID (Guid ID)
+		internal Row GetRowByID (byte[] id)
 		{
-			return Rows [ID];
+			return Rows [id];
 		}
 
 		string name;
@@ -63,19 +62,24 @@ namespace BD2.Frontend.Table
 			this.name = name;
 		}
 
-		SortedDictionary<Guid, SortedSet<Column>> columnSets;
+		internal void InsertColumnSet (ColumnSet columnSet)
+		{
+			columnSets.Add (columnSet.ObjectID, columnSet);
+		}
 
-		internal SortedDictionary<Guid, SortedSet<Column>> ColumnSets {
+		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (new BD2.Common.ByteSequenceComparer ());
+
+		internal SortedDictionary<byte[], ColumnSet> ColumnSets {
 			get {
-				return new SortedDictionary<Guid, SortedSet<Column>> (columnSets);
+				return new SortedDictionary<byte[], ColumnSet> (columnSets);
 			}
 		}
 
-		SortedDictionary<Guid, BD2.Frontend.Table.Model.Relation> relations;
+		SortedDictionary<byte[], BD2.Frontend.Table.Model.Relation> relations = new SortedDictionary<byte[], BD2.Frontend.Table.Model.Relation> (new BD2.Common.ByteSequenceComparer ());
 
-		public SortedDictionary<Guid, BD2.Frontend.Table.Model.Relation> Relations {
+		public SortedDictionary<byte[], BD2.Frontend.Table.Model.Relation> Relations {
 			get {
-				return new SortedDictionary<Guid, BD2.Frontend.Table.Model.Relation> (relations);
+				return new SortedDictionary<byte[], BD2.Frontend.Table.Model.Relation> (relations);
 			}
 		}
 		#region implemented abstract members of Serializable
@@ -89,6 +93,8 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of BaseDataObject
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
+			foreach (ColumnSet cs in columnSets.Values)
+				yield return cs;
 			yield break;
 		}
 
@@ -106,22 +112,43 @@ namespace BD2.Frontend.Table
 
 		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows ()
 		{
-			throw new NotImplementedException ();
+			foreach (KeyValuePair<byte[], Row> r in Rows) {
+				yield return r.Value;
+			}
 		}
 
 		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (IndexBase index)
 		{
-			throw new NotImplementedException ();
+			return rowsByIndices [index].Values;
 		}
 
 		public override IEnumerable<IndexBase> GetIndices ()
 		{
-			throw new NotImplementedException ();
+			return rowsByIndices.Keys;
 		}
 
 		public override IEnumerable<ColumnSet> GetColumnSets ()
 		{
-			throw new NotImplementedException ();
+			return columnSets.Values;
+		}
+		#endregion
+		#region implemented abstract members of Table
+		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (ColumnSet columnSet)
+		{
+			foreach (Row r in Rows.Values) {
+				if (r.ColumnSet == columnSet) {
+					yield return r;
+				}
+			}
+		}
+
+		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (ColumnSet columnSet, IndexBase index)
+		{
+			foreach (Row r in rowsByIndices[index].Values) {
+				if (r.ColumnSet == columnSet) {
+					yield return r;
+				}
+			}
 		}
 		#endregion
 	}

@@ -25,36 +25,25 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	public class GenericValueDeserializer : IValueDeserializer
+	public class GenericValueDeserializer : BD2.Frontend.Table.Model.ValueSerializerBase
 	{
-		object IValueDeserializer.Deserialize (long typeID, byte[] bytes)
+
+		public override object Deserialize (byte typeID, System.IO.Stream stream)
 		{
 			throw new NotImplementedException ();
 		}
 
-		void IValueDeserializer.Serialize (object obj, out int typeID, out byte[] bytes)
+		public static byte GetTypeID (Type type)
 		{
-//			typeIDs.Add (typeof(bool), 104);
-//			typeIDs.Add (typeof(char), 175);
-//			typeIDs.Add (typeof(byte), 48);
-//			typeIDs.Add (typeof(short), 52);
-//			typeIDs.Add (typeof(int), 56);
-//			typeIDs.Add (typeof(long), 127);
-//			typeIDs.Add (typeof(float), 62);
-//			typeIDs.Add (typeof(double), 106);
-//			typeIDs.Add (typeof(Guid), 36);
-//			typeIDs.Add (typeof(String), 231);
-
-			string TFQN = obj.GetType ().FullName;
+			string TFQN = type.FullName;
 			switch (TFQN) {
 			case "System.Byte":
 			case "System.SByte":
-				typeID = 48;
-			
-				break;
+				return 48;
 			case "System.Boolean":
 				break;
 			case "System.Int16":
@@ -75,11 +64,26 @@ namespace BD2.Frontend.Table
 				break;
 			case "System.DateTime":
 				break;
-			
-
 			}
+			return 0;
+		}
+
+		public override void Serialize (object obj, out byte typeID, out byte[] bytes)
+		{
+//			typeIDs.Add (typeof(bool), 104);
+//			typeIDs.Add (typeof(char), 175);
+//			typeIDs.Add (typeof(byte), 48);
+//			typeIDs.Add (typeof(short), 52);
+//			typeIDs.Add (typeof(int), 56);
+//			typeIDs.Add (typeof(long), 127);
+//			typeIDs.Add (typeof(float), 62);
+//			typeIDs.Add (typeof(double), 106);
+//			typeIDs.Add (typeof(Guid), 36);
+//			typeIDs.Add (typeof(String), 231);
+
+			typeID = GetTypeID (obj.GetType ());
 			bytes = null;
-			typeID = 0;
+
 
 		}
 	}

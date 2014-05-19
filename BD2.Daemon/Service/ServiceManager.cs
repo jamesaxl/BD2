@@ -188,7 +188,7 @@ namespace BD2.Daemon
 			RemoteReady = true;
 		}
 
-		void WaitForRemoteReady ()
+		public void WaitForRemoteReady ()
 		{
 			MREReady.WaitOne ();
 		}
@@ -219,6 +219,7 @@ namespace BD2.Daemon
 			ServiceResponseMessage response = pendingResponses [request.ID];
 			lock (pendingResponses)
 				pendingResponses.Remove (response.RequestID);
+			Console.WriteLine ("Service request accepted, remote created a session with ID {0}", response.ID);
 			ServiceAgent agent = func (ServiceAgentMode.Client, objectBus.CreateSession (response.ID, SessionDisconnected), objectBus.Flush, localAgentParameters);
 			sessionAgents.Add (response.ID, agent);
 			mre_done.Set ();

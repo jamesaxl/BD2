@@ -71,7 +71,7 @@ namespace BD2.Test.Daemon.FileShare
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (text);
 					BW.Write (streamID.ToByteArray ());
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}

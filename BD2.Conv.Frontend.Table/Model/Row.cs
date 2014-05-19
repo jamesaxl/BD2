@@ -30,21 +30,20 @@ namespace BD2.Conv.Frontend.Table
 {
 	public class Row
 	{
+		ColumnSet columnSet;
+		object[] fields;
+
 		public int FieldCount {
 			get {
 				return fields.Length;
 			}
 		}
 
-		Guid tableID;
-
-		public Guid TableID {
+		public ColumnSet ColumnSet {
 			get {
-				return tableID;
+				return columnSet;
 			}
 		}
-
-		object[] fields;
 
 		public object[] Fields {
 			get {
@@ -52,11 +51,11 @@ namespace BD2.Conv.Frontend.Table
 			}
 		}
 
-		public Row (Guid tableID, object[] fields)
+		public Row (ColumnSet columnSet, object[] fields)
 		{
 			if (fields == null)
 				throw new ArgumentNullException ("fields");
-			this.tableID = tableID;
+			this.columnSet = columnSet;
 			this.fields = fields;
 		}
 
@@ -64,7 +63,7 @@ namespace BD2.Conv.Frontend.Table
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (MS)) {
-					BW.Write (tableID.ToByteArray ());
+					BW.Write (columnSet.ID.ToByteArray ());
 					BW.Write (FieldCount);
 					for (int n = 0; n != FieldCount; n++) {
 						if (fields [n] == null) {
@@ -77,21 +76,65 @@ namespace BD2.Conv.Frontend.Table
 							BW.Write (((byte[])fields [n]).Length);
 							BW.Write ((byte[])fields [n]);
 						}
-
 					}
-
 				}
 				return MS.ToArray ();
 			}
 		}
 
-		public static Row Deserialize (byte[] bytes)
+		public static Row Deserialize (byte[] bytes, Func<Guid, ColumnSet> getColumnSet)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					Guid tableID = new Guid (BR.ReadBytes (16));
+					Guid columnSet = new Guid (BR.ReadBytes (16));
 					object[] fields = new object[BR.ReadInt32 ()];
-					return new Row (tableID, fields);
+					ColumnSet cs = getColumnSet (columnSet);
+					int n = 0;
+					foreach (Column col in cs.Columns) {
+						switch (col.TFQN) {
+						case "System.Byte":
+							fields [n] = BR.ReadByte ();
+							break;
+						case "System.SByte":
+							fields [n] = BR.ReadSByte ();
+							break;
+						case "System.Int16":
+							fields [n] = BR.ReadInt16 ();
+							break;
+						case "System.UInt16":
+							fields [n] = BR.ReadUInt16 ();
+							break;
+						case "System.Int32":
+							fields [n] = BR.ReadInt32 ();
+							break;
+						case "System.UInt32":
+							fields [n] = BR.ReadUInt32 ();
+							break;
+						case "System.Int64":
+							fields [n] = BR.ReadInt64 ();
+							break;
+						case "System.UInt64":
+							fields [n] = BR.ReadUInt64 ();
+							break;
+						case "System.Single":
+							fields [n] = BR.ReadSingle ();
+							break;
+						case "System.Double":
+							fields [n] = BR.ReadDouble ();
+							break;
+						case "System.Boolean":
+							fields [n] = BR.ReadBoolean ();
+							break;
+						case "System.Char":
+							fields [n] = BR.ReadChar ();
+							break;
+						case "System.String":
+							fields [n] = BR.ReadString ();
+							break;
+						}
+					}
+					//todo: deserialize
+					return new Row (cs, fields);
 				}
 			}
 		}

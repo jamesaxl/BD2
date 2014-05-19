@@ -148,22 +148,27 @@ namespace BD2.Daemon
 					continue;
 				}
 				Action<byte[]>[] cbs;
-				lock (callbacks) {
-					cbs = callbacks.ToArray ();
-				}
-				foreach (Action<byte[]> cb in cbs)
-					cb (messageBytes);
+				System.Threading.ThreadPool.QueueUserWorkItem ((state) => {
+					lock (callbacks) {
+						cbs = callbacks.ToArray ();
+					}
+					foreach (Action<byte[]> cb in cbs)
+						cb ((byte[])state);
+				}, messageBytes);
 			}
 		}
 
 		static byte[] ReadMessage (BinaryReader reader)
 		{
+			if (reader == null)
+				throw new ArgumentNullException ("reader");
+			int l = reader.ReadInt32 ();
+			Console.WriteLine ("reading {0} bytes from wire", l);
+			byte[] buf = reader.ReadBytes (l);
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
 			#endif
-			if (reader == null)
-				throw new ArgumentNullException ("reader");
-			return reader.ReadBytes (reader.ReadInt32 ());
+			return buf;
 		}
 
 		static void WriteMessage (BinaryWriter writer, params byte[][] bytes)
@@ -178,6 +183,7 @@ namespace BD2.Daemon
 			int totalBytes = 0;
 			for (int n = 0; n != bytes.Length; n++)
 				totalBytes += bytes [n].Length;
+			Console.WriteLine ("sending {0} bytes on wire", totalBytes);
 			writer.Write (totalBytes);
 			for (int n = 0; n != bytes.Length; n++)
 				writer.Write (bytes [n]);

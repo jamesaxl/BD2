@@ -212,5 +212,11 @@ namespace BD2.Repo.File
 			throw new NotImplementedException ();
 		}
 		#endregion
+		#region implemented abstract members of ChunkRepository
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateData ()
+		{
+			throw new NotImplementedException ();
+		}
+		#endregion
 	}
 }

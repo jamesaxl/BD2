@@ -70,7 +70,7 @@ namespace BD2.Conv.Frontend.Table
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
 					BW.Write (tableID.ToByteArray ());
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}

@@ -120,7 +120,7 @@ namespace BD2.Conv.Frontend.Table
 							MS.SetLength (MS.Position);
 						}
 					}
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}

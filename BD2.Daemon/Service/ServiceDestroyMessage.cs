@@ -59,7 +59,7 @@ namespace BD2.Daemon
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (sessionID.ToByteArray ());
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}

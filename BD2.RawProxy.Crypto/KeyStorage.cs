@@ -32,6 +32,12 @@ namespace BD2.RawProxy.crypto
 	public class KeyStorage
 	{
 		private SortedDictionary<Guid, System.Security.Cryptography.X509Certificates.PublicKey> publicKeys = new SortedDictionary<Guid, System.Security.Cryptography.X509Certificates.PublicKey> ();
+
+		public SortedDictionary<Guid, System.Security.Cryptography.X509Certificates.PublicKey> PublicKeys {
+			get {
+				return new SortedDictionary<Guid, System.Security.Cryptography.X509Certificates.PublicKey> (publicKeys);
+			}
+		}
 	}
 }
 

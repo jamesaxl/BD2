@@ -27,40 +27,46 @@
 using System;
 using System.Collections.Generic;
 using BD2.Core;
+using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	public class FrontendInstance : FrontendInstanceBase
+	public class FrontendInstance : BD2.Frontend.Table.Model.FrontendInstance
 	{
-		SortedDictionary<byte[], Row> rows;
-		SortedDictionary<byte[], Table> tables;
-		SortedDictionary<byte[], Relation> relations;
-		SortedDictionary<byte[], Column> columns;
-		SortedDictionary<byte[], BD2.Frontend.Table.Model.ColumnSet> columnSets;
-		IValueDeserializer valueDeserializer;
+		SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> typeDescriptors = new SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> ();
+		SortedDictionary<byte[], Row> rows = new SortedDictionary<byte[], Row> (new BD2.Common.ByteSequenceComparer ());
+		SortedDictionary<byte[], Table> tables = new SortedDictionary<byte[], Table> (new BD2.Common.ByteSequenceComparer ());
+		SortedDictionary<byte[], Relation> relations = new SortedDictionary<byte[], Relation> (new BD2.Common.ByteSequenceComparer ());
+		SortedDictionary<byte[], Column> columns = new SortedDictionary<byte[], Column> (new BD2.Common.ByteSequenceComparer ());
+		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (new BD2.Common.ByteSequenceComparer ());
+		ValueSerializerBase valueSerializer;
+		SortedDictionary<byte[], BaseDataObject> volatileData = new SortedDictionary<byte[], BaseDataObject> (new BD2.Common.ByteSequenceComparer ());
 
-		internal IValueDeserializer ValueDeserializer {
+		public override ValueSerializerBase ValueSerializer {
 			get {
-				return valueDeserializer;
+				return valueSerializer;
 			}
 		}
 
 		Frontend frontend;
 
-		public FrontendInstance (Snapshot snapshot, Frontend frontend, IValueDeserializer valueDeserializer):
-			base(snapshot,frontend)
+		public FrontendInstance (Snapshot snapshot, Frontend frontend, ValueSerializerBase valueSerializer):
+			base(snapshot, frontend)
 		{
-			if (valueDeserializer == null)
-				throw new ArgumentNullException ("valueDeserializer");
-			this.valueDeserializer = valueDeserializer;
+			if (valueSerializer == null)
+				throw new ArgumentNullException ("valueSerializer");
+			this.valueSerializer = valueSerializer;
 		}
 		#region implemented abstract members of FrontendInstanceBase
-		protected override void CreateObject (byte[] bytes)
+		protected override void OnCreateObjects (byte[] bytes)
 		{
 			System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes);
 			byte[] buf = new byte[16];
-			MS.Read (buf, 0, 16);
-			switch (new Guid (buf)) {
+			while (MS.Position< MS.Length) {
+				MS.Read (buf, 0, 16);
+				Guid objectTypeID = new Guid (buf);
+				BaseDataObjectTypeIdAttribute typeDescriptor = typeDescriptors [objectTypeID];
+
 			}
 		}
 
@@ -77,7 +83,7 @@ namespace BD2.Frontend.Table
 		protected override void PurgeObject (BaseDataObject baseDataObject)
 		{
 			if (baseDataObject is Row) {
-			
+				
 			} else if (baseDataObject is Column) {
 
 			} else if (baseDataObject is BD2.Frontend.Table.Model.ColumnSet) {
@@ -87,34 +93,54 @@ namespace BD2.Frontend.Table
 			} else if (baseDataObject is Relation) {
 			
 			}
-		}
-
-		protected override byte[] SerializeSingleObject (BaseDataObject baseDataObject)
-		{
-			if (baseDataObject is Row) {
-
-			} else if (baseDataObject is Column) {
-
-			} else if (baseDataObject is BD2.Frontend.Table.Model.ColumnSet) {
-
-			} else if (baseDataObject is Table) {
-
-			} else if (baseDataObject is Relation) {
-
-			}
-			throw new NotImplementedException ();
 		}
 		#endregion
 		//to avoid duplicates
-		void GetColumn (string name, long typeID, bool allowNull, long length)
+		public override BD2.Frontend.Table.Model.Column GetColumn (string name, Type type, bool allowNull, long length)
 		{
-			byte[] hash = Column.Hash (name, typeID, allowNull, length);
-			if (columns.ContainsKey (hash)) {
-
-			} else {
-
-			}
+			Column nc = new Column (this, null, name, type, allowNull, length);
+			byte[] hash = nc.GetPersistentUniqueObjectID ();
+			if (columns.ContainsKey (hash)) 
+				return columns [hash];
+			volatileData.Add (hash, nc);
+			columns.Add (hash, nc);
+			return nc;
 		}
+
+		public override ColumnSet GetColumnSet (Model.Column[] columns)
+		{
+			if (columns == null)
+				throw new ArgumentNullException ("columns");
+			ColumnSet cs = new ColumnSet (this, null, columns);
+			byte[] hash = cs.GetPersistentUniqueObjectID ();
+			if (columnSets.ContainsKey (hash))
+				return columnSets [hash];
+			volatileData.Add (hash, cs);
+			columnSets.Add (hash, cs);
+			return cs;
+		}
+
+		public BD2.Frontend.Table.Row CreateRow (BD2.Frontend.Table.Model.Table table, BD2.Frontend.Table.Model.ColumnSet columnSet, object[] objects)
+		{
+			Row r = new Row (this, null, table, columnSet, objects);
+			volatileData.Add (r.GetPersistentUniqueObjectID (), r);
+			return r;
+		}
+
+		public void Flush ()
+		{
+			Snapshot.PutObjects (GetVolatileObjects ());
+		}
+		#region implemented abstract members of FrontendInstance
+		public override BD2.Frontend.Table.Model.Table GetTable (string name)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (BD2.Frontend.Table.Model.Table table)
+		{
+			throw new NotImplementedException ();
+		}
+		#endregion
 	}
 }
-

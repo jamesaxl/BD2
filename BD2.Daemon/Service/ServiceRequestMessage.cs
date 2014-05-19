@@ -85,7 +85,7 @@ namespace BD2.Daemon
 						BW.Write (parameters.Length);
 						BW.Write (parameters);
 					}
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}

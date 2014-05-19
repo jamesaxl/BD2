@@ -30,15 +30,21 @@ namespace BD2.RawProxy.crypto
 {
 	public class SelectiveCrypto : RawProxyv1
 	{
+
+		public override byte[] Serialize ()
+		{
+			throw new NotImplementedException ();
+		}
+
 		System.Collections.Generic.SortedDictionary<Guid, byte[]> PublicKeys = new System.Collections.Generic.SortedDictionary<Guid, byte[]> ();
 		//TODO:use tamper-safe arrays in future
-		byte[] privateKey;
+		//byte[] privateKey;
 		//TODO:use tamper-safe arrays in future
-		byte[] publicKey;
-		System.Security.Cryptography.Aes AES_PROVIDER;
-
+		//byte[] publicKey;
+		//System.Security.Cryptography.Aes AES_PROVIDER;
 		public byte[] CreateInitializationVector ()
 		{
+			throw new NotImplementedException ();
 
 		}
 
@@ -48,8 +54,8 @@ namespace BD2.RawProxy.crypto
 				throw new ArgumentNullException ("PublicKey");
 			if (PrivateKey == null)
 				throw new ArgumentNullException ("PrivateKey");
-			publicKey = PublicKey;
-			privateKey = PrivateKey;
+//			publicKey = PublicKey;
+//			privateKey = PrivateKey;
 		}
 
 		public void AddPublicKey (Guid ID, byte[] Bytes)

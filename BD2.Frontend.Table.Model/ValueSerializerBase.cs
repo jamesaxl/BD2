@@ -25,34 +25,43 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using BD2.Frontend.Table.Model;
 using System.Collections.Generic;
 
-namespace BD2.Frontend.Table
+namespace BD2.Frontend.Table.Model
 {
-	public class ValueSet : BD2.Frontend.Table.Model.ValueSet
+	public abstract class ValueSerializerBase
 	{
-		SortedDictionary<Model.Column, object> values = new SortedDictionary<Model.Column, object> ();
+		public abstract byte TypeToID (Type type);
 
-		public ValueSet (Row row, byte[] rawData)
-			: base(row)
+		public abstract Type IDToType (byte id);
+
+		public abstract object Deserialize (byte typeID, System.IO.Stream stream);
+
+		public object[] DeserializeArray (byte[] buffer)
 		{
-			System.IO.MemoryStream MS = new System.IO.MemoryStream (rawData, false);
-			System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
-			IValueDeserializer des = ((FrontendInstance)row.FrontendInstanceBase).ValueDeserializer;
-			foreach (BD2.Frontend.Table.Model.Column col in row.ColumnSet.Columns) {
-				//As bad is it can get :P
-				//TODO: have the column to provide it's own length|length of it's length+a value to be added with the length read from the database, 
-				//note that such value should be subtracted before serialization 
-				des.Deserialize (col.TypeID, BR.ReadBytes (BR.ReadInt32 ()));
+			System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer);
+			List<object> objects = new List<object> (); 
+			while (MS.Position < MS.Length) {
+				int Byte = MS.ReadByte ();
+				objects.Add (Deserialize ((byte)Byte, MS));
 			}
+			return objects.ToArray ();
 		}
-		#region implemented abstract members of ValueSet
-		public override object GetValue (Model.Column column)
+
+		public abstract void Serialize (object obj, out byte typeID, out byte[] bytes);
+
+		public void SerializeArray (object[] objects, out byte[] bytes)
 		{
-			return values [column];
+			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
+			foreach (object obj in objects) {
+				byte tid;
+				byte[] buf;
+				Serialize (obj, out tid, out buf);
+				MS.WriteByte (tid);
+				MS.Write (buf, 0, buf.Length);
+			}
+			bytes = MS.ToArray ();
 		}
-		#endregion
 	}
 }
 

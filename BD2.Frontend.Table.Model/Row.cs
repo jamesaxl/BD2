@@ -50,7 +50,7 @@ namespace BD2.Frontend.Table.Model
 		}
 
 		protected Row (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet)
-			:base (frontendInstanceBase, chunkID)
+			: base (frontendInstanceBase, chunkID)
 		{
 			if (table == null)
 				throw new ArgumentNullException ("table");
@@ -60,7 +60,9 @@ namespace BD2.Frontend.Table.Model
 			this.table = table;
 		}
 
-		public abstract ValueSet GetValues ();
+		public abstract object[] GetValues ();
+
+		public abstract IEnumerable<KeyValuePair<BD2.Frontend.Table.Model.Column, object>> GetValuesWithColumns ();
 
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{

@@ -63,6 +63,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Frontend.Table.Model", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2", "BD2\BD2.csproj", "{51635361-E0F0-4E98-B2A2-C7F354DA02A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Test.Daemon.StreamPair", "BD2.Test.Daemon.StreamPair\BD2.Test.Daemon.StreamPair.csproj", "{175B36CF-8C71-4620-83BA-BC94885599FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -103,6 +105,14 @@ Global
 		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Release|Win32.Build.0 = Release|x86
 		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Release|x86.ActiveCfg = Release|x86
 		{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}.Release|x86.Build.0 = Release|x86
+		{175B36CF-8C71-4620-83BA-BC94885599FD}.Debug|Win32.ActiveCfg = Debug|x86
+		{175B36CF-8C71-4620-83BA-BC94885599FD}.Debug|Win32.Build.0 = Debug|x86
+		{175B36CF-8C71-4620-83BA-BC94885599FD}.Debug|x86.ActiveCfg = Debug|x86
+		{175B36CF-8C71-4620-83BA-BC94885599FD}.Debug|x86.Build.0 = Debug|x86
+		{175B36CF-8C71-4620-83BA-BC94885599FD}.Release|Win32.ActiveCfg = Release|x86
+		{175B36CF-8C71-4620-83BA-BC94885599FD}.Release|Win32.Build.0 = Release|x86
+		{175B36CF-8C71-4620-83BA-BC94885599FD}.Release|x86.ActiveCfg = Release|x86
+		{175B36CF-8C71-4620-83BA-BC94885599FD}.Release|x86.Build.0 = Release|x86
 		{19E7BB88-BD82-4428-B256-6B8A7C8682B3}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{19E7BB88-BD82-4428-B256-6B8A7C8682B3}.Debug|Win32.Build.0 = Debug|Any CPU
 		{19E7BB88-BD82-4428-B256-6B8A7C8682B3}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -321,7 +331,7 @@ Global
 		{FFFF9B90-CB32-4841-B335-1F646B2A6FB8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = BD2.Test.Daemon.FileShare\BD2.Test.Daemon.FileShare.csproj
+		StartupItem = BD2.Test.Daemon.StreamPair\BD2.Test.Daemon.StreamPair.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1
 		$1.inheritsSet = null

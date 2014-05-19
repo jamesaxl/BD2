@@ -92,7 +92,7 @@ namespace BD2.Chunk.Daemon
 						BW.Write (filter.Length);
 						BW.Write (filter);
 					}
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			} 
 		}

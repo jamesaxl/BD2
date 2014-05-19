@@ -26,10 +26,11 @@
  * */
 using System;
 using System.Collections.Generic;
+using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	public class Frontend : BD2.Core.Frontend
+	public class Frontend : BD2.Frontend.Table.Model.Frontend
 	{
 		#region implemented abstract members of BD2.Core.Frontend
 		public override string Name {
@@ -38,18 +39,14 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		IValueDeserializer valueDeserializer;
-
-		public Frontend (IValueDeserializer valueDeserializer)
+		public Frontend (ValueSerializerBase valueDeserializer)
+			: base(valueDeserializer)
 		{
-			if (valueDeserializer == null)
-				throw new ArgumentNullException ("valueDeserializer");
-			this.valueDeserializer = valueDeserializer;
 		}
 
 		public override BD2.Core.FrontendInstanceBase CreateInstanse (BD2.Core.Snapshot snapshot)
 		{
-			return new BD2.Frontend.Table.FrontendInstance (snapshot, this, valueDeserializer);
+			return new BD2.Frontend.Table.FrontendInstance (snapshot, this, ValueDeserializer);
 		}
 		#endregion
 	}

@@ -25,7 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
-using System.Collections.Generic;
 using BD2.Core;
 using BD2.Daemon;
 
@@ -35,8 +34,8 @@ namespace BD2.Frontend.Table
 	[ObjectBusMessageDeserializer(typeof(Column), "Deserialize")]
 	public class Column : Model.Column
 	{
-		internal Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, long typeID, bool allowNull, long length)
-			:base(frontendInstanceBase, chunkID, name, typeID, allowNull, length)
+		internal Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, Type type, bool allowNull, long length)
+			:base(frontendInstanceBase, chunkID, name, type, allowNull, length)
 		{
 		}
 		#region implemented abstract members of Serializable
@@ -52,18 +51,5 @@ namespace BD2.Frontend.Table
 			}
 		}
 		#endregion
-		internal static byte[] Hash (string name, long typeID, bool allowNull, long length)
-		{
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
-				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
-					BW.Write (name);
-					BW.Write (typeID);
-					BW.Write (allowNull);
-					BW.Write (length);
-				}
-				System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create ();
-				return sha.ComputeHash (MS.ToArray ());
-			}
-		}
 	}
 }

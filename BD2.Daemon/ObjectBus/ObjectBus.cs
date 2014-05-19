@@ -38,9 +38,6 @@ namespace BD2.Daemon
 
 		public void RegisterType (Type type, Action<ObjectBusMessage> action)
 		{
-			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
-			#endif
 			systemSession.RegisterType (type, action);
 		}
 
@@ -62,7 +59,25 @@ namespace BD2.Daemon
 			System.Buffer.BlockCopy (session.SessionID.ToByteArray (), 0, bytes, 0, 16);
 			System.Buffer.BlockCopy (message.TypeID.ToByteArray (), 0, bytes, 16, 16);
 			System.Buffer.BlockCopy (messageBody, 0, bytes, 32, messageBody.Length);
+			Console.WriteLine ("Sending a {0} byte {1} on bus", bytes.Length, message.GetType ());
 			streamHandler.SendMessage (bytes);
+		}
+
+		class tpmessage
+		{
+			byte[] message;
+			Action<byte[]> cb;
+
+			public tpmessage (Action<byte[]> cb, byte[] message)
+			{
+				this.message = message;
+				this.cb = cb;
+			}
+
+			public void tpcallback (object tc)
+			{
+				cb (message);
+			}
 		}
 
 		void StreamHandlerCallback (byte[] messageContents)
@@ -78,14 +93,19 @@ namespace BD2.Daemon
 			System.Buffer.BlockCopy (messageContents, 0, sessionIDBytes, 0, 16);
 			Guid sessionID = new Guid (sessionIDBytes);
 			ObjectBusSession session = null;
+			Console.WriteLine ("session id={0}", sessionID);
 			if (sessionID == Guid.Empty)
 				session = systemSession;
-			else
+			else {
+				foreach (var tup in sessions) {
+					Console.WriteLine ("we have {0}", tup.Key);
+				}
 				lock (sessions)
 					session = sessions [sessionID];
+			}
 			byte[] bytes = new byte[messageContents.Length - 16];
 			System.Buffer.BlockCopy (messageContents, 16, bytes, 0, messageContents.Length - 16);
-			streamHandlerCallbackHandlers [session] (bytes);
+			System.Threading.ThreadPool.QueueUserWorkItem ((new tpmessage (streamHandlerCallbackHandlers [session], bytes)).tpcallback);
 		}
 
 		public ObjectBus (StreamHandler streamHandler)
@@ -99,6 +119,13 @@ namespace BD2.Daemon
 			streamHandler.RegisterCallback (StreamHandlerCallback);
 			streamHandler.RegisterDisconnectHandler (streamHandlerDisconnected);
 			systemSession = CreateSession (Guid.Empty, SystemSessionDisconnected);
+			RegisterType (typeof(BusReadyMessage), bunReadyMessageReceived);
+		}
+
+		void bunReadyMessageReceived (ObjectBusMessage message)
+		{
+			BusReadyMessage brm = (BusReadyMessage)message;
+			sessions [brm.ObjectBusSessionID].setRemoteReady ();
 		}
 
 		void streamHandlerDisconnected (StreamHandler streamHandler)
@@ -142,10 +169,15 @@ namespace BD2.Daemon
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
 			#endif
-			ObjectBusSession session = new ObjectBusSession (sessionID, SendMessageHandler, RegisterStreamHandlerCallbackHandler, DestroyHandler, sessionDisconnected);
+			ObjectBusSession session = new ObjectBusSession (sessionID, SendMessageHandler, RegisterStreamHandlerCallbackHandler, DestroyHandler, sessionDisconnected, sessionReady);
 			lock (sessions)
 				sessions.Add (sessionID, session);
 			return session;
+		}
+
+		void sessionReady (ObjectBusSession session)
+		{
+			SendMessage (new BusReadyMessage (session.SessionID));
 		}
 
 		void RegisterStreamHandlerCallbackHandler (Action<byte[]> streamHandlerCallbackHandler, ObjectBusSession session)
@@ -165,12 +197,17 @@ namespace BD2.Daemon
 			if (serviceDestroy == null)
 				throw new ArgumentNullException ("serviceDestroy");
 			ObjectBusSession session;
-			lock (sessions)
+			lock (sessions) {
+				//TODO:remove this line
+				if (!sessions.ContainsKey (serviceDestroy.SessionID))
+					return;
 				session = sessions [serviceDestroy.SessionID];
-			if (session == systemSession) {
-				if (sessions.Count != 0) {
-					throw new InvalidOperationException ("System session must be the last session to be destroyed.");
+				if (session == systemSession) {
+					if (sessions.Count != 0) {
+						throw new InvalidOperationException ("System session must be the last session to be destroyed.");
+					}
 				}
+				sessions.Remove (serviceDestroy.SessionID);
 			}
 		}
 
@@ -180,8 +217,8 @@ namespace BD2.Daemon
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
 			#endif
 			ServiceDestroyMessage serviceDestroy = new ServiceDestroyMessage (session.SessionID);
-			DestroySession (serviceDestroy);
 			SendMessage (serviceDestroy);
+			DestroySession (serviceDestroy);
 		}
 	}
 }

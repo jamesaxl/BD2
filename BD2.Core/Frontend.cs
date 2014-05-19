@@ -31,7 +31,21 @@ using BD2.LockManager;
 namespace BD2.Core
 {
 	public abstract class Frontend : IComparable
-	{	
+	{
+		Database database;
+
+		public Database Database {
+			get {
+				return database;
+			}
+			internal set {
+				database = value;
+			}
+		}
+
+		protected Frontend ()
+		{
+		}
 		//For comparison 'only' just to make things smoother in case of needing to sort or search or whatever somewhere.
 		Guid id = Guid.NewGuid ();
 

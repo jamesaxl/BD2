@@ -41,10 +41,11 @@
     <Compile Include="Relation.cs" />
     <Compile Include="Row.cs" />
     <Compile Include="Table.cs" />
-    <Compile Include="ValueSet.cs" />
     <Compile Include="RowDrop.cs" />
     <Compile Include="Frontend.cs" />
     <Compile Include="FrontendInstance.cs" />
+    <Compile Include="ColumnSetConverter.cs" />
+    <Compile Include="ValueSerializerBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

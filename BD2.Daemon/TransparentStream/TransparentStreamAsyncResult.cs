@@ -45,7 +45,7 @@ namespace BD2.Daemon
 		}
 
 		internal TransparentStreamAsyncResult (AsyncCallback callback, object asyncState)
-		:this(asyncState)
+			:this(asyncState)
 		{
 			this.callback = callback;
 		}

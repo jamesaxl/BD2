@@ -91,6 +91,7 @@
     <Compile Include="TransparentStream\FifoStream\IStream.cs" />
     <Compile Include="TransparentStream\FifoStream\OStream.cs" />
     <Compile Include="Service\ServiceManagerReadyMessage.cs" />
+    <Compile Include="ObjectBus\BusReadyMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

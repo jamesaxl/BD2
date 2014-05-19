@@ -60,7 +60,7 @@ namespace BD2.Test.Daemon.FileShare
 					Console.WriteLine ("Service found: {0}", RSA.Name);
 					Console.WriteLine ("Press Enter to request service");
 					ConsoleReadLine ();
-					SM.RequestService (RSA, FileShareAgent.CreateAgent);
+					SM.RequestService (RSA, new byte[] { }, FileShareAgent.CreateAgent, new byte[] { });
 				}
 			}
 		}

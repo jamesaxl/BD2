@@ -148,6 +148,13 @@ namespace BD2.Repo.Leveldb
 				yield return enumerator.Current.Key;
 		}
 
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateData ()
+		{
+			IEnumerator<KeyValuePair <byte[],byte[]>> enumerator = ldependencies.GetRawEnumerator ();
+			while (enumerator.MoveNext ())
+				yield return enumerator.Current;
+		}
+
 		public override IEnumerable<byte[]> EnumerateTopLevels ()
 		{
 			IEnumerator<KeyValuePair <byte[],byte[]>> enumerator = ltopLevels.GetRawEnumerator ();

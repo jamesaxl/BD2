@@ -41,13 +41,18 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract IEnumerable<Row> GetRows (IndexBase index);
 
+		public abstract IEnumerable<Row> GetRows (ColumnSet columnSet);
+
+		public abstract IEnumerable<Row> GetRows (ColumnSet columnSet, IndexBase index);
+
 		public abstract IEnumerable<IndexBase> GetIndices ();
 
 		public abstract IEnumerable<ColumnSet> GetColumnSets ();
 
 		protected Table (FrontendInstanceBase frontendInstanceBase, byte[] chunkID)
-			:base (frontendInstanceBase, chunkID)
+			: base (frontendInstanceBase, chunkID)
 		{
+
 		}
 	}
 }

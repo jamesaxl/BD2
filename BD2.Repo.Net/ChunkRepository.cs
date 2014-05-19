@@ -138,6 +138,12 @@ namespace BD2.Repo.Net
 		{
 			throw new NotImplementedException ();
 		}
+		#region implemented abstract members of ChunkRepository
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateData ()
+		{
+			throw new NotImplementedException ();
+		}
+		#endregion
 		#endregion
 	}
 }

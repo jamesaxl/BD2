@@ -27,7 +27,7 @@
 using System;
 using BD2.Daemon;
 
-namespace BD2.Test.Daemon.Chat
+namespace BD2.Test.Daemon.StreamPair
 {
 	class MainClass
 	{
@@ -53,14 +53,14 @@ namespace BD2.Test.Daemon.Chat
 			ObjectBus OB = new ObjectBus (SH);
 			ServiceManager SM = new ServiceManager (OB);
 			if (modeName == "Server") {
-				SM.AnnounceService (new ServiceAnnounceMessage (Guid.NewGuid (), chatServiceAnouncementType, "Chat"), ChatAgent.CreateAgent);
+				SM.AnnounceService (new ServiceAnnounceMessage (Guid.NewGuid (), chatServiceAnouncementType, "Chat"), StreamPairAgent.CreateAgent);
 				SM.AnounceReady ();
 			}
 			if (modeName == "Client") {
 				SM.WaitForRemoteReady ();
 				foreach (ServiceAnnounceMessage RSA in SM.EnumerateRemoteServices ()) {
 					Console.WriteLine ("Service found: {0}", RSA.Name);
-					SM.RequestService (RSA, null, ChatAgent.CreateAgent, null);
+					SM.RequestService (RSA, null, StreamPairAgent.CreateAgent, null);
 				}
 			}
 		}

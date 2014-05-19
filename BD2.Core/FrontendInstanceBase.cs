@@ -55,29 +55,18 @@ namespace BD2.Core
 			this.frontend = frontend;
 		}
 
-		protected void Initialize ()
-		{
-			foreach (byte[] chunks in snapshot.GetChunks ()) {
-				//something like this
-				//TODO:HACK:FIX:XXX
-				//CreateObject( snapshot.Database.Backends.GetRepositories ().GetEnumerator ().Current.PullData (chunks));
-			}
-		}
-
 		public string Name { get { return snapshot.Name; } }
 
-		protected abstract void CreateObject (byte[] bytes);
+		internal void CreateObjects (byte[] bytes)
+		{
+			OnCreateObjects (bytes);
+		}
+
+		protected abstract void OnCreateObjects (byte[] bytes);
 
 		protected abstract IEnumerable<BaseDataObject> GetVolatileObjects ();
 
 		protected abstract IEnumerable<BaseDataObject> GetObjectWithID (byte[] objectID);
-
-		internal void GetVolatileData (System.IO.BinaryWriter binaryWriter)
-		{
-			SortedSet<BaseDataObject> baseDataObjects = new SortedSet<BaseDataObject> ();
-			foreach (BaseDataObject baseDataObject in baseDataObjects)
-				GetVolatileData (binaryWriter, baseDataObjects, baseDataObject);
-		}
 
 		protected abstract void PurgeObject (BaseDataObject baseDataObject);
 
@@ -87,21 +76,5 @@ namespace BD2.Core
 				PurgeObject (baseDataObject);
 			}
 		}
-
-		internal void GetVolatileData (System.IO.BinaryWriter binaryWriter, SortedSet<BaseDataObject> objects, BaseDataObject baseDataObject)
-		{
-			binaryWriter.Write (SerializeSingleObject (baseDataObject));
-			SortedSet<BaseDataObject> finishedList = new SortedSet<BaseDataObject> ();
-			foreach (BaseDataObject dependency in baseDataObject.GetDependenies ()) {
-				if (dependency.IsVolatile) {
-					if (!finishedList.Contains (dependency)) {
-						finishedList.Add (dependency);
-						GetVolatileData (binaryWriter, objects, dependency);
-					}
-				}
-			}
-		}
-
-		protected abstract byte[] SerializeSingleObject (BaseDataObject baseDataObject);
 	}
 }

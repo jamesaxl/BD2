@@ -36,28 +36,37 @@ namespace BD2.Frontend.Table.Model
 
 		public string Name { get { return name; } }
 
-		long typeID;
+		Type type;
 
-		public long TypeID { get { return typeID; } }
+		public Type Type { get { return type; } }
 
 		long length;
 
 		public long Length { get { return length; } }
 
-		bool? allowNull;
+		bool allowNull;
 
-		public bool AllowNull { get { return allowNull.Value; } }
+		public bool AllowNull { get { return allowNull; } }
 
-		protected Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, long typeID, bool allowNull, long length)
+		protected Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, Type type, bool allowNull, long length)
 			:base (frontendInstanceBase, chunkID)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");
 			this.name = name;
-			this.typeID = typeID;
+			this.type = type;
 			this.allowNull = allowNull;
 			this.length = length;
+		}
 
+		public override void Serialize (System.IO.Stream stream)
+		{
+			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
+				BW.Write (name);
+				BW.Write (((Frontend)FrontendInstanceBase.Frontend).ValueDeserializer.TypeToID (type));
+				BW.Write (allowNull);
+				BW.Write (length);
+			}
 		}
 	}
 }

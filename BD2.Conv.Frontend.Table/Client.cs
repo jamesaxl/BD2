@@ -61,16 +61,17 @@ namespace BD2.Conv.Frontend.Table
 			this.repo = repo;
 			this.databaseName = databaseName;
 			typeIDs.Add (typeof(bool), 1);
-			typeIDs.Add (typeof(char), 175);
-			typeIDs.Add (typeof(byte), 48);
-			typeIDs.Add (typeof(short), 52);
-			typeIDs.Add (typeof(int), 56);
-			typeIDs.Add (typeof(long), 8);
-			typeIDs.Add (typeof(float), 62);
-			typeIDs.Add (typeof(double), 106);
-			typeIDs.Add (typeof(Guid), 16);
-			typeIDs.Add (typeof(String), 100);
-			typeIDs.Add (typeof(DateTime), 20);
+			typeIDs.Add (typeof(char), 2);
+			typeIDs.Add (typeof(byte), 3);
+			typeIDs.Add (typeof(byte[]), 4);
+			typeIDs.Add (typeof(short), 5);
+			typeIDs.Add (typeof(int), 6);
+			typeIDs.Add (typeof(long), 7);
+			typeIDs.Add (typeof(float), 8);
+			typeIDs.Add (typeof(double), 9);
+			typeIDs.Add (typeof(Guid), 10);
+			typeIDs.Add (typeof(String), 11);
+			typeIDs.Add (typeof(DateTime), 12);
 
 		}
 
@@ -87,14 +88,89 @@ namespace BD2.Conv.Frontend.Table
 
 
 			agent.RegisterType (typeof(GetRowsResponseMessage), (message) => {
+				Console.WriteLine ("GetRowsResponseMessageReceived()");
 				GetRowsResponseMessage GRRM = (GetRowsResponseMessage)message;
 				Table table = tableDataRequests [GRRM.RequestID];
-				//BD2.Frontend.Table.Table frontendTable = 
-				new BD2.Frontend.Table.Table (frontendInstance, null, table.Name);
+				BD2.Frontend.Table.Table frontendTable = new BD2.Frontend.Table.Table (frontendInstance, null, table.Name);
+				SortedSet<BD2.Frontend.Table.Model.Column> fcs = new SortedSet<BD2.Frontend.Table.Model.Column> ();
+				Console.WriteLine ("Enumerating columns...");
+				if (!tableColumns.ContainsKey (table)) {
+					Console.WriteLine ("tableColumns doesn't have the key");
+				}
+				Console.Write ("Column Count:");
+				Console.WriteLine (tableColumns [table].Count);
 				foreach (Column c in tableColumns[table]) {
-					//BD2.Frontend.Table.Column frontendColumn = 
-					new BD2.Frontend.Table.Column (frontendInstance, null, c.Name, 0, !c.Mandatory, c.Size);
+					BD2.Frontend.Table.Model.Column frontendColumn = frontendInstance.GetColumn (c.Name, 0, !c.Mandatory, c.Size);
+					fcs.Add (frontendColumn);
+					Console.Write (".");
 					//TODO:Avoid creating duplicates,create columnsets for each table, Associate columnSets and tables, Add data to tables
+				}
+
+				Console.WriteLine ("Openning stream...");
+				BD2.Daemon.TransparentStream stream = agent.OpenStream (GRRM.ResponseStreamID);
+				Console.WriteLine ("Stream created...");
+				System.IO.BinaryReader br = new System.IO.BinaryReader (stream);
+				Console.WriteLine ("Reading stream...");
+				while (true) {
+					if (stream.Done) {
+						break;
+					}
+					object[] objects = new object[fcs.Count];
+					BD2.Frontend.Table.Column[] cols = new BD2.Frontend.Table.Column[fcs.Count];
+					fcs.CopyTo (cols);
+					int n = 0;
+					Console.WriteLine ("Enumerating columns");
+					foreach (Column c in tableColumns[table]) {
+						switch (c.TFQN) {
+						case "System.Byte[]":
+							objects [n] = br.ReadBytes (br.ReadInt32 ());
+							break;
+						case "System.Byte":
+							objects [n] = br.ReadByte ();
+							break;
+						case "System.SByte":
+							objects [n] = br.ReadSByte ();
+							break;
+						case "System.Int16":
+							objects [n] = br.ReadInt16 ();
+							break;
+						case "System.UInt16":
+							objects [n] = br.ReadUInt16 ();
+							break;
+						case "System.Int32":
+							objects [n] = br.ReadInt32 ();
+							break;
+						case "System.UInt32":
+							objects [n] = br.ReadUInt32 ();
+							break;
+						case "System.Int64":
+							objects [n] = br.ReadInt64 ();
+							break;
+						case "System.UInt64":
+							objects [n] = br.ReadUInt64 ();
+							break;
+						case "System.Single":
+							objects [n] = br.ReadSingle ();
+							break;
+						case "System.Double":
+							objects [n] = br.ReadDouble ();
+							break;
+						case "System.String":
+							objects [n] = br.ReadString ();
+							break;
+						case "System.Char":
+							objects [n] = br.ReadChar ();
+							break;
+						case "System.Boolean":
+							objects [n] = br.ReadBoolean ();
+							break;
+						}
+
+					}
+					Console.Write ("Fetched a row");
+					frontendInstance.CreateRow (frontendTable, frontendInstance.GetColumnSet (cols), objects);
+
+					frontendInstance.Flush ();
 				}
 			});
 			agent.RegisterType (typeof(GetColumnsResponseMessage), (message) => {

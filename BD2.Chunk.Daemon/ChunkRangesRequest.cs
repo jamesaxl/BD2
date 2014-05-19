@@ -61,7 +61,7 @@ namespace BD2.Chunk.Daemon
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (ranges.ToByteArray ());
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}

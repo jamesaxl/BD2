@@ -34,6 +34,7 @@ namespace BD2.RawProxy.crypto
 	[RawProxyAttribute(typeof(cryptov1), "1c36f5fc-e0f0-4836-8723-c4d2371c2018", "Deserialize")]
 	public class cryptov1 : RawProxyv1
 	{
+
 		static System.Collections.Generic.SortedDictionary<Guid, X509Certificate2> certificates = new System.Collections.Generic.SortedDictionary<Guid, X509Certificate2> ();
 
 		public static void ImportCertificate (Guid id, X509Certificate2 certificate)
@@ -44,6 +45,7 @@ namespace BD2.RawProxy.crypto
 				certificates.Add (id, certificate);
 			}
 		}
+		//todo:add procedure for retrieving the proxies
 		#region implemented abstract members of RawProxyv1
 		public override string Name {
 			get {
@@ -69,6 +71,7 @@ namespace BD2.RawProxy.crypto
 		{
 			if (Input == null)
 				throw new ArgumentNullException ("Input");
+			throw new NotImplementedException ();
 		}
 
 		public override byte[] Encode (byte[] Input)
@@ -92,8 +95,10 @@ namespace BD2.RawProxy.crypto
 			System.Security.Cryptography.Aes aes = System.Security.Cryptography.Aes.Create ();
 			aes.Mode = System.Security.Cryptography.CipherMode.CBC;
 			aes.Key = Attributes;
-			System.Security.Cryptography.CryptoStream cs = new System.Security.Cryptography.CryptoStream (MS, aes.CreateEncryptor (), System.Security.Cryptography.CryptoStreamMode.Read);
+			//System.Security.Cryptography.CryptoStream cs = 
+				new System.Security.Cryptography.CryptoStream (MS, aes.CreateEncryptor (), System.Security.Cryptography.CryptoStreamMode.Read);
 
+			throw new NotImplementedException ();
 		}
 
 		byte[] defaultEncoder;
@@ -113,7 +118,8 @@ namespace BD2.RawProxy.crypto
 				throw new ArgumentNullException ("hash");
 			if (hash.Length == 0)
 				throw new ArgumentException ("hash cannot be empty.", "Input");
-			X509Certificate2 cert = GetCertificate (hash);//load certificate into memory
+			//X509Certificate2 cert = 
+				GetCertificate (hash);//load certificate into memory
 			defaultEncoder = hash;
 		}
 		#endregion
@@ -141,7 +147,7 @@ namespace BD2.RawProxy.crypto
 				} catch (Exception ex) {
 					throw new InvalidDataException ("Certificate information is damaged/wrong and unusable.", ex);
 				}
-				certs.Add (hash, rawcert);
+				certs.Add (hash, ret);
 				return ret;
 			}
 		}

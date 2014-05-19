@@ -190,8 +190,8 @@ namespace BD2.CLI
 						BD2.Daemon.StreamHandler SH = new BD2.Daemon.StreamHandler (NS);
 						BD2.Daemon.ObjectBus OB = new BD2.Daemon.ObjectBus (SH);
 						BD2.Daemon.ServiceManager SM = new BD2.Daemon.ServiceManager (OB);
-						Console.WriteLine ("Waiting 5 seconds for remote to anounce all it's services...");
-						System.Threading.Thread.Sleep (5000);
+						SM.AnounceReady ();
+						SM.WaitForRemoteReady ();
 						Guid serviceType_SQL = Guid.Parse ("57ce8883-1010-41ec-96da-41d36c64d65d");
 						var RS = SM.EnumerateRemoteServices ();
 						BD2.Daemon.ServiceAnnounceMessage TSA = null;
@@ -236,9 +236,8 @@ namespace BD2.CLI
 				BD2.Daemon.ObjectBus OB = new BD2.Daemon.ObjectBus (SH);
 				BD2.Daemon.ServiceManager SM = new BD2.Daemon.ServiceManager (OB);
 				Guid serviceType_SQL = Guid.Parse ("57ce8883-1010-41ec-96da-41d36c64d65d");
-				Console.WriteLine ("Waiting 1 second for remote to get ready...");
-				System.Threading.Thread.Sleep (1000);
 				SM.AnnounceService (new BD2.Daemon.ServiceAnnounceMessage (Guid.NewGuid (), serviceType_SQL, "Source"), BD2.Conv.Daemon.MSSQL.ServiceAgent.CreateAgent);
+				SM.AnounceReady ();
 			}
 		}
 

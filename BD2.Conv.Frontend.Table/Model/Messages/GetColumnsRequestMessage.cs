@@ -71,7 +71,7 @@ namespace BD2.Conv.Frontend.Table
 					BW.Write (id.ToByteArray ());
 					BW.Write (tableID.ToByteArray ());
 				}
-				return MS.GetBuffer ();
+				return MS.ToArray ();
 			}
 		}
 

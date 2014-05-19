@@ -32,8 +32,8 @@ namespace BD2.Test.Daemon.Chat
 	public class ChatAgent:ServiceAgent
 	{
 
-		ChatAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush)
-			: base(serviceAgentMode, objectBusSession, flush)
+		ChatAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, bool run)
+			: base(serviceAgentMode, objectBusSession, flush, run)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -41,12 +41,12 @@ namespace BD2.Test.Daemon.Chat
 			objectBusSession.RegisterType (typeof(ChatMessage), ChatMessageReceived);
 		}
 
-		public static ServiceAgent CreateAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush)
+		public static ServiceAgent CreateAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, byte[] parameters)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
 			#endif
-			return new ChatAgent (serviceAgentMode, objectBusSession, flush);
+			return new ChatAgent (serviceAgentMode, objectBusSession, flush, true);
 		}
 
 		void ChatMessageReceived (ObjectBusMessage message)
@@ -54,8 +54,8 @@ namespace BD2.Test.Daemon.Chat
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
 			#endif
-			ChatMessage chatMessace = (ChatMessage)message;
-			Console.WriteLine (chatMessace.Text);
+			ChatMessage chatMessage = (ChatMessage)message;
+			Console.WriteLine (chatMessage.Text);
 		}
 
 		void SendMessage (string text)

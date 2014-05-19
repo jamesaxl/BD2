@@ -110,7 +110,7 @@ namespace BD2.Chunk.Daemon
 							BW.Write (item, skipBytes, item.Length - skipBytes);
 						}
 					}
-					return MS.GetBuffer ();
+					return MS.ToArray ();
 				}
 			}
 		}
