@@ -25,44 +25,23 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using System.Collections.Generic;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Test.Frontend.Table
 {
-	public abstract class ValueSerializerBase
+	class MainClass
 	{
-		public abstract byte TypeToID (Type type);
-
-		public abstract Type IDToType (byte id);
-
-		public abstract object Deserialize (System.IO.BinaryReader binaryReader);
-
-		public object[] DeserializeArray (byte[] buffer)
+		public static void Main (string[] args)
 		{
-			System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer);
-			System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
-			object[] objects = new object[BR.ReadInt32 ()]; 
-			int n = 0;
-			while (MS.Position < MS.Length) {
-				objects [n] = Deserialize (BR);
-				n++;
+			string databaseName = "Test";
+			BD2.Core.Database db = new BD2.Core.Database (new BD2.Chunk.ChunkRepository[] { new BD2.Repo.Leveldb.Repository ("/home/behrooz/test") }, new BD2.Core.Frontend[] { new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ()) }, databaseName);
+			BD2.Frontend.Table.FrontendInstance frontendInstance = (BD2.Frontend.Table.FrontendInstance)(db.GetFrontend ("BD2.Frontend.Table")).CreateInstanse (db.GetSnapshot ("Primary"));
+			frontendInstance.CreateRow (frontendInstance.GetTable ("Table2"), frontendInstance.GetColumnSet (new BD2.Frontend.Table.Model.Column[] { frontendInstance.GetColumn ("Name", typeof(String),false,0) }), new object[] { "This is yet another test." });
+			foreach (var R in frontendInstance.GetTable ("Table2").GetRows (frontendInstance.GetColumnSet (new BD2.Frontend.Table.Model.Column[] { frontendInstance.GetColumn ("Name", typeof(String),false,0) }))) {
+				foreach (var V in R.GetValues ()) {
+					Console.WriteLine (V);
+				}
 			}
-			return objects;
-		}
-
-		public abstract void Serialize (object obj, System.IO.BinaryWriter binaryWriter);
-
-		public void SerializeArray (object[] objects, out byte[] bytes)
-		{
-			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
-			System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS);
-			BW.Write (objects.Length);
-			foreach (object obj in objects) {
-				Serialize (obj, BW);
-			}
-			BW.Flush ();
-			bytes = MS.ToArray ();
+			frontendInstance.Flush ();
 		}
 	}
 }
-

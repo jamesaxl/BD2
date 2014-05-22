@@ -37,7 +37,7 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract ColumnSet GetColumnSet (Column[] columns);
 
-		public abstract Column GetColumn (string name, long typeID, bool allowNull, long length);
+		public abstract Column GetColumn (string name, Type type, bool allowNull, long length);
 
 		public abstract Table GetTable (string name);
 

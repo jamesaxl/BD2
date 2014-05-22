@@ -32,12 +32,20 @@ namespace BD2.Core
 	public sealed class DatabaseConfiguration
 	{
 		public Tuple<string, string>[] Backends;
+		public Tuple<string, string>[] Frontends;
 
-		public DatabaseConfiguration (Tuple<string, string>[] backends)
+		public DatabaseConfiguration ()
+		{
+		}
+
+		public DatabaseConfiguration (Tuple<string, string>[] backends, Tuple<string, string>[] frontends)
 		{
 			if (backends == null)
 				throw new ArgumentNullException ("backends");
+			if (frontends == null)
+				throw new ArgumentNullException ("frontends");
 			this.Backends = backends;
+			this.Frontends = frontends;
 		}
 	}
 }

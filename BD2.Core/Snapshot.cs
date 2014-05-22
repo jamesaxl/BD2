@@ -92,7 +92,7 @@ namespace BD2.Core
 				throw new ArgumentNullException ("name");
 			this.database = database;
 			this.name = name;
-			this.objects = new SortedSet<byte[]> (objects);
+			this.objects = new SortedSet<byte[]> (objects, BD2.Common.ByteSequenceComparer.Shared);
 		}
 		#region IComparable implementation
 		public int CompareTo (object obj)
@@ -122,8 +122,11 @@ namespace BD2.Core
 						dependencies.Add (dependency.GetPersistentUniqueObjectID ());
 				}
 				MS.Write (bdo.ObjectType.ToByteArray (), 0, 16);
-				bdo.Serialize (MS);
-				MSID.Write (bdo.GetPersistentUniqueObjectID (), 0, 32);
+				System.IO.MemoryStream MST = new System.IO.MemoryStream ();
+				bdo.Serialize (MST);
+				byte[] bytes = MST.ToArray ();
+				MS.Write (bytes, 0, bytes.Length);
+				MSID.Write (bdo.ObjectID, 0, 32);
 			}
 			System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create ();
 			List<byte[]> deps = new List<byte[]> (dependencies);

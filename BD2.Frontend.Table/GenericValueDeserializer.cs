@@ -31,60 +31,153 @@ namespace BD2.Frontend.Table
 {
 	public class GenericValueDeserializer : BD2.Frontend.Table.Model.ValueSerializerBase
 	{
-
-		public override object Deserialize (byte typeID, System.IO.Stream stream)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public static byte GetTypeID (Type type)
+		#region implemented abstract members of ValueSerializerBase
+		public override byte TypeToID (Type type)
 		{
 			string TFQN = type.FullName;
 			switch (TFQN) {
-			case "System.Byte":
-			case "System.SByte":
-				return 48;
 			case "System.Boolean":
-				break;
+				return 1;
+			case "System.Byte":
+				return 2;
+			case "System.SByte":
+				return 128;
 			case "System.Int16":
-				break;
+				return 3;
 			case "System.UInt16":
-				break;
+				return 129;
 			case "System.Int32":
-				break;
+				return 4;
 			case "System.UInt32":
-				break;
+				return 130;
 			case "System.Int64":
-				break;
+				return 5;
 			case "System.UInt64":
-				break;
+				return 131;
 			case "System.String":
-				break;
+				return 16;
 			case "System.Char":
-				break;
+				return 144;
 			case "System.DateTime":
-				break;
+				return 24;
+			case "System.Guid":
+				return 32;
 			}
 			return 0;
 		}
 
-		public override void Serialize (object obj, out byte typeID, out byte[] bytes)
+		public override Type IDToType (byte id)
 		{
-//			typeIDs.Add (typeof(bool), 104);
-//			typeIDs.Add (typeof(char), 175);
-//			typeIDs.Add (typeof(byte), 48);
-//			typeIDs.Add (typeof(short), 52);
-//			typeIDs.Add (typeof(int), 56);
-//			typeIDs.Add (typeof(long), 127);
-//			typeIDs.Add (typeof(float), 62);
-//			typeIDs.Add (typeof(double), 106);
-//			typeIDs.Add (typeof(Guid), 36);
-//			typeIDs.Add (typeof(String), 231);
+			switch (id) {
+			case 1:
+				return typeof(Boolean);
+			case 2:
+				return typeof(Byte);
+			case 128:
+				return typeof(SByte);
+			case 3:
+				return typeof(Int16);
+			case 129:
+				return typeof(UInt16);
+			case 4:
+				return typeof(Int32);
+			case 130:
+				return typeof(UInt32);
+			case 5:
+				return typeof(Int64);
+			case 131:
+				return typeof(UInt64);
+			case 16:
+				return typeof(String);
+			case 144:
+				return typeof(Char);
+			case 24:
+				return typeof(DateTime);
+			case 32:
+				return typeof(Guid);
+			}
+			return null;
+		}
+		#endregion
+		public override object Deserialize (System.IO.BinaryReader binaryReader)
+		{
+			int typeID = binaryReader.ReadByte ();
+			switch (typeID) {
+			case 1:
+				return binaryReader.ReadBoolean ();
+			case 2:
+				return binaryReader.ReadByte ();
+			case 128:
+				return binaryReader.ReadSByte ();
+			case 3:
+				return binaryReader.ReadInt16 ();
+			case 129:
+				return binaryReader.ReadUInt16 ();
+			case 4:
+				return binaryReader.ReadInt32 ();
+			case 130:
+				return binaryReader.ReadUInt32 ();
+			case 5:
+				return binaryReader.ReadInt64 ();
+			case 131:
+				return binaryReader.ReadUInt64 ();
+			case 16:
+				return binaryReader.ReadString ();
+			case 144:
+				return binaryReader.ReadChar ();
+			case 24:
+				return new DateTime (binaryReader.ReadInt64 ());
+			case 32:
+				return new Guid (binaryReader.ReadBytes (16));
+			}
+			return null;
+		}
 
-			typeID = GetTypeID (obj.GetType ());
-			bytes = null;
-
-
+		public override void Serialize (object obj, System.IO.BinaryWriter binaryWriter)
+		{
+			byte typeID = TypeToID (obj.GetType ());
+			binaryWriter.Write (typeID);
+			switch (typeID) {
+			case 1:
+				binaryWriter.Write ((bool)obj);
+				break;
+			case 2:
+				binaryWriter.Write ((byte)obj);
+				break;
+			case 128:
+				binaryWriter.Write ((sbyte)obj);
+				break;
+			case 3:
+				binaryWriter.Write ((short)obj);
+				break;
+			case 129:
+				binaryWriter.Write ((ushort)obj);
+				break;
+			case 4:
+				binaryWriter.Write ((int)obj);
+				break;
+			case 130:
+				binaryWriter.Write ((uint)obj);
+				break;
+			case 5:
+				binaryWriter.Write ((long)obj);
+				break;
+			case 131:
+				binaryWriter.Write ((ulong)obj);
+				break;
+			case 16:
+				binaryWriter.Write ((string)obj);
+				break;
+			case 144:
+				binaryWriter.Write ((char)obj);
+				break;
+			case 24:
+				binaryWriter.Write (((DateTime)obj).Ticks);
+				break;
+			case 32:
+				binaryWriter.Write (((Guid)obj).ToByteArray ());
+				break;
+			}
 		}
 	}
 }

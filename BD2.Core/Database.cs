@@ -51,6 +51,15 @@ namespace BD2.Core
 			}
 		}
 
+		SortedDictionary<string, Frontend> frontends = new SortedDictionary<string, Frontend> ();
+
+		public Frontend GetFrontend (string frontendName)
+		{
+			if (frontendName == null)
+				throw new ArgumentNullException ("name");
+			return frontends [frontendName];
+		}
+
 		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends)
 		{
 			this.backends = new ChunkRepositoryCollection ();
@@ -58,6 +67,7 @@ namespace BD2.Core
 				this.backends.AddRepository (CR);
 			primary = CreateSnapshot ("Primary");
 			foreach (Frontend Frontend in frontends) {
+				this.frontends.Add (Frontend.Name, Frontend);
 				Frontend.Database = this;
 				this.frontendInstances.Add (Frontend.CreateInstanse (primary));
 			}
@@ -66,9 +76,9 @@ namespace BD2.Core
 
 		void Load ()
 		{
-			SortedSet<byte[]> pendingData = new SortedSet<byte[]> (backends.Enumerate ());
-			SortedSet<byte[]> loaded = new SortedSet<byte[]> ();
-			foreach (var tup in new SortedSet<byte[]>( pendingData)) {
+			SortedSet<byte[]> pendingData = new SortedSet<byte[]> (backends.Enumerate (), BD2.Common.ByteSequenceComparer.Shared);
+			SortedSet<byte[]> loaded = new SortedSet<byte[]> (BD2.Common.ByteSequenceComparer.Shared);
+			foreach (var tup in new SortedSet<byte[]>(pendingData, BD2.Common.ByteSequenceComparer.Shared)) {
 				byte[][] deps = backends.PullDependencies (tup);
 				foreach (byte[] dep in deps) {
 					if (!loaded.Contains (dep)) {
@@ -92,6 +102,8 @@ namespace BD2.Core
 
 		public Database (DatabaseConfiguration databaseConfiguration)
 		{
+			if (databaseConfiguration == null)
+				throw new ArgumentNullException ("databaseConfiguration");
 			foreach (var Tuple in databaseConfiguration.Backends) {
 				ChunkRepository repo = (ChunkRepository)(Type.GetType (Tuple.Item1).Assembly.GetType ("Repository").GetConstructor (new Type[] { typeof(string) }).Invoke (null, new object[] { Tuple.Item2 }));
 				this.backends.AddRepository (repo);
@@ -110,6 +122,20 @@ namespace BD2.Core
 			lock (snapshots) {
 				return new SortedSet<Snapshot> (snapshots);
 			}
+		}
+
+		public Snapshot GetSnapshot (string snapshotName)
+		{
+			if (snapshotName == null)
+				throw new ArgumentNullException ("snapshotName");
+			lock (snapshots) {
+				foreach (Snapshot ss in snapshots) {
+					if (ss.Name == snapshotName) {
+						return ss;
+					}
+				}
+			}
+			return new Snapshot (this, snapshotName, backends.Enumerate ());
 		}
 
 		public Snapshot CreateSnapshot (string snapshotName)

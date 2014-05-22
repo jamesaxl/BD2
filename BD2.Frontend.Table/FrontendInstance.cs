@@ -34,21 +34,19 @@ namespace BD2.Frontend.Table
 	public class FrontendInstance : BD2.Frontend.Table.Model.FrontendInstance
 	{
 		SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> typeDescriptors = new SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> ();
-		SortedDictionary<byte[], Row> rows = new SortedDictionary<byte[], Row> (new BD2.Common.ByteSequenceComparer ());
-		SortedDictionary<byte[], Table> tables = new SortedDictionary<byte[], Table> (new BD2.Common.ByteSequenceComparer ());
-		SortedDictionary<byte[], Relation> relations = new SortedDictionary<byte[], Relation> (new BD2.Common.ByteSequenceComparer ());
-		SortedDictionary<byte[], Column> columns = new SortedDictionary<byte[], Column> (new BD2.Common.ByteSequenceComparer ());
-		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (new BD2.Common.ByteSequenceComparer ());
+		SortedDictionary<byte[], Row> rows = new SortedDictionary<byte[], Row> (BD2.Common.ByteSequenceComparer.Shared);
+		SortedDictionary<byte[], Table> tables = new SortedDictionary<byte[], Table> (BD2.Common.ByteSequenceComparer.Shared);
+		SortedDictionary<byte[], Relation> relations = new SortedDictionary<byte[], Relation> (BD2.Common.ByteSequenceComparer.Shared);
+		SortedDictionary<byte[], Column> columns = new SortedDictionary<byte[], Column> (BD2.Common.ByteSequenceComparer.Shared);
+		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (BD2.Common.ByteSequenceComparer.Shared);
 		ValueSerializerBase valueSerializer;
-		SortedDictionary<byte[], BaseDataObject> volatileData = new SortedDictionary<byte[], BaseDataObject> (new BD2.Common.ByteSequenceComparer ());
+		SortedDictionary<byte[], BaseDataObject> volatileData = new SortedDictionary<byte[], BaseDataObject> (BD2.Common.ByteSequenceComparer.Shared);
 
 		public override ValueSerializerBase ValueSerializer {
 			get {
 				return valueSerializer;
 			}
 		}
-
-		Frontend frontend;
 
 		public FrontendInstance (Snapshot snapshot, Frontend frontend, ValueSerializerBase valueSerializer):
 			base(snapshot, frontend)
@@ -72,7 +70,10 @@ namespace BD2.Frontend.Table
 
 		protected override IEnumerable<BaseDataObject> GetVolatileObjects ()
 		{
-			throw new NotImplementedException ();
+			foreach (var tup in volatileData) {
+				yield return tup.Value;
+			}
+			volatileData.Clear ();
 		}
 
 		protected override IEnumerable<BaseDataObject> GetObjectWithID (byte[] objectID)
@@ -86,7 +87,7 @@ namespace BD2.Frontend.Table
 				
 			} else if (baseDataObject is Column) {
 
-			} else if (baseDataObject is BD2.Frontend.Table.Model.ColumnSet) {
+			} else if (baseDataObject is ColumnSet) {
 
 			} else if (baseDataObject is Table) {
 			
@@ -112,9 +113,10 @@ namespace BD2.Frontend.Table
 			if (columns == null)
 				throw new ArgumentNullException ("columns");
 			ColumnSet cs = new ColumnSet (this, null, columns);
-			byte[] hash = cs.GetPersistentUniqueObjectID ();
-			if (columnSets.ContainsKey (hash))
+			byte[] hash = cs.ObjectID;
+			if (columnSets.ContainsKey (hash)) {
 				return columnSets [hash];
+			}
 			volatileData.Add (hash, cs);
 			columnSets.Add (hash, cs);
 			return cs;
@@ -123,7 +125,8 @@ namespace BD2.Frontend.Table
 		public BD2.Frontend.Table.Row CreateRow (BD2.Frontend.Table.Model.Table table, BD2.Frontend.Table.Model.ColumnSet columnSet, object[] objects)
 		{
 			Row r = new Row (this, null, table, columnSet, objects);
-			volatileData.Add (r.GetPersistentUniqueObjectID (), r);
+			volatileData.Add (r.ObjectID, r);
+			rows.Add (r.ObjectID, r);
 			return r;
 		}
 
@@ -134,7 +137,13 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of FrontendInstance
 		public override BD2.Frontend.Table.Model.Table GetTable (string name)
 		{
-			throw new NotImplementedException ();
+			Table temp = new Table (this, null, name);
+			if (tables.ContainsKey (temp.ObjectID)) {
+				return tables [temp.ObjectID];
+			}
+			volatileData.Add (temp.ObjectID, temp);
+			tables.Add (temp.ObjectID, temp);
+			return temp;
 		}
 
 		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (BD2.Frontend.Table.Model.Table table)
