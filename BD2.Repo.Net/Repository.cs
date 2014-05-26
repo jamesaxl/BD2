@@ -144,6 +144,22 @@ namespace BD2.Repo.Net
 			throw new NotImplementedException ();
 		}
 		#endregion
+		#region implemented abstract members of ChunkRepository
+		public override void PushRawProxyData (byte[] index, byte[] value)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override byte[] PullRawProxyData (byte[] index)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateRawProxyData ()
+		{
+			throw new NotImplementedException ();
+		}
+		#endregion
 		#endregion
 	}
 }

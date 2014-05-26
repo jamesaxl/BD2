@@ -28,6 +28,7 @@ using System;
 
 namespace BD2.RawProxy.compress
 {
+	[RawProxyAttribute(typeof(compressv1), "873a0bc6-8631-43cd-8763-764810156050", "Deserialize")]
 	public class compressv1 : RawProxyv1
 	{
 		static readonly Guid TypeGuid = new Guid ("873a0bc6-8631-43cd-8763-764810156050");
@@ -61,9 +62,17 @@ namespace BD2.RawProxy.compress
 			}
 		}
 		#region implemented abstract members of RawProxyv1
-		public override byte[] Serialize ()
+		protected override byte[] DoSerialize ()
 		{
-			throw new NotImplementedException ();
+			return new byte[1] { 1 };
+		}
+
+		public static RawProxyv1 Deserialize (byte[] buffer)
+		{
+			if ((buffer.Length == 1) && buffer [0] == 1) {
+				return new compressv1 ();
+			}
+			throw new NotSupportedException ("The version of compression proxy requested is not available.");
 		}
 		#endregion
 		public override byte[] Encode (byte[] Input)

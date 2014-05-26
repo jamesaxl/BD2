@@ -64,17 +64,12 @@ namespace BD2.Core
 
 		protected abstract void OnCreateObjects (byte[] bytes);
 
-		protected abstract IEnumerable<BaseDataObject> GetVolatileObjects ();
+		/// <summary>
+		/// Returns a SNAPSHOT of current volatile objects.
+		/// </summary>
+		/// <returns>The volatile objects.</returns>
 
-		protected abstract IEnumerable<BaseDataObject> GetObjectWithID (byte[] objectID);
 
-		protected abstract void PurgeObject (BaseDataObject baseDataObject);
-
-		public void PurgeVolatileData ()
-		{
-			foreach (BaseDataObject baseDataObject in GetVolatileObjects()) {
-				PurgeObject (baseDataObject);
-			}
-		}
+		protected abstract BaseDataObject GetObjectWithID (byte[] objectID);
 	}
 }

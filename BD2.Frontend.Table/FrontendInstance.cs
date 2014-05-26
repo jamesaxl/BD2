@@ -40,8 +40,7 @@ namespace BD2.Frontend.Table
 		SortedDictionary<byte[], Column> columns = new SortedDictionary<byte[], Column> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (BD2.Common.ByteSequenceComparer.Shared);
 		ValueSerializerBase valueSerializer;
-		SortedDictionary<byte[], BaseDataObject> volatileData = new SortedDictionary<byte[], BaseDataObject> (BD2.Common.ByteSequenceComparer.Shared);
-
+		//SortedDictionary<byte[], BaseDataObject> volatileData = new SortedDictionary<byte[], BaseDataObject> (BD2.Common.ByteSequenceComparer.Shared);
 		public override ValueSerializerBase ValueSerializer {
 			get {
 				return valueSerializer;
@@ -58,42 +57,34 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of FrontendInstanceBase
 		protected override void OnCreateObjects (byte[] bytes)
 		{
-			System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes);
-			byte[] buf = new byte[16];
-			while (MS.Position< MS.Length) {
-				MS.Read (buf, 0, 16);
-				Guid objectTypeID = new Guid (buf);
-				BaseDataObjectTypeIdAttribute typeDescriptor = typeDescriptors [objectTypeID];
-
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					int sectionVersion = BR.ReadInt32 ();//unused, just in case
+					while (MS.Position < MS.Length) {
+						while (MS.Position < MS.Length) {
+							int payloadLength = BR.ReadInt32 ();
+							Guid objectTypeID = new Guid (BR.ReadBytes (16));
+							BaseDataObjectTypeIdAttribute typeDescriptor = typeDescriptors [objectTypeID];
+							typeDescriptor.Deserialize (BR.ReadBytes (payloadLength));
+						}
+					}
+				}
 			}
 		}
 
-		protected override IEnumerable<BaseDataObject> GetVolatileObjects ()
+		protected override BaseDataObject GetObjectWithID (byte[] objectID)
 		{
-			foreach (var tup in volatileData) {
-				yield return tup.Value;
-			}
-			volatileData.Clear ();
-		}
-
-		protected override IEnumerable<BaseDataObject> GetObjectWithID (byte[] objectID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		protected override void PurgeObject (BaseDataObject baseDataObject)
-		{
-			if (baseDataObject is Row) {
-				
-			} else if (baseDataObject is Column) {
-
-			} else if (baseDataObject is ColumnSet) {
-
-			} else if (baseDataObject is Table) {
-			
-			} else if (baseDataObject is Relation) {
-			
-			}
+			if (rows.ContainsKey (objectID))
+				return rows [objectID];
+			if (columns.ContainsKey (objectID))
+				return columns [objectID];
+			if (columnSets.ContainsKey (objectID))
+				return columnSets [objectID];
+			if (tables.ContainsKey (objectID))
+				return tables [objectID];
+			if (relations.ContainsKey (objectID))
+				return relations [objectID];
+			return null;
 		}
 		#endregion
 		//to avoid duplicates
@@ -103,7 +94,7 @@ namespace BD2.Frontend.Table
 			byte[] hash = nc.GetPersistentUniqueObjectID ();
 			if (columns.ContainsKey (hash)) 
 				return columns [hash];
-			volatileData.Add (hash, nc);
+			Snapshot.AddVolatileData (nc);
 			columns.Add (hash, nc);
 			return nc;
 		}
@@ -117,7 +108,7 @@ namespace BD2.Frontend.Table
 			if (columnSets.ContainsKey (hash)) {
 				return columnSets [hash];
 			}
-			volatileData.Add (hash, cs);
+			Snapshot.AddVolatileData (cs);
 			columnSets.Add (hash, cs);
 			return cs;
 		}
@@ -125,14 +116,13 @@ namespace BD2.Frontend.Table
 		public BD2.Frontend.Table.Row CreateRow (BD2.Frontend.Table.Model.Table table, BD2.Frontend.Table.Model.ColumnSet columnSet, object[] objects)
 		{
 			Row r = new Row (this, null, table, columnSet, objects);
-			volatileData.Add (r.ObjectID, r);
+			Snapshot.AddVolatileData (r);
 			rows.Add (r.ObjectID, r);
 			return r;
 		}
 
 		public void Flush ()
 		{
-			Snapshot.PutObjects (GetVolatileObjects ());
 		}
 		#region implemented abstract members of FrontendInstance
 		public override BD2.Frontend.Table.Model.Table GetTable (string name)
@@ -141,14 +131,18 @@ namespace BD2.Frontend.Table
 			if (tables.ContainsKey (temp.ObjectID)) {
 				return tables [temp.ObjectID];
 			}
-			volatileData.Add (temp.ObjectID, temp);
+			Snapshot.AddVolatileData (temp);
 			tables.Add (temp.ObjectID, temp);
 			return temp;
 		}
 
 		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (BD2.Frontend.Table.Model.Table table)
 		{
-			throw new NotImplementedException ();
+			foreach (var rt in rows) {
+				if (rt.Value.Table == table) {
+					yield return rt.Value;
+				}
+			}
 		}
 		#endregion
 	}

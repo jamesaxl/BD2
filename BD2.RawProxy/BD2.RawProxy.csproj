@@ -38,6 +38,13 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="RawProxyv1.cs" />
     <Compile Include="RawProxyAttribute.cs" />
+    <Compile Include="RawProxyCollection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
+      <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
+      <Name>BD2.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

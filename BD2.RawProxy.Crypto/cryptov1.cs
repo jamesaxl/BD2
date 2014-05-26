@@ -164,7 +164,7 @@ namespace BD2.RawProxy.crypto
 
 		#region implemented abstract members of RawProxyv1
 
-		public override byte[] Serialize ()
+		protected override byte[] DoSerialize ()
 		{
 			throw new NotImplementedException ();
 		}

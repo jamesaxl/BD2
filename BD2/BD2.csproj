@@ -133,5 +133,45 @@
       <Project>{8DD96596-38AC-46DD-80C1-75D9EBE585EA}</Project>
       <Name>leveldb-sharp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BD2.Chunk.Daemon.BloomFilter\BD2.Chunk.Daemon.BloomFilter.csproj">
+      <Project>{8167365B-7849-434A-A5EA-62BE332F523C}</Project>
+      <Name>BD2.Chunk.Daemon.BloomFilter</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.RawProxy.Compress\BD2.RawProxy.Compress.csproj">
+      <Project>{9B5ABA79-CDA4-4762-B03E-1D04E79F8088}</Project>
+      <Name>BD2.RawProxy.Compress</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.RawProxy.Crypto\BD2.RawProxy.Crypto.csproj">
+      <Project>{FFFF9B90-CB32-4841-B335-1F646B2A6FB8}</Project>
+      <Name>BD2.RawProxy.Crypto</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Test.Conv.MSSQL\BD2.Test.Conv.MSSQL.csproj">
+      <Project>{FB276F98-934B-4E9C-A1DC-7F9CCA8AACA0}</Project>
+      <Name>BD2.Test.Conv.MSSQL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Test.Daemon.Chat\BD2.Test.Daemon.Chat.csproj">
+      <Project>{128AAEC3-FCA2-4C66-95D5-8A4E3181DEAA}</Project>
+      <Name>BD2.Test.Daemon.Chat</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Test.Daemon.StreamPair\BD2.Test.Daemon.StreamPair.csproj">
+      <Project>{175B36CF-8C71-4620-83BA-BC94885599FD}</Project>
+      <Name>BD2.Test.Daemon.StreamPair</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Test.Frontend.Table\BD2.Test.Frontend.Table.csproj">
+      <Project>{472E06FA-66CA-4C61-90E7-14F8B7095F67}</Project>
+      <Name>BD2.Test.Frontend.Table</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Test.Repo.LevelDB\BD2.Test.Repo.LevelDB.csproj">
+      <Project>{1F62C8FD-73FA-4EA8-BBB7-0106EF6E292D}</Project>
+      <Name>BD2.Test.Repo.LevelDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Squad\Squad.csproj">
+      <Project>{8179BF44-79F2-4A33-AA38-0872CCCBB85E}</Project>
+      <Name>Squad</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Test.Daemon.FileShare\BD2.Test.Daemon.FileShare.csproj">
+      <Project>{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}</Project>
+      <Name>BD2.Test.Daemon.FileShare</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

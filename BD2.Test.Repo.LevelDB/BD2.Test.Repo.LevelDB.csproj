@@ -38,4 +38,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\BD2.Repo.LevelDB\BD2.Repo.Leveldb.csproj">
+      <Project>{AD303744-084C-4FC6-84C9-46F6179C670C}</Project>
+      <Name>BD2.Repo.Leveldb</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

@@ -29,7 +29,9 @@ using System;
 namespace BD2.RawProxy
 {
 	public abstract class RawProxyv1
-	{
+	{		
+		byte[] objectID;
+
 		public abstract byte[] Decode (byte[] Input);
 
 		public abstract byte[] Encode (byte[] Input);
@@ -40,6 +42,25 @@ namespace BD2.RawProxy
 
 		public abstract Guid Type { get; }
 
-		public abstract byte[] Serialize ();
+		public byte[] Serialize ()
+		{
+			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
+			MS.Write (Type.ToByteArray (), 0, 16);
+			byte[] buf = DoSerialize ();
+			MS.Write (buf, 0, buf.Length);
+			return MS.ToArray ();
+		}
+
+		protected abstract byte[] DoSerialize ();
+
+		public byte[] ObjectID {
+			get {
+				if (objectID == null) {
+					System.Security.Cryptography.SHA1 sha1 = System.Security.Cryptography.SHA1.Create ();
+					objectID = sha1.ComputeHash (Serialize ());
+				}
+				return objectID;
+			}
+		}
 	}
 }

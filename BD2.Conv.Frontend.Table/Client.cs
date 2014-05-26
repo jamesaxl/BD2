@@ -100,7 +100,7 @@ namespace BD2.Conv.Frontend.Table
 				Console.Write ("Column Count:");
 				Console.WriteLine (tableColumns [table].Count);
 				foreach (Column c in tableColumns[table]) {
-					BD2.Frontend.Table.Model.Column frontendColumn = frontendInstance.GetColumn (c.Name, 0, !c.Mandatory, c.Size);
+					BD2.Frontend.Table.Model.Column frontendColumn = frontendInstance.GetColumn (c.Name, System.Type.GetType (c.TFQN), !c.Mandatory, c.Size);
 					fcs.Add (frontendColumn);
 					Console.Write (".");
 					//TODO:Avoid creating duplicates,create columnsets for each table, Associate columnSets and tables, Add data to tables

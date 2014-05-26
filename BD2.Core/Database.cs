@@ -74,10 +74,48 @@ namespace BD2.Core
 			Load ();
 		}
 
+		public void SaveAllSnapshots ()
+		{
+			SortedDictionary<Snapshot,SortedSet<BaseDataObject>> bdos = new SortedDictionary<Snapshot, SortedSet<BaseDataObject>> ();
+			foreach (Snapshot snapshot in snapshots) {
+				bdos.Add (snapshot, snapshot.GetVolatileData ());
+			}
+			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
+			System.IO.MemoryStream MSID = new System.IO.MemoryStream ();
+			SortedSet<byte[]> dependencies = new SortedSet<byte[]> (BD2.Common.ByteSequenceComparer.Shared);
+			foreach (var tup in bdos) {
+				MS.WriteByte (1);
+				RawProxy.RawProxyCollection rpc = tup.Key.GetRawProxies ();
+				System.IO.MemoryStream MSRP = new System.IO.MemoryStream ();
+				foreach (BaseDataObject bdo in tup.Value) {
+					foreach (BaseDataObject dependency in bdo.GetDependenies ()) {
+						if (!dependencies.Contains (dependency.GetPersistentUniqueObjectID ()))
+							dependencies.Add (dependency.GetPersistentUniqueObjectID ());
+					}
+					MSRP.Write (bdo.ObjectType.ToByteArray (), 0, 16);
+					System.IO.MemoryStream MST = new System.IO.MemoryStream ();
+					bdo.Serialize (MST);
+					byte[] bytes = MST.ToArray ();
+					MSRP.Write (bytes, 0, bytes.Length);
+					MSID.Write (bdo.ObjectID, 0, 32);
+				}
+				byte[] encoded = rpc.ChainEncode (MSRP.ToArray ());
+				MS.Write (encoded, 0, encoded.Length);
+			}
+			System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create ();
+			List<byte[]> deps = new List<byte[]> (dependencies);
+			Console.WriteLine ("Writing {0} bytes to backend", MS.Length);
+			Backends.Push (sha.ComputeHash (MSID.ToArray ()), MS.ToArray (), deps.ToArray ());
+		}
+
 		void Load ()
 		{
 			SortedSet<byte[]> pendingData = new SortedSet<byte[]> (backends.Enumerate (), BD2.Common.ByteSequenceComparer.Shared);
 			SortedSet<byte[]> loaded = new SortedSet<byte[]> (BD2.Common.ByteSequenceComparer.Shared);
+			RawProxy.RawProxyCollection rpc = new BD2.RawProxy.RawProxyCollection ();
+			foreach (var rp in backends.EnumerateRawProxyData()) {
+				rpc.Add (RawProxy.RawProxyAttribute.DeserializeFromRawData (rp.Value));
+			}
 			foreach (var tup in new SortedSet<byte[]>(pendingData, BD2.Common.ByteSequenceComparer.Shared)) {
 				byte[][] deps = backends.PullDependencies (tup);
 				foreach (byte[] dep in deps) {
@@ -88,8 +126,28 @@ namespace BD2.Core
 				}
 				if (deps == null)
 					continue;
-				foreach (FrontendInstanceBase fib in frontendInstances)
-					fib.CreateObjects (backends.PullData (tup));
+				byte[] chunkData = backends.PullData (tup);
+				System.IO.MemoryStream MS = new System.IO.MemoryStream (chunkData);
+				System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
+				int chunkVersion = BR.ReadInt32 ();
+				switch (chunkVersion) {
+				case 1:
+					while (MS.Position < MS.Length) {
+						int proxyCount = BR.ReadInt32 ();
+						System.Collections.Generic.List<byte[]> proxies = new List<byte[]> ();
+						for (int n = 0; n != proxyCount; n++) {
+							proxies.Add (BR.ReadBytes (20));
+						}
+						int payloadLength = BR.ReadInt32 ();
+						byte[] payload = BR.ReadBytes (payloadLength);
+						byte[] decodedPayload = rpc.ChainDecode (payload, proxies.ToArray ());
+						foreach (FrontendInstanceBase fib in frontendInstances)
+							fib.CreateObjects (decodedPayload);
+					}
+					break;
+				default:
+					throw new Exception ("This version of BD2 does not support the version of data provided.");
+				}
 				pendingData.Remove (tup);
 			}
 		}

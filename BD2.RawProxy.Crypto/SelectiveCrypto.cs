@@ -31,7 +31,7 @@ namespace BD2.RawProxy.crypto
 	public class SelectiveCrypto : RawProxyv1
 	{
 
-		public override byte[] Serialize ()
+		protected override byte[] DoSerialize ()
 		{
 			throw new NotImplementedException ();
 		}

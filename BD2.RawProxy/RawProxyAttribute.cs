@@ -30,6 +30,7 @@ namespace BD2.RawProxy
 {
 	public sealed class RawProxyAttribute : Attribute
 	{
+		static System.Collections.Concurrent.ConcurrentDictionary<Guid, RawProxyAttribute> attribs = new System.Collections.Concurrent.ConcurrentDictionary<Guid, RawProxyAttribute> ();
 		Guid guid;
 
 		public Guid Guid {
@@ -63,11 +64,28 @@ namespace BD2.RawProxy
 			this.deserializeMethodName = deserializeMethodName;
 			this.guid = Guid.Parse (guid);
 			deserializeMethod = type.GetMethod (deserializeMethodName, System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+			attribs.AddOrUpdate (this.guid, (g) => {
+				return this;
+			}, (g,o) => {
+				return this;
+			}
+			);
 		}
 
 		RawProxyv1 Deserialize (byte[] buffer)
 		{
 			return (RawProxyv1)deserializeMethod.Invoke (null, new object[] { buffer });
+		}
+
+		public static BD2.RawProxy.RawProxyv1 DeserializeFromRawData (byte[] value)
+		{
+			System.IO.MemoryStream MS = new System.IO.MemoryStream (value);
+			byte[] guidBytes = new byte[16];
+			MS.Read (guidBytes, 0, 16);
+			Guid guid = new Guid (guidBytes);
+			byte[] payload = new byte[value.Length - 16];
+			MS.Read (payload, 0, value.Length - 16);
+			return attribs [guid].Deserialize (payload);
 		}
 	}
 }

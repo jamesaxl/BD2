@@ -36,10 +36,11 @@ namespace BD2.Repo.Leveldb
 		string path;
 		const string dependenciesDirectoryName = "Dependencies";
 		const string dataDirectoryName = "Data";
+		const string rawProxyDataDirectoryName = "RawProxyData";
 		const string topLevelsDirectoryName = "TopLevel";
 		const string metaDirectoryName = "Meta";
 		const string indexDirectoryName = "Index";
-		LevelDB.DB ldependencies, ldata, ltopLevels, lmeta, lindex;
+		LevelDB.DB ldependencies, ldata, lrawProxyData, ltopLevels, lmeta, lindex;
 
 		LevelDB.DB OpenLevelDB (string directoryName)
 		{
@@ -58,6 +59,7 @@ namespace BD2.Repo.Leveldb
 			this.path = path;
 			lmeta = OpenLevelDB (metaDirectoryName);
 			ldata = OpenLevelDB (dataDirectoryName);
+			lrawProxyData = OpenLevelDB (rawProxyDataDirectoryName);
 			ldependencies = OpenLevelDB (dependenciesDirectoryName);
 			ltopLevels = OpenLevelDB (topLevelsDirectoryName);
 			lindex = OpenLevelDB (indexDirectoryName);
@@ -194,8 +196,30 @@ namespace BD2.Repo.Leveldb
 				return new Guid (lmeta.GetRaw ("Guid"));
 			}
 		}
-		#endregion
-		#region implemented abstract members of ChunkRepository
+
+		public override void PushRawProxyData (byte[] index, byte[] value)
+		{
+			if (index == null)
+				throw new ArgumentNullException ("index");
+			if (value == null)
+				throw new ArgumentNullException ("value");
+			lrawProxyData.Put (index, value);
+		}
+
+		public override byte[] PullRawProxyData (byte[] chunkID)
+		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			return lrawProxyData.GetRaw (chunkID);
+		}
+
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateRawProxyData ()
+		{
+			IEnumerator<KeyValuePair <byte[],byte[]>> enumerator = lrawProxyData.GetRawEnumerator ();
+			while (enumerator.MoveNext ())
+				yield return enumerator.Current;
+		}
+
 		public override void PushIndex (byte[] index, byte[] value)
 		{
 			if (index == null)

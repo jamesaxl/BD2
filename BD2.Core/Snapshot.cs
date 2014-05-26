@@ -33,6 +33,30 @@ namespace BD2.Core
 {
 	public sealed class Snapshot : Serializable, IComparable<Snapshot>
 	{
+		RawProxy.RawProxyCollection rpc = new BD2.RawProxy.RawProxyCollection ();
+
+		public RawProxy.RawProxyCollection GetRawProxies ()
+		{
+			return rpc;
+		}
+
+		object syncVolatileData = new object ();
+		SortedSet<BaseDataObject> volatileData = new SortedSet<BaseDataObject> ();
+
+		public void AddVolatileData (BaseDataObject objRef)
+		{
+			lock (syncVolatileData)
+				volatileData.Add (objRef);
+		}
+
+		public SortedSet<BaseDataObject> GetVolatileData ()
+		{
+			lock (syncVolatileData) {
+				SortedSet<BaseDataObject> oldSet = volatileData;
+				volatileData = new SortedSet<BaseDataObject> ();
+				return oldSet;
+			}
+		}
 
 		public override void Serialize (System.IO.Stream stream)
 		{
@@ -111,39 +135,5 @@ namespace BD2.Core
 			return other.name.CompareTo (name);
 		}
 		#endregion
-		public void PutObjects (IEnumerable<BaseDataObject> objects)
-		{
-			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
-			System.IO.MemoryStream MSID = new System.IO.MemoryStream ();
-			SortedSet<byte[]> dependencies = new SortedSet<byte[]> (BD2.Common.ByteSequenceComparer.Shared);
-			foreach (BaseDataObject bdo in objects) {
-				foreach (BaseDataObject dependency in bdo.GetDependenies ()) {
-					if (!dependencies.Contains (dependency.GetPersistentUniqueObjectID ()))
-						dependencies.Add (dependency.GetPersistentUniqueObjectID ());
-				}
-				MS.Write (bdo.ObjectType.ToByteArray (), 0, 16);
-				System.IO.MemoryStream MST = new System.IO.MemoryStream ();
-				bdo.Serialize (MST);
-				byte[] bytes = MST.ToArray ();
-				MS.Write (bytes, 0, bytes.Length);
-				MSID.Write (bdo.ObjectID, 0, 32);
-			}
-			System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create ();
-			List<byte[]> deps = new List<byte[]> (dependencies);
-			Console.WriteLine ("Writing {0} bytes to backend", MS.Length);
-			database.Backends.Push (sha.ComputeHash (MSID.ToArray ()), MS.ToArray (), deps.ToArray ());
-		}
-
-		public void PutObject (BaseDataObject obj)
-		{
-			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
-			List<byte[]> dependencies = new List<byte[]> ();
-			foreach (BaseDataObject dependency in obj.GetDependenies ()) {
-				dependencies.Add (dependency.GetPersistentUniqueObjectID ());
-			}
-			MS.Write (obj.ObjectType.ToByteArray (), 0, 16);
-			obj.Serialize (MS);
-			database.Backends.Push (obj.GetPersistentUniqueObjectID (), MS.ToArray (), dependencies.ToArray ());
-		}
 	}
 }
