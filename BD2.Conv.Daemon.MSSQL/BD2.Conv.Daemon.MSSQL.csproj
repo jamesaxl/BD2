@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{84598FAA-8E5D-47A9-9463-AFB5A5FAD28F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>BD2.Conv.Daemon.MSSQL</RootNamespace>
+    <AssemblyName>BD2.Conv.Daemon.MSSQL</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="Mono.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="ServiceAgent.cs" />
+    <Compile Include="Table.cs" />
+    <Compile Include="Column.cs" />
+    <Compile Include="ForeignKeyRelation.cs" />
+    <Compile Include="ServiceParameters.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\BD2.Daemon\BD2.Daemon.csproj">
+      <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>
+      <Name>BD2.Daemon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv.Frontend.Table\BD2.Conv.Frontend.Table.csproj">
+      <Project>{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}</Project>
+      <Name>BD2.Conv.Frontend.Table</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Conv\BD2.Conv.csproj">
+      <Project>{CFC2FE19-A495-44D1-9B56-E0FB316A6414}</Project>
+      <Name>BD2.Conv</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
