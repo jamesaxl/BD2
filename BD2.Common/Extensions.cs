@@ -93,6 +93,24 @@ namespace BD2.Common
 		{
 			return System.Security.Cryptography.SHA256.Create ().ComputeHash (buffer);
 		}
+
+		public static bool In<T> (this T obj, System.Collections.Generic.IEnumerable<T> enumerable)
+		{
+			foreach (T tref in enumerable) {
+				if (tref.Equals (obj))
+					return true;
+			}
+			return false;
+		}
+
+		public static bool In<T> (this T obj, params T[] enumerable)
+		{
+			foreach (T tref in enumerable) {
+				if (tref.Equals (obj))
+					return true;
+			}
+			return false;
+		}
 	}
 }
 
