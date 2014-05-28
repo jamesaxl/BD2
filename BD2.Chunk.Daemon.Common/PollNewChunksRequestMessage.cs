@@ -26,13 +26,12 @@
  * */
 using System;
 using BD2.Daemon;
-using System.Collections.Generic;
 
-namespace BD2.Chunk.Daemon
+namespace BD2.Chunk.Daemon.Common
 {
-	[ObjectBusMessageTypeIDAttribute("eacfc35a-cc3d-4d2c-a27f-669dd41894ee")]
-	[ObjectBusMessageDeserializerAttribute(typeof(TopLevelChunksRequestMessage), "Deserialize")]
-	public class TopLevelChunksRequestMessage : ObjectBusMessage
+	[ObjectBusMessageTypeIDAttribute("9998e472-0425-4457-ab86-486d91072e71")]
+	[ObjectBusMessageDeserializerAttribute(typeof(PollNewChunksRequestMessage), "Deserialize")]
+	public class PollNewChunksRequestMessage : ObjectBusMessage
 	{
 		Guid id;
 
@@ -42,42 +41,31 @@ namespace BD2.Chunk.Daemon
 			}
 		}
 
-		SortedSet<IRangedFilter> filters;
+		bool metaOnly;
 
-		public SortedSet<IRangedFilter> Filters {
+		public bool MetaOnly {
 			get {
-				return new SortedSet<IRangedFilter> (filters);
+				return metaOnly;
 			}
 		}
 
-		public TopLevelChunksRequestMessage (Guid id, SortedSet<IRangedFilter> filters)
+		public PollNewChunksRequestMessage (Guid id, bool metaOnly)
 		{
-			if (filters == null)
-				throw new ArgumentNullException ("filters");
 			this.id = id;
-			this.filters = filters;
+			this.metaOnly = metaOnly;
 		}
 
-		public static ObjectBusMessage Deserialize (byte[]bytes)
+		public static PollNewChunksRequestMessage Deserialize (byte[] bytes)
 		{
-
+			Guid id;
+			bool metaOnly;
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					Guid ID = new Guid (BR.ReadBytes (16));
-					int FilterCount = BR.ReadInt32 ();
-					SortedSet<IRangedFilter> filters = new  SortedSet<IRangedFilter> ();
-					for (int n = 0; n != FilterCount; n++) {
-						string FilterTypeName = BR.ReadString ();
-						int filterLength = BR.ReadInt32 ();
-						switch (FilterTypeName) {
-						case "List":
-							filters.Add (RangedListFilter.Deserialize (BR.ReadBytes (filterLength)));
-							break;
-						}
-					}
-					return new TopLevelChunksRequestMessage (ID, filters);
+					id = new Guid (BR.ReadBytes (16));
+					metaOnly = BR.ReadBoolean ();
 				}
 			}
+			return new PollNewChunksRequestMessage (id, metaOnly);
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
@@ -85,24 +73,17 @@ namespace BD2.Chunk.Daemon
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
-					BW.Write (filters.Count);
-					foreach (IRangedFilter IRF in filters) {
-						byte[] filter = IRF.GetMessageBody ();
-						BW.Write (IRF.FilterTypeName);
-						BW.Write (filter.Length);
-						BW.Write (filter);
-					}
-					return MS.ToArray ();
+					BW.Write (metaOnly);
 				}
-			} 
+				return MS.ToArray ();
+			}
 		}
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("eacfc35a-cc3d-4d2c-a27f-669dd41894ee");
+				return Guid.Parse ("9998e472-0425-4457-ab86-486d91072e71");
 			}
 		}
 		#endregion
 	}
 }
-

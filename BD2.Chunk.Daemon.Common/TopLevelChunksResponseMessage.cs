@@ -27,7 +27,7 @@
 using System;
 using BD2.Daemon;
 
-namespace BD2.Chunk.Daemon
+namespace BD2.Chunk.Daemon.Common
 {
 	[ObjectBusMessageTypeID("fee3227b-92b1-42e3-8f7b-a544e8e81d50")]
 	[ObjectBusMessageDeserializer(typeof(TopLevelChunksRequestMessage), "Deserialize")]

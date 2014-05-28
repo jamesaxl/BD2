@@ -1,5 +1,6 @@
 using System;
 using BD2.Chunk.Daemon;
+using BD2.Chunk.Daemon.Common;
 
 namespace BD2.BloomFilter
 {

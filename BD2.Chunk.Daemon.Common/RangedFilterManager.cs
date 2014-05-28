@@ -25,53 +25,26 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using BD2.Daemon;
+using System.Collections.Generic;
 
-namespace BD2.Chunk.Daemon
+namespace BD2.Chunk.Daemon.Common
 {
-	[ObjectBusMessageDeserializer(typeof(PollChunksResponseMessage), "Deserialize")]
-	[ObjectBusMessageTypeID("6ea5b723-0a56-45e6-b57e-c938d1b6e84f")]
-	public class PollChunksResponseMessage : ObjectBusMessage
+	public static class RangedFilterManager
 	{
-		Guid requestID;
-		Guid chunks;
+		static SortedDictionary<string , Func<byte[], IRangedFilter>> rangedFilters = new SortedDictionary<string, Func<byte[], IRangedFilter>> ();
 
-		public PollChunksResponseMessage (Guid requestID, Guid chunks)
+		public static void DeclareRangedFilter (string name, Func<byte[], IRangedFilter> deserializer)
 		{
-			this.requestID = requestID;
-			this.chunks = chunks;
-		}
-
-		public static PushChunksRequestMessage Deserialize (byte[] bytes)
-		{
-			Guid requestID;
-			Guid chunks;
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
-				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					requestID = new Guid (BR.ReadBytes (16));
-					chunks = new Guid (BR.ReadBytes (16));
-				}
-			}
-			return new PushChunksRequestMessage (requestID, chunks);
-		}
-		#region implemented abstract members of ObjectBusMessage
-		public override byte[] GetMessageBody ()
-		{
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
-				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
-					BW.Write (requestID.ToByteArray ());
-					BW.Write (chunks.ToByteArray ());
-				}
-				return MS.ToArray ();
-			}
+			lock (rangedFilters)
+				rangedFilters.Add (name, deserializer);
 		}
 
-		public override Guid TypeID {
-			get {
-				return Guid.Parse ("6ea5b723-0a56-45e6-b57e-c938d1b6e84f");
+		internal static void GetFilterDeserializer (string filterTypeName, out Func<byte[], IRangedFilter> deserializer)
+		{
+			lock (rangedFilters) {
+				deserializer = rangedFilters [filterTypeName];
 			}
 		}
-		#endregion
 	}
 }
 

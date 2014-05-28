@@ -27,11 +27,17 @@
 using System;
 using System.Collections.Generic;
 using BD2.Common;
+using BD2.Chunk.Daemon.Common;
 
 namespace BD2.Chunk.Daemon
 {
 	public class RangedListFilter : IRangedFilter
 	{
+		static RangedListFilter ()
+		{
+			Common.RangedFilterManager.DeclareRangedFilter ("List", Deserialize);
+		}
+
 		byte[] first;
 		byte[] last;
 		int skipBytes;

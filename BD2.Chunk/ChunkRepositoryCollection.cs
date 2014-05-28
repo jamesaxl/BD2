@@ -264,17 +264,37 @@ namespace BD2.Chunk
 		#region implemented abstract members of ChunkRepository
 		public override void PushRawProxyData (byte[] index, byte[] value)
 		{
-			throw new NotImplementedException ();
+			if (index == null)
+				throw new ArgumentNullException ("index");
+			if (value == null)
+				throw new ArgumentNullException ("value");
+			foreach (ChunkRepository CR in repositories)
+				CR.PushRawProxyData (index, value);
 		}
 
 		public override byte[] PullRawProxyData (byte[] index)
 		{
-			throw new NotImplementedException ();
+			if (index == null)
+				throw new ArgumentNullException ("index");
+			foreach (var Repo in GetRepositories ()) {
+				byte[] value = Repo.PullRawProxyData (index);
+				if (value != null) {
+					return value;
+				}
+			}
+			return null;
 		}
 
 		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateRawProxyData ()
 		{
-			throw new NotImplementedException ();
+			SortedSet<byte[]> temp = null;
+			foreach (ChunkRepository CR in GetRepositories()) {
+				foreach (var tup in CR.EnumerateRawProxyData ()) {
+					if (!temp.Contains (tup.Key))
+						temp.Add (tup.Key);
+					yield return tup;
+				}
+			}
 		}
 		#endregion
 	}

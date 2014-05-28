@@ -26,7 +26,7 @@
  * */
 using System;
 
-namespace BD2.Chunk.Daemon
+namespace BD2.Chunk.Daemon.Common
 {
 	public interface IRangedFilter:IComparable
 	{

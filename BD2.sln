@@ -71,6 +71,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Test.Frontend.Table", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Test.Repo.LevelDB", "BD2.Test.Repo.LevelDB\BD2.Test.Repo.LevelDB.csproj", "{1F62C8FD-73FA-4EA8-BBB7-0106EF6E292D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BD2.Chunk.Daemon.Common", "BD2.Chunk.Daemon.Common\BD2.Chunk.Daemon.Common.csproj", "{7759DDFD-E328-4788-B67C-6967E65811B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -199,6 +201,14 @@ Global
 		{6938747E-45CF-4653-99C8-5D40E436E244}.Release|Win32.Build.0 = Release|Any CPU
 		{6938747E-45CF-4653-99C8-5D40E436E244}.Release|x86.ActiveCfg = Release|Any CPU
 		{6938747E-45CF-4653-99C8-5D40E436E244}.Release|x86.Build.0 = Release|Any CPU
+		{7759DDFD-E328-4788-B67C-6967E65811B6}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{7759DDFD-E328-4788-B67C-6967E65811B6}.Debug|Win32.Build.0 = Debug|Any CPU
+		{7759DDFD-E328-4788-B67C-6967E65811B6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7759DDFD-E328-4788-B67C-6967E65811B6}.Debug|x86.Build.0 = Debug|Any CPU
+		{7759DDFD-E328-4788-B67C-6967E65811B6}.Release|Win32.ActiveCfg = Release|Any CPU
+		{7759DDFD-E328-4788-B67C-6967E65811B6}.Release|Win32.Build.0 = Release|Any CPU
+		{7759DDFD-E328-4788-B67C-6967E65811B6}.Release|x86.ActiveCfg = Release|Any CPU
+		{7759DDFD-E328-4788-B67C-6967E65811B6}.Release|x86.Build.0 = Release|Any CPU
 		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Debug|Win32.ActiveCfg = Debug|x86
 		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Debug|Win32.Build.0 = Debug|x86
 		{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}.Debug|x86.ActiveCfg = Debug|x86

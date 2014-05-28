@@ -5,10 +5,10 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C60A5077-8EFF-4791-8AA2-89A2EBE58653}</ProjectGuid>
+    <ProjectGuid>{7759DDFD-E328-4788-B67C-6967E65811B6}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>BD2.Chunk.Daemon</RootNamespace>
-    <AssemblyName>BD2.RepoDaemon</AssemblyName>
+    <RootNamespace>BD2.Chunk.Daemon.Common</RootNamespace>
+    <AssemblyName>BD2.Chunk.Daemon.Common</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -19,7 +19,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -31,36 +30,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Mono.Upnp, Version=1.0.5012.29973, Culture=neutral">
-      <Private>False</Private>
-      <Package>mono.upnp</Package>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ChunkAgent.cs" />
-    <Compile Include="RangedListFilter.cs" />
-    <Compile Include="ChunkAgentOptions.cs" />
-    <Compile Include="FilterDescriptor.cs" />
-    <Compile Include="IHashable.cs" />
+    <Compile Include="PollChunksRequestMessage.cs" />
+    <Compile Include="PollChunksResponseMessage.cs" />
+    <Compile Include="PollNewChunksRequestMessage.cs" />
+    <Compile Include="PushChunksRequestMessage.cs" />
+    <Compile Include="TopLevelChunksRequestMessage.cs" />
+    <Compile Include="TopLevelChunksResponseMessage.cs" />
+    <Compile Include="IRangedFilter.cs" />
+    <Compile Include="RangedFilterManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
-      <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
-      <Name>BD2.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
-      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
-      <Name>BD2.Chunk</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Daemon\BD2.Daemon.csproj">
       <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>
       <Name>BD2.Daemon</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk.Daemon.Common\BD2.Chunk.Daemon.Common.csproj">
-      <Project>{7759DDFD-E328-4788-B67C-6967E65811B6}</Project>
-      <Name>BD2.Chunk.Daemon.Common</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

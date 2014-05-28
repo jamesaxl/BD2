@@ -25,18 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
-using BD2.Daemon;
 using System.Collections.Generic;
+using BD2.Daemon;
 
-namespace BD2.Chunk.Daemon
+namespace BD2.Chunk.Daemon.Common
 {
-	[ObjectBusMessageTypeIDAttribute("17eb68e2-43b5-4d43-b6af-6a2fd9ac1a25")]
-	[ObjectBusMessageDeserializerAttribute(typeof(PollChunksRequestMessage), "Deserialize")]
-	public class PollChunksRequestMessage : ObjectBusMessage
+	[ObjectBusMessageTypeIDAttribute("e71158b7-ee11-44a4-aac9-8f180871554c")]
+	[ObjectBusMessageDeserializerAttribute(typeof(PushChunksRequestMessage), "Deserialize")]
+	public class PushChunksRequestMessage : ObjectBusMessage
 	{
 		Guid id;
-		bool requestData;
-		Guid chunkIDs;
 
 		public Guid ID {
 			get {
@@ -44,32 +42,31 @@ namespace BD2.Chunk.Daemon
 			}
 		}
 
-		public bool RequestData {
+		Guid chunks;
+
+		public Guid Chunks {
 			get {
-				return requestData;
+				return chunks;
 			}
 		}
 
-		public PollChunksRequestMessage (Guid id, Guid chunkIDs, bool requestData)
+		public PushChunksRequestMessage (Guid id, Guid chunks)
 		{
 			this.id = id;
-			this.requestData = requestData;
-			this.chunkIDs = chunkIDs;
+			this.chunks = chunks;
 		}
 
-		public static PollChunksRequestMessage Deserialize (byte[] bytes)
+		public static PushChunksRequestMessage Deserialize (byte[] bytes)
 		{
 			Guid id;
-			Guid chunkIDs;
-			bool requestData;
+			Guid chunks;
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					id = new Guid (BR.ReadBytes (16));
-					chunkIDs = new Guid (BR.ReadBytes (16));
-					requestData = BR.ReadBoolean ();
+					chunks = new Guid (BR.ReadBytes (16));
 				}
 			}
-			return new PollChunksRequestMessage (id, chunkIDs, requestData);
+			return new PushChunksRequestMessage (id, chunks);
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
@@ -77,8 +74,7 @@ namespace BD2.Chunk.Daemon
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
-					BW.Write (chunkIDs.ToByteArray ());
-					BW.Write (requestData);
+					BW.Write (chunks.ToByteArray ());
 				}
 				return MS.ToArray ();
 			}
@@ -86,7 +82,7 @@ namespace BD2.Chunk.Daemon
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("17eb68e2-43b5-4d43-b6af-6a2fd9ac1a25");
+				return Guid.Parse ("e71158b7-ee11-44a4-aac9-8f180871554c");
 			}
 		}
 		#endregion

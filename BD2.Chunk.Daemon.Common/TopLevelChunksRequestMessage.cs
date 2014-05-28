@@ -25,15 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
-using System.Collections.Generic;
 using BD2.Daemon;
+using System.Collections.Generic;
 
-namespace BD2.Chunk.Daemon
+namespace BD2.Chunk.Daemon.Common
 {
-	[ObjectBusMessageTypeIDAttribute("e71158b7-ee11-44a4-aac9-8f180871554c")]
-	[ObjectBusMessageDeserializerAttribute(typeof(PushChunksRequestMessage), "Deserialize")]
-	public class PushChunksRequestMessage : ObjectBusMessage
+	[ObjectBusMessageTypeIDAttribute("eacfc35a-cc3d-4d2c-a27f-669dd41894ee")]
+	[ObjectBusMessageDeserializerAttribute(typeof(TopLevelChunksRequestMessage), "Deserialize")]
+	public class TopLevelChunksRequestMessage : ObjectBusMessage
 	{
+
 		Guid id;
 
 		public Guid ID {
@@ -42,31 +43,40 @@ namespace BD2.Chunk.Daemon
 			}
 		}
 
-		Guid chunks;
+		SortedSet<IRangedFilter> filters;
 
-		public Guid Chunks {
+		public SortedSet<IRangedFilter> Filters {
 			get {
-				return chunks;
+				return new SortedSet<IRangedFilter> (filters);
 			}
 		}
 
-		public PushChunksRequestMessage (Guid id, Guid chunks)
+		public TopLevelChunksRequestMessage (Guid id, SortedSet<IRangedFilter> filters)
 		{
+			if (filters == null)
+				throw new ArgumentNullException ("filters");
 			this.id = id;
-			this.chunks = chunks;
+			this.filters = filters;
 		}
 
-		public static PushChunksRequestMessage Deserialize (byte[] bytes)
+		public static ObjectBusMessage Deserialize (byte[]bytes)
 		{
-			Guid id;
-			Guid chunks;
+
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					id = new Guid (BR.ReadBytes (16));
-					chunks = new Guid (BR.ReadBytes (16));
+					Guid ID = new Guid (BR.ReadBytes (16));
+					int FilterCount = BR.ReadInt32 ();
+					SortedSet<IRangedFilter> filters = new  SortedSet<IRangedFilter> ();
+					for (int n = 0; n != FilterCount; n++) {
+						string FilterTypeName = BR.ReadString ();
+						int filterLength = BR.ReadInt32 ();
+						Func<byte[], IRangedFilter> deserializer;
+						RangedFilterManager.GetFilterDeserializer (FilterTypeName, out deserializer);
+						filters.Add (deserializer (BR.ReadBytes (filterLength)));
+					}
+					return new TopLevelChunksRequestMessage (ID, filters);
 				}
 			}
-			return new PushChunksRequestMessage (id, chunks);
 		}
 		#region implemented abstract members of ObjectBusMessage
 		public override byte[] GetMessageBody ()
@@ -74,15 +84,21 @@ namespace BD2.Chunk.Daemon
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
-					BW.Write (chunks.ToByteArray ());
+					BW.Write (filters.Count);
+					foreach (IRangedFilter IRF in filters) {
+						byte[] filter = IRF.GetMessageBody ();
+						BW.Write (IRF.FilterTypeName);
+						BW.Write (filter.Length);
+						BW.Write (filter);
+					}
+					return MS.ToArray ();
 				}
-				return MS.ToArray ();
-			}
+			} 
 		}
 
 		public override Guid TypeID {
 			get {
-				return Guid.Parse ("e71158b7-ee11-44a4-aac9-8f180871554c");
+				return Guid.Parse ("eacfc35a-cc3d-4d2c-a27f-669dd41894ee");
 			}
 		}
 		#endregion
