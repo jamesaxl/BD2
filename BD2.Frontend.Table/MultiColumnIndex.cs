@@ -50,7 +50,7 @@ namespace BD2.Frontend.Table
 				if (IC == null)
 					throw new ArgumentException ("IndexColumn must not contain null enteries.", "IndexColumn");
 			}
-			indexColumns = ((IndexColumnBase[])indexColumns.Clone ());
+			this.indexColumns = ((IndexColumnBase[])indexColumns.Clone ());
 		}
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)

@@ -49,6 +49,22 @@ namespace BD2.Frontend.Table.Model
 		public abstract IEnumerator<IndexColumnBase> GetIndexColumns ();
 
 		public bool Unique { get { return unique; } }
+
+		public bool SignatureEquals (IndexBase index)
+		{
+			if (table.Equals (index.table)) {
+				IEnumerator<IndexColumnBase> othericbe = index.GetIndexColumns ();
+				IEnumerator<IndexColumnBase> icbe = GetIndexColumns ();
+				while (icbe.MoveNext()) {
+					if (!othericbe.MoveNext ())
+						return false;
+					if (icbe.Current != othericbe.Current)
+						return false;
+				}
+				return !othericbe.MoveNext ();
+			}
+			return false;
+		}
 	}
 }
 

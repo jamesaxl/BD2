@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using BD2.Core;
 using BD2.Frontend.Table.Model;
+using BD2.Common;
 
 namespace BD2.Frontend.Table
 {
@@ -60,6 +61,8 @@ namespace BD2.Frontend.Table
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					int sectionVersion = BR.ReadInt32 ();//unused, just in case
+					if (!sectionVersion.In (1)) 
+						throw new Exception (string.Format ("Insupported structure version, Expected {0}, Got {1}", 1, sectionVersion));
 					while (MS.Position < MS.Length) {
 						while (MS.Position < MS.Length) {
 							int payloadLength = BR.ReadInt32 ();

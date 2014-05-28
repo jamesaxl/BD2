@@ -39,7 +39,7 @@ namespace BD2.Frontend.Table
 			IndexValue OtherIV = obj as IndexValue;
 			if (OtherIV == null)
 				throw new ArgumentException ("obj must be of type IndexValue.", "obj");
-			if (!OtherIV.index.Equals (index))
+			if (!OtherIV.index.SignatureEquals (index))
 				throw new ArgumentException ("obj must have the same index signature", "obj");
 			//Row OtherRow = OtherIV.row;
 			IEnumerator<IndexColumnBase> OtherIndices = OtherIV.index.GetIndexColumns ();
@@ -55,7 +55,7 @@ namespace BD2.Frontend.Table
 //					return CompareValue;
 //				return -CompareValue;
 			}
-			return 0;
+			throw new Exception ("Index doesn't have any columns.");
 		}
 
 		IndexBase index;
