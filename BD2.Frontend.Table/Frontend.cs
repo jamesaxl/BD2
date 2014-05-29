@@ -44,9 +44,15 @@ namespace BD2.Frontend.Table
 		{
 		}
 
+		SortedDictionary<BD2.Core.Snapshot, BD2.Frontend.Table.FrontendInstance> instances = new SortedDictionary<BD2.Core.Snapshot, FrontendInstance> ();
+
 		public override BD2.Core.FrontendInstanceBase CreateInstanse (BD2.Core.Snapshot snapshot)
 		{
-			return new BD2.Frontend.Table.FrontendInstance (snapshot, this, ValueDeserializer);
+			if (instances.ContainsKey (snapshot))
+				return instances [snapshot];
+			BD2.Frontend.Table.FrontendInstance fi = new BD2.Frontend.Table.FrontendInstance (snapshot, this, ValueDeserializer);
+			instances.Add (snapshot, fi);
+			return fi;
 		}
 		#endregion
 	}

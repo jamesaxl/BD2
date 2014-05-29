@@ -47,6 +47,7 @@ namespace BD2.Core
 		{
 			lock (syncVolatileData)
 				volatileData.Add (objRef);
+			//Console.Write ("*");
 		}
 
 		public SortedSet<BaseDataObject> GetVolatileData ()

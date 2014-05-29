@@ -50,7 +50,6 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{
-			base.Serialize (stream);
 			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
 				BW.Write (indexColumn.ObjectID);
 			}

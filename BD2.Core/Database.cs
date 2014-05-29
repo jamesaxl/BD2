@@ -76,36 +76,69 @@ namespace BD2.Core
 
 		public void SaveAllSnapshots ()
 		{
-			SortedDictionary<Snapshot,SortedSet<BaseDataObject>> bdos = new SortedDictionary<Snapshot, SortedSet<BaseDataObject>> ();
+			SortedDictionary<Snapshot, SortedSet<BaseDataObject>> bdos = new SortedDictionary<Snapshot, SortedSet<BaseDataObject>> ();
 			foreach (Snapshot snapshot in snapshots) {
 				bdos.Add (snapshot, snapshot.GetVolatileData ());
 			}
 			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
-			System.IO.MemoryStream MSID = new System.IO.MemoryStream ();
+			System.IO.MemoryStream MSRP = new System.IO.MemoryStream ();
+			System.IO.BinaryWriter MSBW = new System.IO.BinaryWriter (MS);
 			SortedSet<byte[]> dependencies = new SortedSet<byte[]> (BD2.Common.ByteSequenceComparer.Shared);
+			MSBW.Write (1);
+			MSBW.Write (bdos.Count);
+			Console.WriteLine ("{0} sections", bdos.Count);
+			int n = 0;
 			foreach (var tup in bdos) {
-				MS.WriteByte (1);
+				MSBW.Write (1);
+				Console.WriteLine ("Section version is {0}", 1);
 				RawProxy.RawProxyCollection rpc = tup.Key.GetRawProxies ();
-				System.IO.MemoryStream MSRP = new System.IO.MemoryStream ();
+				MSBW.Write (rpc.Count);
+				Console.WriteLine ("Raw proxies are {0}", rpc.Count);
+				MSBW.Write (rpc.Serialize ());
+				{
+					System.IO.MemoryStream MSC = new System.IO.MemoryStream ();
+					System.IO.BinaryWriter BWC = new System.IO.BinaryWriter (MSC);
+					BWC.Write (tup.Value.Count);
+					Console.WriteLine ("{0} objects", tup.Value.Count);
+					MSRP.Write (MSC.ToArray (), 0, 4);
+				}
 				foreach (BaseDataObject bdo in tup.Value) {
+					n++;
 					foreach (BaseDataObject dependency in bdo.GetDependenies ()) {
 						if (!dependencies.Contains (dependency.GetPersistentUniqueObjectID ()))
 							dependencies.Add (dependency.GetPersistentUniqueObjectID ());
 					}
-					MSRP.Write (bdo.ObjectType.ToByteArray (), 0, 16);
 					System.IO.MemoryStream MST = new System.IO.MemoryStream ();
+					MST.Write (bdo.ObjectType.ToByteArray (), 0, 16);
 					bdo.Serialize (MST);
 					byte[] bytes = MST.ToArray ();
+					//Console.WriteLine ("Object of type {0} serialized to {1} bytes.", bdo.GetType ().FullName, bytes.Length);
+					{
+						System.IO.MemoryStream MSC = new System.IO.MemoryStream ();
+						System.IO.BinaryWriter BWC = new System.IO.BinaryWriter (MSC);
+						BWC.Write (bytes.Length);
+						Console.WriteLine ("{0} bytes", bytes.Length);
+						MSRP.Write (MSC.ToArray (), 0, 4);
+					}
+				
 					MSRP.Write (bytes, 0, bytes.Length);
-					MSID.Write (bdo.ObjectID, 0, 32);
 				}
 				byte[] encoded = rpc.ChainEncode (MSRP.ToArray ());
-				MS.Write (encoded, 0, encoded.Length);
+				Console.WriteLine ("{0} objects encoded in {1} bytes", tup.Value.Count, encoded.Length);
+				MSBW.Write (encoded.Length);
+				MSBW.Write (encoded);
 			}
 			System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create ();
 			List<byte[]> deps = new List<byte[]> (dependencies);
-			Console.WriteLine ("Writing {0} bytes to backend", MS.Length);
-			Backends.Push (sha.ComputeHash (MSID.ToArray ()), MS.ToArray (), deps.ToArray ());
+			Console.WriteLine ("Writing {0} bytes representing {1} objects to backend", MS.Length, n);
+			byte[] buf = MS.ToArray ();
+			byte[] chunkID = sha.ComputeHash (buf);
+			Backends.Push (chunkID, buf, deps.ToArray ());
+			foreach (var tup in bdos) {
+				foreach (var bdo in tup.Value) {
+					bdo.SetChunkID (chunkID);
+				}
+			}
 		}
 
 		void Load ()
@@ -116,40 +149,61 @@ namespace BD2.Core
 			foreach (var rp in backends.EnumerateRawProxyData()) {
 				rpc.Add (RawProxy.RawProxyAttribute.DeserializeFromRawData (rp.Value));
 			}
-			foreach (var tup in new SortedSet<byte[]>(pendingData, BD2.Common.ByteSequenceComparer.Shared)) {
-				byte[][] deps = backends.PullDependencies (tup);
-				foreach (byte[] dep in deps) {
-					if (!loaded.Contains (dep)) {
-						deps = null;
-						break;
+			while (pendingData.Count != 0)
+				foreach (var tup in new SortedSet<byte[]>(pendingData, BD2.Common.ByteSequenceComparer.Shared)) {
+					byte[] nchunk = tup;
+					while (loaded.Contains (nchunk)) {
+						byte[][] deps = backends.PullDependencies (nchunk);
+						foreach (byte[] dep in deps) {
+							if (pendingData.Contains (dep)) {
+								nchunk = dep;
+								break;
+							}
+						}
 					}
-				}
-				if (deps == null)
-					continue;
-				byte[] chunkData = backends.PullData (tup);
-				System.IO.MemoryStream MS = new System.IO.MemoryStream (chunkData);
-				System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
-				int chunkVersion = BR.ReadInt32 ();
+					byte[] chunkData = backends.PullData (nchunk);
+					LoadChunk (nchunk, chunkData, rpc);
+					loaded.Add (nchunk);
+					pendingData.Remove (nchunk);
+				}	
+		}
+
+		void LoadChunk (byte[] chunkID, byte[] chunkData, RawProxy.RawProxyCollection rpc)
+		{
+			Console.WriteLine ("Pulled a chunk with a size of {0}", chunkData.Length);
+			System.IO.MemoryStream MS = new System.IO.MemoryStream (chunkData);
+			System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
+			int chunkVersion = BR.ReadInt32 ();
+			int sectionCount = BR.ReadInt32 ();
+			for (int sectionID =  0; sectionID != sectionCount; sectionID++) {
 				switch (chunkVersion) {
 				case 1:
-					while (MS.Position < MS.Length) {
+					int SectionVersion = BR.ReadInt32 ();
+					switch (SectionVersion) {
+					case 1:
 						int proxyCount = BR.ReadInt32 ();
+						Console.WriteLine ("Payload is encoded with {0} proxies.", proxyCount);
 						System.Collections.Generic.List<byte[]> proxies = new List<byte[]> ();
 						for (int n = 0; n != proxyCount; n++) {
 							proxies.Add (BR.ReadBytes (20));
 						}
 						int payloadLength = BR.ReadInt32 ();
 						byte[] payload = BR.ReadBytes (payloadLength);
+						Console.WriteLine ("The payload[{0}] is {1} bytes.", sectionID, payloadLength);
 						byte[] decodedPayload = rpc.ChainDecode (payload, proxies.ToArray ());
+						Console.WriteLine ("Trying to deserialize in {0} frontends.", frontendInstances.Count);
 						foreach (FrontendInstanceBase fib in frontendInstances)
-							fib.CreateObjects (decodedPayload);
+							fib.CreateObjects (chunkID, decodedPayload);
+						break;
+					default:
+						throw new Exception ("This version of BD2 does not support the version of data provided.");						
 					}
 					break;
 				default:
 					throw new Exception ("This version of BD2 does not support the version of data provided.");
 				}
-				pendingData.Remove (tup);
 			}
+
 		}
 
 		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends, string name)

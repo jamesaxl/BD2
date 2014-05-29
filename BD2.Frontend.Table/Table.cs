@@ -31,6 +31,7 @@ using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
+	[BaseDataObjectTypeIdAttribute("3be06a16-6727-4639-b702-060b522af660", typeof(Table), "Deserialize")]
 	public class Table : Model.Table
 	{
 		public class Comparer : IComparer<Table>

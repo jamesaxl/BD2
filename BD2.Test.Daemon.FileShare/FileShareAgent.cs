@@ -71,14 +71,13 @@ namespace BD2.Test.Daemon.FileShare
 					}
 				}
 				while (true) {
-					FileShareMessage fileShareMessace;
+					FileShareMessage fileShareMessage;
 					mre_fileReceived.WaitOne (10);
-					while (files.TryDequeue (out fileShareMessace)) {
+					while (files.TryDequeue (out fileShareMessage)) {
 						mre_fileReceived.Reset ();
 						Console.Write ("server has shared a file: ");
-						Console.WriteLine (fileShareMessace.Text);
-						using (TransparentStream s = OpenStream (fileShareMessace.StreamID)) {
-							bool CR = s.CanRead;
+						Console.WriteLine (fileShareMessage.Text);
+						using (TransparentStream s = OpenStream (fileShareMessage.StreamID)) {
 							Console.Write ("path to save: ");
 							s.CopyTo (File.OpenWrite (MainClass.ConsoleReadLine ()), 64, 512);	
 						}

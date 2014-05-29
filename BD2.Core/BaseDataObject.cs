@@ -29,7 +29,7 @@ namespace BD2.Core
 			this.chunkID = chunkID;
 		}
 
-		protected void SetChunkID (byte[] newChunkID)
+		internal void SetChunkID (byte[] newChunkID)
 		{
 			if (newChunkID == null)
 				throw new ArgumentNullException ("newChunkID");
@@ -54,7 +54,7 @@ namespace BD2.Core
 		{
 			int IComparer<BaseDataObject>.Compare (BaseDataObject x, BaseDataObject y)
 			{
-				return y.ObjectID.CompareTo (x.ObjectID);
+				return  ByteSequenceComparer.Shared.Compare (x.ObjectID, y.ObjectID);
 			}
 		}
 
@@ -75,7 +75,7 @@ namespace BD2.Core
 			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
 			Serialize (MS);
 			puoid = MS.ToArray ().SHA256 ();
-			return GetPersistentUniqueObjectID ();
+			return puoid;
 		}
 
 		public byte[] ObjectID {
@@ -90,7 +90,7 @@ namespace BD2.Core
 		{
 			if (other == null)
 				throw new ArgumentNullException ("other");
-			int R = other.ObjectID.CompareTo (ObjectID);
+			int R = ByteSequenceComparer.Shared.Compare (ObjectID, other.ObjectID);
 			if (R == 0) {
 				R = other.Frontend.CompareTo (Frontend);
 			}

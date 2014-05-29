@@ -163,7 +163,6 @@ namespace BD2.Daemon
 			if (reader == null)
 				throw new ArgumentNullException ("reader");
 			int l = reader.ReadInt32 ();
-			Console.WriteLine ("reading {0} bytes from wire", l);
 			byte[] buf = reader.ReadBytes (l);
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -183,7 +182,6 @@ namespace BD2.Daemon
 			int totalBytes = 0;
 			for (int n = 0; n != bytes.Length; n++)
 				totalBytes += bytes [n].Length;
-			Console.WriteLine ("sending {0} bytes on wire", totalBytes);
 			writer.Write (totalBytes);
 			for (int n = 0; n != bytes.Length; n++)
 				writer.Write (bytes [n]);

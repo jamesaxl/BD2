@@ -40,9 +40,11 @@ namespace BD2.CLI
 		{
 			//yes, it's just this simple for now.
 			lock (lock_query) {
-				if (initial.Count != 0)
-					return initial.Dequeue ();
 				Console.Write (message + " ");
+				if (initial.Count != 0) {
+					Console.WriteLine (initial.Peek ());
+					return initial.Dequeue ();
+				}
 				return Console.ReadLine ();
 			}
 		}
@@ -83,6 +85,7 @@ namespace BD2.CLI
 
 		public static void Main (string[] args)
 		{
+			System.Threading.ThreadPool.SetMinThreads (64, 16);
 			if (args.Length == 1)
 				foreach (string str in System.IO.File.ReadAllLines (args[0]))
 					initial.Enqueue (str);
@@ -192,6 +195,7 @@ namespace BD2.CLI
 						BD2.Daemon.ServiceManager SM = new BD2.Daemon.ServiceManager (OB);
 						SM.AnounceReady ();
 						SM.WaitForRemoteReady ();
+
 						Guid serviceType_SQL = Guid.Parse ("57ce8883-1010-41ec-96da-41d36c64d65d");
 						var RS = SM.EnumerateRemoteServices ();
 						BD2.Daemon.ServiceAnnounceMessage TSA = null;

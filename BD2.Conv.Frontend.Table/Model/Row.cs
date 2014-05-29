@@ -57,24 +57,78 @@ namespace BD2.Conv.Frontend.Table
 				throw new ArgumentNullException ("fields");
 			this.columnSet = columnSet;
 			this.fields = fields;
+			if (columnSet.Columns.Length != fields.Length)
+				throw new Exception ();
+
 		}
 
-		public byte[] Serialize (Func<System.IO.Stream, byte[]> createStream)
+		public byte[] Serialize ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
-				using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (MS)) {
-					BW.Write (columnSet.ID.ToByteArray ());
-					BW.Write (FieldCount);
+				using (System.IO.BinaryWriter bw = new System.IO.BinaryWriter (MS)) {
+					bw.Write (columnSet.GetHash ());
+					bw.Write (FieldCount);
 					for (int n = 0; n != FieldCount; n++) {
-						if (fields [n] == null) {
-							BW.Write (1);
-						} else if (fields [n] is System.IO.Stream) {
-							BW.Write (2);
-							BW.Write (createStream ((System.IO.Stream)fields [n]));
-						} else {
-							BW.Write (0);
-							BW.Write (((byte[])fields [n]).Length);
-							BW.Write ((byte[])fields [n]);
+						bw.Write ((fields [n] == null) || (fields [n] == DBNull.Value));
+						if ((fields [n] != null) && (fields [n] != DBNull.Value)) {
+							//Console.WriteLine ("Column {0} contains {1}", n, values [n]);
+							switch (columnSet.Columns [n].TFQN) {
+							case "System.Byte":
+								bw.Write ((byte)fields [n]);
+								break;
+							case "System.Byte[]":
+								bw.Write (((byte[])fields [n]).Length);
+								bw.Write ((byte[])fields [n]);
+								break;
+							case "System.SByte":
+								bw.Write ((sbyte)fields [n]);
+								break;
+							case "System.Int16":
+								bw.Write ((short)fields [n]);
+								break;
+							case "System.UInt16":
+								bw.Write ((ushort)fields [n]);
+								break;
+							case "System.Int32":
+								bw.Write ((int)fields [n]);
+								break;
+							case "System.UInt32":
+								bw.Write ((uint)fields [n]);
+								break;
+							case "System.Int64":
+								bw.Write ((long)fields [n]);
+								break;
+							case "System.UInt64":
+								bw.Write ((ulong)fields [n]);
+								break;
+							case "System.Single":
+								bw.Write ((float)fields [n]);
+								break;
+							case "System.Double":
+								bw.Write ((double)fields [n]);
+								break;
+							case "System.String":
+								bw.Write ((string)fields [n]);
+								break;
+							case "System.Char":
+								bw.Write ((char)fields [n]);
+								break;
+							case "System.Guid":
+								bw.Write (((Guid)fields [n]).ToByteArray ());
+								break;
+							case "System.Boolean":
+								bw.Write ((bool)fields [n]);
+								break;
+							case "System.DateTime":
+								if (fields [n] is string) {
+									bw.Write ((DateTime.Parse ((string)fields [n])).Ticks);
+								} else {
+									bw.Write (((DateTime)fields [n]).Ticks);
+								}
+								break;
+							default:
+								throw new Exception (string.Format ("Type {0} is undefined", columnSet.Columns [n].TFQN));
+							}
 						}
 					}
 				}
@@ -82,16 +136,36 @@ namespace BD2.Conv.Frontend.Table
 			}
 		}
 
-		public static Row Deserialize (byte[] bytes, Func<Guid, ColumnSet> getColumnSet)
+		static System.Collections.Concurrent.ConcurrentDictionary<byte[], ColumnSet> css = new System.Collections.Concurrent.ConcurrentDictionary<byte[], ColumnSet> 
+			(BD2.Common.ByteSequenceComparer.Shared);
+
+		public static void AddColumnSet (ColumnSet columnSet)
+		{
+			css.AddOrUpdate (columnSet.GetHash (), (hash) => columnSet, (hash,ocs) => {
+				throw new Exception ();
+			});
+		}
+
+		public static Row Deserialize (byte[] bytes)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					Guid columnSet = new Guid (BR.ReadBytes (16));
-					object[] fields = new object[BR.ReadInt32 ()];
-					ColumnSet cs = getColumnSet (columnSet);
-					int n = 0;
-					foreach (Column col in cs.Columns) {
-						switch (col.TFQN) {
+					byte[] columnSet = BR.ReadBytes (32);
+					int FieldCount = BR.ReadInt32 ();
+					object[] fields = new object[FieldCount];
+					ColumnSet cs = css [columnSet];
+					if (cs.Columns.Length != fields.Length)
+						throw new Exception ();
+					for (int n = 0; n != fields.Length; n++) {
+						bool Null = BR.ReadBoolean ();
+						if (Null) {
+							fields [n] = null;
+							continue;
+						}
+						switch (cs.Columns [n].TFQN) {
+						case "System.Byte[]":
+							fields [n] = BR.ReadBytes (BR.ReadInt32 ());
+							break;
 						case "System.Byte":
 							fields [n] = BR.ReadByte ();
 							break;
@@ -122,22 +196,26 @@ namespace BD2.Conv.Frontend.Table
 						case "System.Double":
 							fields [n] = BR.ReadDouble ();
 							break;
-						case "System.Boolean":
-							fields [n] = BR.ReadBoolean ();
+						case "System.String":
+							fields [n] = BR.ReadString ();
 							break;
 						case "System.Char":
 							fields [n] = BR.ReadChar ();
 							break;
-						case "System.String":
-							fields [n] = BR.ReadString ();
+						case "System.Boolean":
+							fields [n] = BR.ReadBoolean ();
+							break;
+						case "System.DateTime":
+							fields [n] = new DateTime (BR.ReadInt64 ());
+							break;
+						case "System.Guid":
+							fields [n] = new Guid (BR.ReadBytes (16));
 							break;
 						}
 					}
-					//todo: deserialize
 					return new Row (cs, fields);
 				}
 			}
 		}
 	}
 }
-

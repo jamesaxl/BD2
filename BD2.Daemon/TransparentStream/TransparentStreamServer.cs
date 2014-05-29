@@ -37,7 +37,6 @@ namespace BD2.Daemon
 
 		public void EnqueueRequest (TransparentStreamMessageBase transparentStreamMessageBase)
 		{
-			Console.WriteLine ("Enqueue:{0}", transparentStreamMessageBase.GetType ());
 			if (transparentStreamMessageBase == null)
 				throw new ArgumentNullException ("transparentStreamMessageBase");
 			if (transparentStreamMessageBase is TransparentStreamCanReadRequestMessage) {
@@ -107,16 +106,12 @@ namespace BD2.Daemon
 		#region "Callbacks"
 		void TransparentStreamCanReadRequestMessageReceived (TransparentStreamMessageBase transparentStreamMessageBase)
 		{
-			Console.WriteLine ("TransparentStreamCanReadRequestMessageReceived()");
 			TransparentStreamCanReadRequestMessage request = (TransparentStreamCanReadRequestMessage)transparentStreamMessageBase;
 			Exception exception = null;
 			bool canRead = false;
 			try {
-				Console.WriteLine ("Trying baseStream.CanRead()");
 				canRead = baseStream.CanRead;
-				Console.WriteLine ("Success @ baseStream.CanRead()");
 			} catch (Exception ex) {
-				Console.WriteLine ("Failed @ baseStream.CanRead()");
 				exception = ex;
 			}
 			objectBusSession.SendMessage (new TransparentStreamCanReadResponseMessage (streamID, request.ID, canRead, exception));

@@ -64,9 +64,11 @@ namespace BD2.Conv.Daemon.MSSQL
 			tfqns.Add (239, "System.String");
 			tfqns.Add (175, "System.String");
 			tfqns.Add (104, "System.Boolean");
+			tfqns.Add (34, "System.Byte[]");
 			tfqns.Add (36, "System.Guid");
 			tfqns.Add (41, "System.DateTime");
 			tfqns.Add (42, "System.DateTime");
+			tfqns.Add (43, "System.DateTime");
 			tfqns.Add (61, "System.DateTime");
 
 		}
@@ -105,171 +107,58 @@ namespace BD2.Conv.Daemon.MSSQL
 			ObjectBusSession.SendMessage (response);
 		}
 
-		class ReadRowsDataContext {
-			SqlConnection connection;
-
-			public SqlConnection Connection {
-				get {
-					return connection;
-				}
-			}
-
-			SqlCommand command;
-
-			public SqlCommand Command {
-				get {
-					return command;
-				}
-			}
-
-			SqlDataReader reader;
-
-			public SqlDataReader Reader {
-				get {
-					return reader;
-				}
-			}
-			IStream stream;
-
-			public IStream Stream {
-				get {
-					return stream;
-				}
-			}
-			Table table;
-
-			public Table Table {
-				get {
-					return table;
-				}
-			}
-
-			public ReadRowsDataContext(SqlConnection connection, SqlCommand command, SqlDataReader reader, Table table, IStream stream) {
-				if (connection == null)
-					throw new ArgumentNullException ("connection");
-				if (command == null)
-					throw new ArgumentNullException ("command");
-				if (reader == null)
-					throw new ArgumentNullException ("reader");
-				if (table == null)
-					throw new ArgumentNullException ("table");
-				if (stream == null)
-					throw new ArgumentNullException ("stream");
-				this.connection = connection;
-				this.command = command;
-				this.reader = reader;
-				this.table = table;
-				this.stream = stream;
-			}
-		}
-			 
 		void GetRowsRequestMessageReceived (ObjectBusMessage obj)
 		{
 			Console.WriteLine ("GetRowsRequestMessageReceived()");
 			GetRowsRequestMessage request = (GetRowsRequestMessage)obj;
 			GetRowsResponseMessage response;
-			StreamPair SP = new StreamPair ();
-			GC.SuppressFinalize (SP);
-			Guid StreamID = CreateStream (SP.GetOStream ());
-			IStream inStream = SP.GetIStream ();
 			Table table;
 			lock (tables)
 				table = (Table)psc.GetTableByID (request.TableID);
 			Console.WriteLine (table.Name);
-			//try {
-				SqlConnection conn_Rows = new SqlConnection (connectionString);
+			try {
+
+			SqlConnection conn_Rows = new SqlConnection (connectionString);
+			try {
 				conn_Rows.Open ();
-				SqlCommand cmdSelect = new SqlCommand (string.Format ("Select * from [{0}]", table.Name), conn_Rows);
-				cmdSelect.CommandTimeout *= 30; 
-				System.Threading.Thread t_read = new System.Threading.Thread (readRowsData);
-				t_read.Start (new ReadRowsDataContext (conn_Rows, cmdSelect, cmdSelect.ExecuteReader (), table, inStream));
-				response = new GetRowsResponseMessage (request.ID, StreamID, null);
-			//} catch (Exception ex) {
-//				DestroyStream (StreamID);
-//				response = new GetRowsResponseMessage (request.ID, Guid.Empty, ex);
-			//}
+			} catch {                    //retry once
+				conn_Rows.Open ();
+			}
+
+			SqlCommand cmdSelect = new SqlCommand (string.Format ("Select * from [{0}]", table.Name), conn_Rows);
+			cmdSelect.CommandTimeout *= 30; 
+			response = new GetRowsResponseMessage (request.ID, readRowsData (conn_Rows, cmdSelect, cmdSelect.ExecuteReader (), table), null);
+			} catch (Exception ex) {
+				response = new GetRowsResponseMessage (request.ID, new List<BD2.Conv.Frontend.Table.Row>(), ex);
+			}
 			ObjectBusSession.SendMessage (response);
 			Console.WriteLine ("Sent GetRowsResponseMessage.");
 		}
 
-		void readRowsData(object arg)
+		List<BD2.Conv.Frontend.Table.Row> readRowsData(SqlConnection connection, SqlCommand command, SqlDataReader reader, Table table)
 		{
 			Console.WriteLine ("readRowsData()");
-			ReadRowsDataContext context = (ReadRowsDataContext)arg;
-			System.IO.BinaryWriter bw = new System.IO.BinaryWriter (context.Stream);
-			object[] values = new object[context.Reader.FieldCount];
+			List<BD2.Conv.Frontend.Table.Row> rows = new List<BD2.Conv.Frontend.Table.Row> ();
+			object[] values;
 			//SortedDictionary<string, Column> table = tableColumns [context.Table.SqlTableID];
-			string[] rowTFQNs = new string[context.Reader.FieldCount];
-			BD2.Conv.Frontend.Table.Column[] cols =  new BD2.Conv.Frontend.Table.Column[context.Reader.FieldCount];
-			for (int n = 0; n != context.Reader.FieldCount; n++) {
-				cols [n] = psc.GetColumnByName (context.Table, context.Reader.GetName (n));
+			string[] rowTFQNs = new string[reader.FieldCount];
+			BD2.Conv.Frontend.Table.Column[] cols =  new BD2.Conv.Frontend.Table.Column[reader.FieldCount];
+			for (int n = 0; n != reader.FieldCount; n++) {
+				cols [n] = psc.GetColumnByName (table, reader.GetName (n));
 				rowTFQNs [n] = cols[n].TFQN;
 			}
 			int rc = 0;
-			while (context.Reader.Read ()) {
+			ColumnSet columnSet = new ColumnSet (cols);
+			while (reader.Read ()) {
 				rc++;
-				context.Reader.GetValues (values);
-				for (int n = 0; n != context.Reader.FieldCount; n++) {
-					bw.Write ((values [n] == null) || (values [n] == DBNull.Value));
-					if ((values [n] != null) && (values [n] != DBNull.Value)) {
-						//todo: use tfqn array instead
-						switch (rowTFQNs [n]) {
-						case "System.Byte":
-							bw.Write ((byte)values [n]);
-							break;
-						case "System.Byte[]":
-							bw.Write (((byte[])values [n]).Length);
-							bw.Write ((byte[])values [n]);
-							break;
-						case "System.SByte":
-							bw.Write ((sbyte)values [n]);
-							break;
-						case "System.Int16":
-							bw.Write ((short)values [n]);
-							break;
-						case "System.UInt16":
-							bw.Write ((ushort)values [n]);
-							break;
-						case "System.Int32":
-							bw.Write ((int)values [n]);
-							break;
-						case "System.UInt32":
-							bw.Write ((uint)values [n]);
-							break;
-						case "System.Int64":
-							bw.Write ((long)values [n]);
-							break;
-						case "System.UInt64":
-							bw.Write ((ulong)values [n]);
-							break;
-						case "System.Single":
-							bw.Write ((float)values [n]);
-							break;
-						case "System.Double":
-							bw.Write ((double)values [n]);
-							break;
-						case "System.String":
-							bw.Write ((string)values [n]);
-							break;
-						case "System.Char":
-							bw.Write ((char)values [n]);
-							break;
-						case "System.Boolean":
-							bw.Write ((bool)values [n]);
-							break;
-						}
-					}
-				}
-				if ((rc % 1000) == 0) {
-					Console.Write (".");
-					for (int n =0; n != values.Length; n++) {
-						Console.Write ("{0}:{1}\t", cols[n].Name, values[n]);
-					}
-					Console.WriteLine ();
-				}
+				values = new object[reader.FieldCount];
+				reader.GetValues (values);
+				BD2.Conv.Frontend.Table.Row r = new BD2.Conv.Frontend.Table.Row (columnSet, values);
+				rows.Add (r);
 			}
-
-			Console.WriteLine (rc);
+			reader.Close ();
+			connection.Close ();
+			return rows;
 		}
 		void GetForeignKeyRelationsRequestMessageReceived (ObjectBusMessage obj)
 		{
@@ -417,7 +306,7 @@ namespace BD2.Conv.Daemon.MSSQL
 							if (tfqns.ContainsKey (ColumnType))
 								tfqn = tfqns [ColumnType];
 							else
-								Console.WriteLine ("typeof({0}) is not known.", ColumnName);
+								Console.WriteLine ("typeof({0}) which is {1} is not known.", ColumnName, ColumnType);
 							Column column = new Column (Guid.NewGuid (), ColumnName, !ColumnNullable, ColumnLength, tfqn, ColumnOrder);
 							returnColumns.Add (column);
 							psc.AddColumn (tables [tableID], column);

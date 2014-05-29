@@ -50,7 +50,7 @@ namespace BD2.Daemon
 			if (buffer.TryDequeue (out bytes)) {
 				return bytes;
 			}
-			iStream.Flush ();
+			iStream.wait ();
 			if (buffer.TryDequeue (out bytes)) {
 				return bytes;
 			}

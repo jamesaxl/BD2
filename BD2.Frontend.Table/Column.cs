@@ -30,8 +30,7 @@ using BD2.Daemon;
 
 namespace BD2.Frontend.Table
 {
-	[ObjectBusMessageTypeID("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60")]
-	[ObjectBusMessageDeserializer(typeof(Column), "Deserialize")]
+	[BaseDataObjectTypeIdAttribute("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60", typeof(Column), "Deserialize")]
 	public class Column : Model.Column
 	{
 		internal Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, Type type, bool allowNull, long length)

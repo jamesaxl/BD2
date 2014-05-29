@@ -34,6 +34,7 @@ namespace BD2.Daemon
 	/// </summary>
 	public sealed class IStream : Stream
 	{
+		System.Threading.AutoResetEvent arew = new System.Threading.AutoResetEvent (false);
 		StreamPair streamPair;
 		MemoryStream bufferStream = new MemoryStream ();
 
@@ -52,7 +53,6 @@ namespace BD2.Daemon
 		#region implemented abstract members of Stream
 		public override void Flush ()
 		{
-			Console.WriteLine ("IStream.Flush({0})", bufferStream.Position);
 			byte[] bytes = bufferStream.ToArray ();
 			bufferStream = new MemoryStream ();
 			streamPair.Enqueue (bytes);
@@ -73,17 +73,20 @@ namespace BD2.Daemon
 			throw new NotSupportedException ();
 		}
 
+		int tw = 0;
+
 		public override void Write (byte[] buffer, int offset, int count)
 		{
+			tw += count;
 			bufferStream.Write (buffer, offset, count);
-			if (bufferStream.Position > 4096) {
+			arew.Set ();
+			if (bufferStream.Length > 4096) {
 				Flush ();
 			}
 		}
 
 		public override bool CanRead {
 			get {
-				Console.WriteLine ("****************************************************WRONG STREAM");
 				return false;
 			}
 		}
@@ -114,7 +117,16 @@ namespace BD2.Daemon
 				throw new NotSupportedException ();
 			}
 		}
+
+		public override void Close ()
+		{
+			base.Close ();
+		}
 		#endregion
+		public void wait ()
+		{
+			arew.WaitOne ();
+		}
 	}
 }
 

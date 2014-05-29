@@ -57,7 +57,13 @@ namespace BD2.Test.Daemon.StreamPair
 			#endif
 			StreamPairMessage StreamPairMessage = (StreamPairMessage)message;
 			Stream stream = OpenStream (StreamPairMessage.StreamID);
-			Console.WriteLine ("********************************************{0}", stream.CanRead);
+			System.IO.BinaryReader BR = new BinaryReader (stream);
+			byte[] buf = BR.ReadBytes (BR.ReadInt32 ());
+			byte[] hash = System.Security.Cryptography.SHA1.Create ().ComputeHash (buf);
+			for (int n = 0; n != hash.Length; n++)
+				Console.Write ("{0:X2}", hash [n]);
+			Console.WriteLine ();
+
 		}
 
 		void SendStreamPairMessage (Stream stream)
@@ -69,6 +75,17 @@ namespace BD2.Test.Daemon.StreamPair
 			ObjectBusSession.SendMessage (new StreamPairMessage (CreateStream (stream)));
 		}
 		#region implemented abstract members of ServiceAgent
+		static void SendObject (BinaryWriter bw, string path)
+		{
+			byte[] buf = System.IO.File.ReadAllBytes (path);
+			bw.Write (buf.Length);
+			bw.Write (buf);
+			byte[] hash = System.Security.Cryptography.SHA1.Create ().ComputeHash (buf);
+			for (int n = 0; n != hash.Length; n++)
+				Console.Write ("{0:X2}", hash [n]);
+			Console.WriteLine ();
+		}
+
 		protected override void Run ()
 		{
 			#if TRACE
@@ -81,6 +98,12 @@ namespace BD2.Test.Daemon.StreamPair
 				DateTime t1 = DateTime.UtcNow;
 				BD2.Daemon.StreamPair SP = new BD2.Daemon.StreamPair ();
 				SendStreamPairMessage (SP.GetOStream ());
+				System.IO.BinaryWriter BW = new BinaryWriter (SP.GetIStream ());
+				SendObject (BW, "/home/behrooz/The unix haters handbook.pdf");
+				SendObject (BW, "/home/behrooz/john_1.7.8.orig.tar.gz");
+				SendObject (BW, "/home/behrooz/Flag_Register_of_80386.PNG");
+				SendObject (BW, "/home/behrooz/BD2.Arch.odg");
+
 				Flush ();
 				Console.WriteLine ("Done in {0}", (DateTime.UtcNow - t1).TotalMilliseconds);
 				//Destroy ();

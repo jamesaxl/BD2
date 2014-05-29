@@ -34,7 +34,6 @@ namespace BD2.Frontend.Table
 {
 	public class FrontendInstance : BD2.Frontend.Table.Model.FrontendInstance
 	{
-		SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> typeDescriptors = new SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> ();
 		SortedDictionary<byte[], Row> rows = new SortedDictionary<byte[], Row> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], Table> tables = new SortedDictionary<byte[], Table> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], Relation> relations = new SortedDictionary<byte[], Relation> (BD2.Common.ByteSequenceComparer.Shared);
@@ -56,19 +55,26 @@ namespace BD2.Frontend.Table
 			this.valueSerializer = valueSerializer;
 		}
 		#region implemented abstract members of FrontendInstanceBase
-		protected override void OnCreateObjects (byte[] bytes)
+		protected override void OnCreateObjects (byte[] chunkID, byte[] bytes)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					int sectionVersion = BR.ReadInt32 ();//unused, just in case
-					if (!sectionVersion.In (1)) 
-						throw new Exception (string.Format ("Insupported structure version, Expected {0}, Got {1}", 1, sectionVersion));
-					while (MS.Position < MS.Length) {
-						while (MS.Position < MS.Length) {
-							int payloadLength = BR.ReadInt32 ();
-							Guid objectTypeID = new Guid (BR.ReadBytes (16));
-							BaseDataObjectTypeIdAttribute typeDescriptor = typeDescriptors [objectTypeID];
-							typeDescriptor.Deserialize (BR.ReadBytes (payloadLength));
+					int objectCount = BR.ReadInt32 ();
+					Console.WriteLine ("Deserializing {0} objects", objectCount);
+					for (int n = 0; n != objectCount; n++) {
+						int objectLengeth = BR.ReadInt32 ();
+						Guid objectTypeID = new Guid (BR.ReadBytes (16));
+						BaseDataObjectTypeIdAttribute typeDescriptor = BaseDataObjectTypeIdAttribute.GetAttribFor (objectTypeID);
+						BaseDataObject BDO = typeDescriptor.Deserialize (this, chunkID, BR.ReadBytes (objectLengeth));
+						Console.WriteLine (BDO.GetType ().FullName);
+						if (BDO is Table) {
+							tables.Add (BDO.ObjectID, (Table)BDO);
+						} else if (BDO is Column) {
+							columns.Add (BDO.ObjectID, (Column)BDO);
+						} else if (BDO is ColumnSet) {
+							columnSets.Add (BDO.ObjectID, (ColumnSet)BDO);
+						} else if (BDO is Row) {
+							rows.Add (BDO.ObjectID, (Row)BDO);
 						}
 					}
 				}
@@ -119,13 +125,14 @@ namespace BD2.Frontend.Table
 		public BD2.Frontend.Table.Row CreateRow (BD2.Frontend.Table.Model.Table table, BD2.Frontend.Table.Model.ColumnSet columnSet, object[] objects)
 		{
 			Row r = new Row (this, null, table, columnSet, objects);
-			Snapshot.AddVolatileData (r);
 			rows.Add (r.ObjectID, r);
+			Snapshot.AddVolatileData (r);
 			return r;
 		}
 
 		public void Flush ()
 		{
+			Snapshot.Database.SaveAllSnapshots ();
 		}
 		#region implemented abstract members of FrontendInstance
 		public override BD2.Frontend.Table.Model.Table GetTable (string name)
@@ -148,5 +155,14 @@ namespace BD2.Frontend.Table
 			}
 		}
 		#endregion
+		public ColumnSet GetColumnSetByID (byte[] id)
+		{
+			return columnSets [id];
+		}
+
+		public Table GetTableByID (byte[] id)
+		{
+			return tables [id];
+		}
 	}
 }

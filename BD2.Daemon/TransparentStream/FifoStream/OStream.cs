@@ -57,8 +57,7 @@ namespace BD2.Daemon
 
 		public override int Read (byte[] buffer, int offset, int count)
 		{
-			Console.WriteLine ("OStream.Read()");
-			bool hasData = bufferStream != null;
+			bool hasData = bufferStream != null && bufferStream.Length > 0;
 			if (!hasData) {
 				byte[] bytes = streamPair.Dequeue ();
 				hasData = bytes != null;
@@ -69,8 +68,9 @@ namespace BD2.Daemon
 			}
 			int read = 0;
 			while ((read != count) && hasData) {
-				bufferStream.Read (buffer, read, (int)Math.Min (count, bufferStream.Length - bufferStream.Position));
-				if (bufferStream.Length == bufferStream.Position) {
+				long l = bufferStream.Length - bufferStream.Position;
+				read += bufferStream.Read (buffer, read, (int)Math.Min (count, l));
+				if (l < count) {
 					byte[] bytes = streamPair.Dequeue ();
 					hasData = bytes != null;
 					if (hasData)
@@ -101,7 +101,6 @@ namespace BD2.Daemon
 
 		public override bool CanRead {
 			get {
-				Console.WriteLine ("*********************************************OStream.getCanRead()");
 				return true;
 			}
 		}

@@ -31,6 +31,7 @@ using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
+	[BaseDataObjectTypeIdAttribute("10ec2d31-3291-43ae-96fe-da8537b22af6", typeof(Row), "Deserialize")]
 	public sealed class Row : Model.Row
 	{
 		object[] data;
@@ -52,10 +53,26 @@ namespace BD2.Frontend.Table
 			this.data = data;
 		}
 		#region implemented abstract members of Serializable
+		public static Row Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					Table table = ((BD2.Frontend.Table.FrontendInstance)fib).GetTableByID (BR.ReadBytes (32));
+					ColumnSet columnSet = ((BD2.Frontend.Table.FrontendInstance)fib).GetColumnSetByID (BR.ReadBytes (32));
+					return new Row (fib, 
+					                chunkID,
+					                table,
+					                columnSet,
+					                columnSet.DeserializeObjects (BR.ReadBytes (BR.ReadInt32 ())));
+				}
+			}
+		}
+
 		public override void Serialize (System.IO.Stream stream)
 		{
-			base.Serialize (stream);
 			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
+				BW.Write (Table.ObjectID, 0, 32);
+				BW.Write (ColumnSet.ObjectID, 0, 32);
 				byte[] buf = ColumnSet.SerializeObjects (data);
 				BW.Write (buf.Length);
 				BW.Write (buf);

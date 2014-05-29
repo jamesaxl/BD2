@@ -32,6 +32,13 @@ namespace BD2
 {
 	public sealed class BaseDataObjectTypeIdAttribute : Attribute
 	{
+		static System.Collections.Generic.SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> attribs = new SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> ();
+
+		public static BaseDataObjectTypeIdAttribute GetAttribFor (Guid id)
+		{
+			return attribs [id];
+		}
+
 		Guid id;
 
 		public Guid Id {
@@ -47,12 +54,18 @@ namespace BD2
 
 		System.Reflection.MethodInfo deserialize;
 
-		public BaseDataObject Deserialize (byte[] buffer)
+		public BaseDataObject Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
 		{
+			if (fib == null)
+				throw new ArgumentNullException ("fib");
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			if (buffer == null)
+				throw new ArgumentNullException ("buffer");
 			if (deserialize == null) {
 				ResolveMethod ();
 			}
-			return (BaseDataObject)deserialize.Invoke (null, new object[] { buffer });
+			return (BaseDataObject)deserialize.Invoke (null, new object[] { fib, chunkID, buffer });
 		}
 
 		Type deserializerType;
@@ -71,15 +84,16 @@ namespace BD2
 			}
 		}
 
-		public BaseDataObjectTypeIdAttribute (Guid id, Type deserializerType, string deserializerProcedureName)
+		public BaseDataObjectTypeIdAttribute (string id, Type deserializerType, string deserializerProcedureName)
 		{
 			if (deserializerType == null)
 				throw new ArgumentNullException ("deserializerType");
 			if (deserializerProcedureName == null)
 				throw new ArgumentNullException ("deserializerProcedureName");
-			this.id = id;
+			this.id = Guid.Parse (id);
 			this.deserializerType = deserializerType;
 			this.deserializerProcedureName = deserializerProcedureName;
+			attribs.Add (this.id, this);
 			ResolveMethod ();
 		}
 	}

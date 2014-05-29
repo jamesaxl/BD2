@@ -185,6 +185,7 @@ namespace BD2.Daemon
 
 		void ServiceManagerReadyMessageReceived (ObjectBusMessage message)
 		{
+			System.Threading.Thread.Sleep (100);
 			RemoteReady = true;
 		}
 

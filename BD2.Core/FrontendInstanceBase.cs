@@ -57,12 +57,12 @@ namespace BD2.Core
 
 		public string Name { get { return snapshot.Name; } }
 
-		internal void CreateObjects (byte[] bytes)
+		internal void CreateObjects (byte[] chunkID, byte[] bytes)
 		{
-			OnCreateObjects (bytes);
+			OnCreateObjects (chunkID, bytes);
 		}
 
-		protected abstract void OnCreateObjects (byte[] bytes);
+		protected abstract void OnCreateObjects (byte[] chunkID, byte[] bytes);
 
 		/// <summary>
 		/// Returns a SNAPSHOT of current volatile objects.

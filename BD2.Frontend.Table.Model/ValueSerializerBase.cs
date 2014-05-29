@@ -52,16 +52,17 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract void Serialize (object obj, System.IO.BinaryWriter binaryWriter);
 
-		public void SerializeArray (object[] objects, out byte[] bytes)
+		public byte[] SerializeArray (object[] objects)
 		{
-			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
-			System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS);
-			BW.Write (objects.Length);
-			foreach (object obj in objects) {
-				Serialize (obj, BW);
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (objects.Length);
+					foreach (object obj in objects) {
+						Serialize (obj, BW);
+					}
+					return MS.ToArray ();
+				}
 			}
-			BW.Flush ();
-			bytes = MS.ToArray ();
 		}
 	}
 }

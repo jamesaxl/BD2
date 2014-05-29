@@ -29,7 +29,7 @@ using System.Collections.Generic;
 
 namespace BD2.Common
 {
-	public sealed class  ByteSequenceComparer : IComparer<byte[]>
+	public sealed class  ByteSequenceComparer : IComparer<byte[]>, IEqualityComparer<byte[]>
 	{
 		static ByteSequenceComparer shared = new ByteSequenceComparer ();
 
@@ -60,6 +60,21 @@ namespace BD2.Common
 				return 1;
 			}
 			return 0;
+		}
+		#endregion
+		#region IEqualityComparer implementation
+		bool IEqualityComparer<byte[]>.Equals (byte[] x, byte[] y)
+		{
+			return Compare (x, y) == 0;
+		}
+
+		int IEqualityComparer<byte[]>.GetHashCode (byte[] obj)
+		{
+			byte[] hashbytes = new byte[4]; 
+			for (int n = 0; n != obj.Length; n++) {
+				hashbytes [n % 4] ^= obj [n];
+			}
+			return (hashbytes [0]) | (hashbytes [1] << 8) | (hashbytes [2] << 16) | (hashbytes [3] << 24); 
 		}
 		#endregion
 	}

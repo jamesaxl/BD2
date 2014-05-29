@@ -31,7 +31,17 @@ namespace BD2.Conv.Frontend.Table
 {
 	public class Client
 	{
-		Dictionary<Type, long> typeIDs = new Dictionary<Type, long> ();
+		SortedDictionary<Guid, Table> tableDataRequests;
+		BD2.Core.Frontend frontend;
+		BD2.Core.Frontend[] frontends;
+		BD2.Core.Database db;
+		BD2.Core.Snapshot ss;
+		BD2.Frontend.Table.FrontendInstance frontendInstance;
+		System.Collections.Concurrent.ConcurrentDictionary<Table, System.Collections.Concurrent.BlockingCollection<Column>> tableColumns;
+		SortedDictionary<Guid, Tuple<Table, List<Column>>> tables;
+		System.Threading.AutoResetEvent AREGetColumns = new System.Threading.AutoResetEvent (false);
+		System.Threading.AutoResetEvent AREGetRows = new System.Threading.AutoResetEvent (false);
+		Dictionary<Type, long> typeIDs;
 		BD2.Daemon.TransparentAgent agent;
 		BD2.Chunk.ChunkRepository repo;
 
@@ -60,6 +70,7 @@ namespace BD2.Conv.Frontend.Table
 			this.agent = agent;
 			this.repo = repo;
 			this.databaseName = databaseName;
+			typeIDs = new Dictionary<Type, long> ();
 			typeIDs.Add (typeof(bool), 1);
 			typeIDs.Add (typeof(char), 2);
 			typeIDs.Add (typeof(byte), 3);
@@ -72,148 +83,116 @@ namespace BD2.Conv.Frontend.Table
 			typeIDs.Add (typeof(Guid), 10);
 			typeIDs.Add (typeof(String), 11);
 			typeIDs.Add (typeof(DateTime), 12);
+			tableDataRequests = new SortedDictionary<Guid, Table> ();
+			frontend = new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ());
+			frontends = new BD2.Core.Frontend[] { frontend };
+			db = new BD2.Core.Database (new BD2.Chunk.ChunkRepository[] { repo }, frontends, databaseName);
+			ss = db.GetSnapshot ("Primary");
+			frontendInstance = (BD2.Frontend.Table.FrontendInstance)frontend.CreateInstanse (ss);
+			tableColumns = new System.Collections.Concurrent.ConcurrentDictionary<Table, System.Collections.Concurrent.BlockingCollection<Column>> ();
+			tables = new SortedDictionary<Guid, Tuple<Table, List<Column>>> ();
+		}
 
+		void GetRowsResponseMessageHandler (GetRowsResponseMessage message)
+		{
+			Console.WriteLine ("GetRowsResponseMessageReceived()");
+			GetRowsResponseMessage GRRM = (GetRowsResponseMessage)message;
+			Table table = tableDataRequests [GRRM.RequestID];
+			BD2.Frontend.Table.Table frontendTable = new BD2.Frontend.Table.Table (frontendInstance, null, table.Name);
+			SortedSet<BD2.Frontend.Table.Model.Column> fcs = new SortedSet<BD2.Frontend.Table.Model.Column> ();
+			Console.WriteLine ("Table: {0}", table.Name);
+			Console.WriteLine ("Enumerating columns...");
+			if (!tableColumns.ContainsKey (table)) {
+				Console.WriteLine ("tableColumns doesn't have the key");
+			}
+			Console.WriteLine ("Column Count: {0}", tableColumns [table].Count);
+
+			foreach (Column c in tableColumns[table]) {
+				BD2.Frontend.Table.Model.Column frontendColumn = frontendInstance.GetColumn (c.Name, System.Type.GetType (c.TFQN), !c.Mandatory, c.Size);
+				int cc = fcs.Count;
+				fcs.Add (frontendColumn);
+				if (fcs.Count == cc)
+					throw new Exception ("FATAL column ID collision detected");
+				//TODO:Avoid creating duplicates,create columnsets for each table, Associate columnSets and tables, Add data to tables
+			}
+			frontendInstance.Flush ();
+			int rc = 0;
+			BD2.Frontend.Table.Column[] cols = new BD2.Frontend.Table.Column[fcs.Count];
+			fcs.CopyTo (cols);
+			BD2.Frontend.Table.Model.ColumnSet columnSet = frontendInstance.GetColumnSet (cols);
+			frontendInstance.Flush ();
+			foreach (BD2.Conv.Frontend.Table.Row r in message.Rows) {
+				frontendInstance.CreateRow (frontendTable, columnSet, r.Fields);
+				rc++;
+			}
+			Console.WriteLine (rc);
+			frontendInstance.Flush ();
+			AREGetRows.Set ();
+		}
+
+		void GetColumnsResponseMessageHandler (GetColumnsResponseMessage message)
+		{
+			GetColumnsResponseMessage GCRM = (GetColumnsResponseMessage)message;
+			Console.WriteLine ("GetColumnsResponseMessage received");
+			if (GCRM.Exception != null) {
+				Console.WriteLine ("GCRM.Exception: ");
+				Console.WriteLine (GCRM.Exception);
+			}
+			Table table;
+			Guid reqID = Guid.NewGuid ();
+			Tuple<Table, List<Column>> tuple;
+			lock (tables) {
+				tuple = tables [GCRM.RequestID];
+			}
+			Console.Write (tuple.Item1.Name);
+			foreach (Column c in GCRM.Columns) {
+				tuple.Item2.Add (c);
+				tableColumns [tuple.Item1].Add (c);
+				Console.WriteLine ("Name:{0}\t, Size:{1}\t, Mandatory:{2}\t, TFQN:{3}", c.Name, c.Size, c.Mandatory, c.TFQN);
+			}
+			table = tuple.Item1;
+			lock (tableDataRequests) {
+				tableDataRequests.Add (reqID, table);
+			}
+			BD2.Conv.Frontend.Table.Row.AddColumnSet (new BD2.Conv.Frontend.Table.ColumnSet (tableColumns [table].ToArray ()));
+
+			agent.SendMessage (new GetRowsRequestMessage (reqID, table.ID));
+			AREGetRows.WaitOne ();
+			AREGetColumns.Set ();
+		}
+
+		void GetTablesResponseMessageHandler (GetTablesResponseMessage message)
+		{
+			GetTablesResponseMessage GTRM = (GetTablesResponseMessage)message;
+			Console.WriteLine ("GetTablesResponseMessage received");
+			if (GTRM.Exception != null) {
+				Console.WriteLine ("GTRM.Exception: ");
+				Console.WriteLine (GTRM.Exception);
+			}
+			foreach (Table t in GTRM.Tables) {
+				Guid reqID = Guid.NewGuid ();
+				lock (tables) {
+					tables.Add (reqID, new Tuple<Table, List<Column>> (t, new List<Column> ()));
+				}
+				tableColumns.GetOrAdd (t, (tref) => new System.Collections.Concurrent.BlockingCollection<Column> ());
+				Console.WriteLine (t.Name);
+				agent.SendMessage (new GetColumnsRequestMessage (reqID, t.ID));
+				AREGetColumns.WaitOne ();
+			}
 		}
 
 		public void Convert ()
 		{
-			SortedDictionary<Guid,Table> tableDataRequests = new SortedDictionary<Guid, Table> ();
-			BD2.Frontend.Table.Frontend frontend = new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ());
-			BD2.Core.Frontend[] frontends = new BD2.Core.Frontend[] { frontend };
-			BD2.Core.Database db = new BD2.Core.Database (new BD2.Chunk.ChunkRepository[] { repo }, frontends, databaseName);
-			BD2.Core.Snapshot ss = db.CreateSnapshot ("Current");
-			BD2.Frontend.Table.FrontendInstance frontendInstance = (BD2.Frontend.Table.FrontendInstance)frontend.CreateInstanse (ss);
-			SortedDictionary<Table, List<Column>> tableColumns = new SortedDictionary<Table, List<Column>> ();
-			SortedDictionary<Guid, Tuple<Table, List<Column>>> tables = new SortedDictionary<Guid, Tuple<Table, List<Column>>> ();
-
-
 			agent.RegisterType (typeof(GetRowsResponseMessage), (message) => {
-				Console.WriteLine ("GetRowsResponseMessageReceived()");
-				GetRowsResponseMessage GRRM = (GetRowsResponseMessage)message;
-				Table table = tableDataRequests [GRRM.RequestID];
-				BD2.Frontend.Table.Table frontendTable = new BD2.Frontend.Table.Table (frontendInstance, null, table.Name);
-				SortedSet<BD2.Frontend.Table.Model.Column> fcs = new SortedSet<BD2.Frontend.Table.Model.Column> ();
-				Console.WriteLine ("Enumerating columns...");
-				if (!tableColumns.ContainsKey (table)) {
-					Console.WriteLine ("tableColumns doesn't have the key");
-				}
-				Console.Write ("Column Count:");
-				Console.WriteLine (tableColumns [table].Count);
-				foreach (Column c in tableColumns[table]) {
-					BD2.Frontend.Table.Model.Column frontendColumn = frontendInstance.GetColumn (c.Name, System.Type.GetType (c.TFQN), !c.Mandatory, c.Size);
-					fcs.Add (frontendColumn);
-					Console.Write (".");
-					//TODO:Avoid creating duplicates,create columnsets for each table, Associate columnSets and tables, Add data to tables
-				}
-
-				Console.WriteLine ("Openning stream...");
-				BD2.Daemon.TransparentStream stream = agent.OpenStream (GRRM.ResponseStreamID);
-				Console.WriteLine ("Stream created...");
-				System.IO.BinaryReader br = new System.IO.BinaryReader (stream);
-				Console.WriteLine ("Reading stream...");
-				while (true) {
-					if (stream.Done) {
-						break;
-					}
-					object[] objects = new object[fcs.Count];
-					BD2.Frontend.Table.Column[] cols = new BD2.Frontend.Table.Column[fcs.Count];
-					fcs.CopyTo (cols);
-					int n = 0;
-					Console.WriteLine ("Enumerating columns");
-					foreach (Column c in tableColumns[table]) {
-						switch (c.TFQN) {
-						case "System.Byte[]":
-							objects [n] = br.ReadBytes (br.ReadInt32 ());
-							break;
-						case "System.Byte":
-							objects [n] = br.ReadByte ();
-							break;
-						case "System.SByte":
-							objects [n] = br.ReadSByte ();
-							break;
-						case "System.Int16":
-							objects [n] = br.ReadInt16 ();
-							break;
-						case "System.UInt16":
-							objects [n] = br.ReadUInt16 ();
-							break;
-						case "System.Int32":
-							objects [n] = br.ReadInt32 ();
-							break;
-						case "System.UInt32":
-							objects [n] = br.ReadUInt32 ();
-							break;
-						case "System.Int64":
-							objects [n] = br.ReadInt64 ();
-							break;
-						case "System.UInt64":
-							objects [n] = br.ReadUInt64 ();
-							break;
-						case "System.Single":
-							objects [n] = br.ReadSingle ();
-							break;
-						case "System.Double":
-							objects [n] = br.ReadDouble ();
-							break;
-						case "System.String":
-							objects [n] = br.ReadString ();
-							break;
-						case "System.Char":
-							objects [n] = br.ReadChar ();
-							break;
-						case "System.Boolean":
-							objects [n] = br.ReadBoolean ();
-							break;
-						}
-
-					}
-					Console.Write ("Fetched a row");
-					frontendInstance.CreateRow (frontendTable, frontendInstance.GetColumnSet (cols), objects);
-
-					frontendInstance.Flush ();
-				}
+				GetRowsResponseMessageHandler ((GetRowsResponseMessage)message);
 			});
 			agent.RegisterType (typeof(GetColumnsResponseMessage), (message) => {
-				GetColumnsResponseMessage GCRM = (GetColumnsResponseMessage)message;
-				Console.WriteLine ("GetColumnsResponseMessage received");
-				if (GCRM.Exception != null) {
-					Console.WriteLine ("GCRM.Exception: ");
-					Console.WriteLine (GCRM.Exception);
-				}
-				lock (tables) {
-					Tuple<Table, List<Column>> tuple = tables [GCRM.RequestID];
-					Console.Write (tuple.Item1.Name);
-					foreach (Column c in GCRM.Columns) {
-						tuple.Item2.Add (c);
-						tableColumns [tuple.Item1].Add (c);
-						Console.WriteLine ("Name:{0}\t, Size:{1}\t, Mandatory:{2}\t, TFQN:{3}", c.Name, c.Size, c.Mandatory, c.TFQN);
-					}
-					Table table = tuple.Item1;
-					Guid reqID = Guid.NewGuid ();
-					tableDataRequests.Add (reqID, table);
-					agent.SendMessage (new GetRowsRequestMessage (reqID, table.ID));
-
-				}
+				GetColumnsResponseMessageHandler ((GetColumnsResponseMessage)message);
 			});
 			agent.RegisterType (typeof(GetTablesResponseMessage), (message) => {
-				GetTablesResponseMessage GTRM = (GetTablesResponseMessage)message;
-				Console.WriteLine ("GetTablesResponseMessage received");
-				if (GTRM.Exception != null) {
-					Console.WriteLine ("GTRM.Exception: ");
-					Console.WriteLine (GTRM.Exception);
-				}
-				lock (tables) {
-					foreach (Table t in  GTRM.Tables) {
-						Guid reqID = Guid.NewGuid ();
-						tables.Add (reqID, new Tuple<Table, List<Column>> (t, new List<Column> ()));
-						tableColumns.Add (t, new  List<Column> ());
-						agent.SendMessage (new GetColumnsRequestMessage (reqID, t.ID));
-						Console.WriteLine (t.Name);
-					}
-				}
+				GetTablesResponseMessageHandler ((GetTablesResponseMessage)message);
 			});
 			agent.SendMessage (new GetTablesRequestMessage (Guid.NewGuid ()));
-
 		}
 	}
 }

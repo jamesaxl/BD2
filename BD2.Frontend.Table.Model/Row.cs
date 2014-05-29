@@ -84,12 +84,5 @@ namespace BD2.Frontend.Table.Model
 				;
 			}
 		}
-		#region implemented abstract members of Serializable
-		public override void Serialize (System.IO.Stream stream)
-		{
-			stream.Write (table.ObjectID, 0, table.ObjectID.Length);
-			stream.Write (columnSet.ObjectID, 0, table.ObjectID.Length);
-		}
-		#endregion
 	}
 }

@@ -36,13 +36,7 @@ namespace BD2.Chunk
 	public sealed class ChunkRepositoryCollection : ChunkRepository
 	{
 		SortedSet<ChunkRepository> repositories = new SortedSet<ChunkRepository> ();
-		//		Database database;
-		//		internal ChunkRepositoryCollection (Database Database)
-		//		{
-		//			if (database == null)
-		//				throw new ArgumentNullException ("database");
-		//			database = Database;
-		//		}
+
 		public void AddRepository (ChunkRepository repository)
 		{
 			if (repository == null)
@@ -51,18 +45,7 @@ namespace BD2.Chunk
 				throw new InvalidOperationException ("Cannot add repository to collection more than once.");
 			repositories.Add (repository);
 		}
-		//		internal void HandleChunkInserted (object sender, ChunkInsertedEventArgs e)
-		//		{
-		//			SortedSet<ChunkRepository> repos = GetRepositories ();
-		//			ChunkRepository Orig = (ChunkRepository)sender;
-		//			repos.Remove (Orig);
-		//			byte[] Data = Orig.Pull (e.ChunkDescriptor);
-		//			foreach (ChunkRepository Repo in repos) {
-		//				Repo.Push (e.ChunkDescriptor, Data);
-		//			}
-		//			ChunkData CD = ChunkData.GetData (new MemoryStream (Data), false);
-		//			database.HandleChunkInserted (CD);
-		//		}
+
 		public SortedSet<ChunkRepository> GetRepositories ()
 		{
 			lock (repositories) {
@@ -95,13 +78,7 @@ namespace BD2.Chunk
 			}
 			return null;
 		}
-		//internal byte[][] GetDependencies (byte[] ChunkDescriptor)
-		//{
-		//	int Cost;
-		//	ChunkRepository CR;
-		//	GetLeastCost (ChunkDescriptor, out Cost, out CR);
-		//	return CR.GetDependencies (ChunkDescriptor);
-		//}
+
 		public override void PushIndex (byte[] index, byte[] value)
 		{
 			if (index == null)
@@ -151,14 +128,14 @@ namespace BD2.Chunk
 			SortedSet<ChunkRepository> CRs = GetRepositories ();
 			cost = int.MaxValue;
 			repository = null;
-			//instant
+			//no remote calls, i hope
 			foreach (var Repo in CRs) {
 				int Current = Repo.GetMaxCostForAny ();
 				if (Current < cost) {
 					cost = Current;
 				}
 			}
-			//takes a while if object is not available locally or bad heuristics have deluded the first estimation process
+			//takes a while if object is not available locally or bad heuristics have mislead the first estimation process
 			foreach (var Repo in CRs) {
 				int Current = Repo.GetLeastCost (cost, chunkID);
 				if (Current < cost) {
@@ -201,27 +178,14 @@ namespace BD2.Chunk
 		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateData ()
 		{
 			SortedSet<byte[]> temp = null;
-			foreach (ChunkRepository CR in GetRepositories()) {
-				foreach (var tup in CR.EnumerateData ()) {
-					if (!temp.Contains (tup.Key))
+			foreach (ChunkRepository CR in GetRepositories()) 
+				foreach (var tup in CR.EnumerateData ()) 
+					if (!temp.Contains (tup.Key)) {
 						temp.Add (tup.Key);
-					yield return tup;
-				}
-			}
+						yield return tup;
+					}
 		}
-		//		internal SortedSet<byte[]> GetIndependentChunks ()
-		//		{
-		//			SortedSet<byte[]> cache = null;
-		//			foreach (ChunkRepository CR in GetRepositories()) {
-		//				SortedSet<byte[]> IndependentChunks = CR.GetIndependentChunks ();
-		//				if (cache != null)
-		//					cache.UnionWith (IndependentChunks);
-		//				else {
-		//					cache = IndependentChunks;
-		//				}
-		//			}
-		//			return cache;
-		//		}
+
 		public override int GetMaxCostForAny ()
 		{
 			int MaxCost = int.MaxValue;
@@ -240,17 +204,37 @@ namespace BD2.Chunk
 
 		public override IEnumerable<byte[]> EnumerateTopLevels ()
 		{
-			throw new NotImplementedException ();
+			SortedSet<byte[]> temp = null;
+			foreach (ChunkRepository CR in GetRepositories()) {
+				foreach (var tup in CR.EnumerateTopLevels ()) {
+					if (!temp.Contains (tup)) {
+						temp.Add (tup);
+						yield return tup;
+					}
+				}
+			}
 		}
 
 		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateDependencies ()
 		{
-			throw new NotImplementedException ();
+			SortedSet<byte[]> temp = null;
+			foreach (ChunkRepository CR in GetRepositories())
+				foreach (var tup in CR.EnumerateDependencies ())
+					if (!temp.Contains (tup.Item1)) {
+						temp.Add (tup.Item1);
+						yield return tup;
+					}
 		}
 
 		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateTopLevelDependencies ()
 		{
-			throw new NotImplementedException ();
+			SortedSet<byte[]> temp = null;
+			foreach (ChunkRepository CR in GetRepositories())
+				foreach (var tup in CR.EnumerateTopLevelDependencies ())
+					if (!temp.Contains (tup.Item1)) {
+						temp.Add (tup.Item1);
+						yield return tup;
+					}
 		}
 
 		Guid id = Guid.NewGuid ();
@@ -290,9 +274,10 @@ namespace BD2.Chunk
 			SortedSet<byte[]> temp = null;
 			foreach (ChunkRepository CR in GetRepositories()) {
 				foreach (var tup in CR.EnumerateRawProxyData ()) {
-					if (!temp.Contains (tup.Key))
+					if (!temp.Contains (tup.Key)) {
 						temp.Add (tup.Key);
-					yield return tup;
+						yield return tup;
+					}
 				}
 			}
 		}

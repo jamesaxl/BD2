@@ -101,6 +101,9 @@ namespace BD2.Frontend.Table
 		#endregion
 		public override object Deserialize (System.IO.BinaryReader binaryReader)
 		{
+			bool hasValue = binaryReader.ReadBoolean ();
+			if (!hasValue)
+				return null;
 			int typeID = binaryReader.ReadByte ();
 			switch (typeID) {
 			case 1:
@@ -135,6 +138,11 @@ namespace BD2.Frontend.Table
 
 		public override void Serialize (object obj, System.IO.BinaryWriter binaryWriter)
 		{
+			if (obj == null) {
+				binaryWriter.Write (false);
+				return;
+			}
+			binaryWriter.Write (true);
 			byte typeID = TypeToID (obj.GetType ());
 			binaryWriter.Write (typeID);
 			switch (typeID) {

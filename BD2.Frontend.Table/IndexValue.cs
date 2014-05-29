@@ -45,7 +45,7 @@ namespace BD2.Frontend.Table
 			IEnumerator<IndexColumnBase> OtherIndices = OtherIV.index.GetIndexColumns ();
 			IEnumerator<IndexColumnBase> ThisIndices = this.index.GetIndexColumns ();
 			while (ThisIndices.MoveNext () && OtherIndices.MoveNext ()) {
-				int CompareValue;
+				//int CompareValue;
 				//TODO:HACK:XXX
 				throw new NotImplementedException ();
 //				CompareValue = row.GetValue (ThisIndices.Current.Column).CompareTo (OtherRow.GetValue (OtherIndices.Current.Column));

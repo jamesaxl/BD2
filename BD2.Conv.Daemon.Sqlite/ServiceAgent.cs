@@ -91,7 +91,7 @@ namespace BD2.Conv.Daemon.Sqlite
 			if (tables.TryGetValue (request.TableID, out t)) {
 
 			} else {
-				ObjectBusSession.SendMessage (new GetRowsResponseMessage (request.ID, Guid.Empty, new KeyNotFoundException ()));
+				ObjectBusSession.SendMessage (new GetRowsResponseMessage (request.ID, new List<Row>(), new KeyNotFoundException ()));
 			}
 		}
 

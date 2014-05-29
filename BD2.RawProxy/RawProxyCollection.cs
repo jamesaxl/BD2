@@ -31,17 +31,20 @@ namespace BD2.RawProxy
 {
 	public sealed class RawProxyCollection : System.Collections.Generic.ICollection<RawProxyv1>
 	{
-		SortedDictionary<byte[], RawProxyv1> rps;
+		SortedDictionary<byte[], RawProxyv1> rpd;
+		List<RawProxyv1> rps;
 		//TODO: provide facilites for proxies which know ids for other proxies to access them, for example the id for the compressv1 is always known and can be accessed by all but no one can't guess the id for a cryptov1 serialized with a specific key
 		//TODO(if time): provide facilities in chunkRepository to let RawProxyCollection to know exactly which proxies have access to others
 		public RawProxyCollection ()
 		{
-			rps = new SortedDictionary<byte[], RawProxyv1> (BD2.Common.ByteSequenceComparer.Shared);
+			rps = new List<RawProxyv1> ();
+			rpd = new SortedDictionary<byte[], RawProxyv1> ();
 		}
 		#region ICollection implementation
 		public void Add (RawProxyv1 item)
 		{
-			rps.Add (item.ObjectID, item);
+			rps.Add (item);
+			rpd.Add (item.ObjectID, item);
 		}
 
 		public void Clear ()
@@ -51,7 +54,7 @@ namespace BD2.RawProxy
 
 		public bool Contains (RawProxyv1 item)
 		{
-			return rps.ContainsValue (item);
+			return rps.Contains (item);
 		}
 
 		public void CopyTo (RawProxyv1[] array, int arrayIndex)
@@ -61,7 +64,7 @@ namespace BD2.RawProxy
 
 		public bool Remove (RawProxyv1 item)
 		{
-			return rps.Remove (item.ObjectID);
+			return rps.Remove (item);
 		}
 
 		public int Count {
@@ -79,34 +82,67 @@ namespace BD2.RawProxy
 		#region IEnumerable implementation
 		public IEnumerator<RawProxyv1> GetEnumerator ()
 		{
-			throw new NotSupportedException ();
+			return rps.GetEnumerator ();
 		}
 		#endregion
 		#region IEnumerable implementation
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
 		{
-			throw new NotSupportedException ();
+			return rps.GetEnumerator ();
 		}
 		#endregion
-		public byte[] ChainDecode (byte[] payload, byte[][] proxiesInOrder)
+		public byte[] ChainDecode (byte[] payload)
+		{
+			List<RawProxyv1> rrps = new List<RawProxyv1> (rps);
+			rrps.Reverse ();
+			return ChainDecode (payload, rrps);
+		}
+
+		public static byte[] ChainDecode (byte[] payload, IEnumerable<RawProxyv1> proxiesInOrder)
+		{
+			foreach (RawProxyv1 proxy in proxiesInOrder) {
+				payload = proxy.Decode (payload);
+			}
+			return payload;
+		}
+
+		public byte[] ChainDecode (byte[] payload, IEnumerable<byte[]> proxiesInOrder)
 		{
 			foreach (byte[] proxy in proxiesInOrder) {
-				payload = rps [proxy].Decode (payload);
+				payload = rpd [proxy].Decode (payload);
 			}
 			return payload;
 		}
 
 		public byte[] ChainEncode (byte[] payload)
 		{
-			return ChainEncode (payload, rps.Keys);
+			return ChainEncode (payload, rps);
+		}
+
+		public static byte[] ChainEncode (byte[] payload, IEnumerable<RawProxyv1> proxiesInOrder)
+		{
+			foreach (RawProxyv1 proxy in proxiesInOrder) {
+				payload = proxy.Encode (payload);
+			}
+			return payload;
 		}
 
 		public byte[] ChainEncode (byte[] payload, IEnumerable<byte[]> proxiesInOrder)
 		{
 			foreach (byte[] proxy in proxiesInOrder) {
-				payload = rps [proxy].Encode (payload);
+				payload = rpd [proxy].Encode (payload);
 			}
 			return payload;
+		}
+
+		public byte[] Serialize ()
+		{
+			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
+			foreach (var rp in rps) {
+				byte[] buf = rp.Serialize ();
+				MS.Write (buf, 0, buf.Length);
+			}
+			return MS.ToArray ();
 		}
 	}
 }

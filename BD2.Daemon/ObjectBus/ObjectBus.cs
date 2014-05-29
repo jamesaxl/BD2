@@ -59,7 +59,6 @@ namespace BD2.Daemon
 			System.Buffer.BlockCopy (session.SessionID.ToByteArray (), 0, bytes, 0, 16);
 			System.Buffer.BlockCopy (message.TypeID.ToByteArray (), 0, bytes, 16, 16);
 			System.Buffer.BlockCopy (messageBody, 0, bytes, 32, messageBody.Length);
-			Console.WriteLine ("Sending a {0} byte {1} on bus", bytes.Length, message.GetType ());
 			streamHandler.SendMessage (bytes);
 		}
 
@@ -93,13 +92,9 @@ namespace BD2.Daemon
 			System.Buffer.BlockCopy (messageContents, 0, sessionIDBytes, 0, 16);
 			Guid sessionID = new Guid (sessionIDBytes);
 			ObjectBusSession session = null;
-			Console.WriteLine ("session id={0}", sessionID);
 			if (sessionID == Guid.Empty)
 				session = systemSession;
 			else {
-				foreach (var tup in sessions) {
-					Console.WriteLine ("we have {0}", tup.Key);
-				}
 				lock (sessions)
 					session = sessions [sessionID];
 			}

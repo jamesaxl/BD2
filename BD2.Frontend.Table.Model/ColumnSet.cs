@@ -75,9 +75,12 @@ namespace BD2.Frontend.Table.Model
 		#endregion
 		public byte[] SerializeObjects (object[] data)
 		{
-			byte[] buf;
-			((FrontendInstance)FrontendInstanceBase).ValueSerializer.SerializeArray (data, out buf);
-			return buf;
+			return ((FrontendInstance)FrontendInstanceBase).ValueSerializer.SerializeArray (data);
+		}
+
+		public object[] DeserializeObjects (byte[] data)
+		{
+			return ((FrontendInstance)FrontendInstanceBase).ValueSerializer.DeserializeArray (data);
 		}
 	}
 }

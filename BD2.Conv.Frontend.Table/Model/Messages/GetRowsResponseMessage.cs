@@ -41,11 +41,11 @@ namespace BD2.Conv.Frontend.Table
 			}
 		}
 
-		Guid responseStreamID;
+		System.Collections.Generic.List<BD2.Conv.Frontend.Table.Row> rows;
 
-		public Guid ResponseStreamID {
+		public System.Collections.Generic.List<BD2.Conv.Frontend.Table.Row> Rows {
 			get {
-				return responseStreamID;
+				return rows;
 			}
 		}
 
@@ -57,11 +57,11 @@ namespace BD2.Conv.Frontend.Table
 			}
 		}
 
-		public GetRowsResponseMessage (Guid requestID, Guid responseStreamID, Exception exception)
+		public GetRowsResponseMessage (Guid requestID, System.Collections.Generic.List<BD2.Conv.Frontend.Table.Row> rows, Exception exception)
 		{
 			Console.WriteLine ("GetRowsResponseMessage..ctor()");
 			this.requestID = requestID;
-			this.responseStreamID = responseStreamID;
+			this.rows = rows;
 			this.exception = exception;
 		}
 
@@ -69,12 +69,17 @@ namespace BD2.Conv.Frontend.Table
 		{
 			Console.WriteLine ("GetRowsResponseMessage.Deserialize()");
 			Guid requestID;
-			Guid responseStreamID;
 			Exception exception;
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					requestID = new Guid (BR.ReadBytes (16));
-					responseStreamID = new Guid (BR.ReadBytes (16));
+					int rc = BR.ReadInt32 ();
+					Console.WriteLine ("Response contains {0} rows", rc);
+					System.Collections.Generic.List<BD2.Conv.Frontend.Table.Row> rows = new  System.Collections.Generic.List<BD2.Conv.Frontend.Table.Row> ();
+					for (int n  = 0; n != rc; n++) {
+						Row r = Row.Deserialize (BR.ReadBytes (BR.ReadInt32 ()));
+						rows.Add (r);
+					}
 					if (MS.ReadByte () == 1) {
 						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter BF = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
 						object deserializedObject = BF.Deserialize (MS);
@@ -85,7 +90,7 @@ namespace BD2.Conv.Frontend.Table
 						}
 					} else
 						exception = null;
-					return new GetRowsResponseMessage (requestID, responseStreamID, exception);
+					return new GetRowsResponseMessage (requestID, rows, exception);
 				}
 			}
 		}
@@ -95,7 +100,13 @@ namespace BD2.Conv.Frontend.Table
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (requestID.ToByteArray ());
-					BW.Write (responseStreamID.ToByteArray ());
+					BW.Write (rows.Count);
+					Console.WriteLine ("Sending {0} rows in response", rows.Count);
+					foreach (BD2.Conv.Frontend.Table.Row r in rows) {
+						byte[] buf = r.Serialize ();
+						BW.Write (buf.Length);
+						BW.Write (buf);
+					}
 					if (exception == null) {
 						MS.WriteByte (0);
 					} else {

@@ -32,11 +32,18 @@ namespace BD2.Test.Frontend.Table
 	{
 		public static void Main (string[] args)
 		{
-			string databaseName = "Test";
-			BD2.Core.Database db = new BD2.Core.Database (new BD2.Chunk.ChunkRepository[] { new BD2.Repo.Leveldb.Repository ("/home/behrooz/test") }, new BD2.Core.Frontend[] { new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ()) }, databaseName);
-			BD2.Frontend.Table.FrontendInstance frontendInstance = (BD2.Frontend.Table.FrontendInstance)(db.GetFrontend ("BD2.Frontend.Table")).CreateInstanse (db.GetSnapshot ("Primary"));
-			frontendInstance.CreateRow (frontendInstance.GetTable ("Table2"), frontendInstance.GetColumnSet (new BD2.Frontend.Table.Model.Column[] { frontendInstance.GetColumn ("Name", typeof(String),false,0) }), new object[] { "This is yet another test." });
-			foreach (var R in frontendInstance.GetTable ("Table2").GetRows (frontendInstance.GetColumnSet (new BD2.Frontend.Table.Model.Column[] { frontendInstance.GetColumn ("Name", typeof(String),false,0) }))) {
+			typeof(BD2.Frontend.Table.Row).GetCustomAttributes (true);
+			typeof(BD2.Frontend.Table.Table).GetCustomAttributes (true);
+			typeof(BD2.Frontend.Table.Relation).GetCustomAttributes (true);
+			typeof(BD2.Frontend.Table.Column).GetCustomAttributes (true);
+			typeof(BD2.Frontend.Table.Model.ColumnSet).GetCustomAttributes (true);
+			string databaseName = "Esfand";
+			BD2.Core.Database db = new BD2.Core.Database 
+				(new BD2.Chunk.ChunkRepository[] { new BD2.Repo.Leveldb.Repository ("/home/behrooz/Test") }, 
+			  new BD2.Core.Frontend[] { new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ()) }, databaseName);
+			BD2.Frontend.Table.FrontendInstance frontendInstance =
+				(BD2.Frontend.Table.FrontendInstance)(db.GetFrontend ("BD2.Frontend.Table")).CreateInstanse (db.GetSnapshot ("Primary"));
+			foreach (var R in frontendInstance.GetTable ("Moshtary").GetRows ()) {
 				foreach (var V in R.GetValues ()) {
 					Console.WriteLine (V);
 				}

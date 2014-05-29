@@ -28,20 +28,11 @@ using System;
 
 namespace BD2.Conv.Daemon.MSSQL
 {
-	public sealed class Table : BD2.Conv.Frontend.Table.Table
+	public class Row : BD2.Conv.Frontend.Table.Row
 	{
-		int sqlTableID;
-
-		public int SqlTableID {
-			get {
-				return sqlTableID;
-			}
-		}
-
-		public Table (Guid id, string name, int sqlTableID)
-		: base(id, name)
+		public Row (BD2.Conv.Frontend.Table.ColumnSet columnSet, object[] fields)
+		: base(columnSet, fields)
 		{
-			this.sqlTableID = sqlTableID;
 		}
 	}
 }

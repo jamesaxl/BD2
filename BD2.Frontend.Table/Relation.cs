@@ -31,6 +31,7 @@ using BD2.Core;
 
 namespace BD2.Frontend.Table
 {
+	[BaseDataObjectTypeIdAttribute("bb346656-4812-4fb5-8dd0-abb75f9bab80", typeof(Relation), "Deserialize")]
 	public sealed class Relation : Model.Relation
 	{
 
@@ -44,15 +45,13 @@ namespace BD2.Frontend.Table
 		{
 			base.Serialize (stream);
 		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
+
 		public override Guid ObjectType {
 			get {
 				return Guid.Parse ("bb346656-4812-4fb5-8dd0-abb75f9bab80");
 			}
 		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
+
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
 			foreach (BaseDataObject bdo in base.GetDependenies ()) {
