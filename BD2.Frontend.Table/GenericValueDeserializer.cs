@@ -54,6 +54,8 @@ namespace BD2.Frontend.Table
 				return 5;
 			case "System.UInt64":
 				return 131;
+			case "System.Double":
+				return 9;
 			case "System.String":
 				return 16;
 			case "System.Char":
@@ -62,8 +64,11 @@ namespace BD2.Frontend.Table
 				return 24;
 			case "System.Guid":
 				return 32;
+			case "System.Byte[]":
+				return 36;
+			default:
+				throw new Exception (string.Format ("Serialization for type <{0}> is not supported", type.FullName));
 			}
-			return 0;
 		}
 
 		public override Type IDToType (byte id)
@@ -87,6 +92,8 @@ namespace BD2.Frontend.Table
 				return typeof(Int64);
 			case 131:
 				return typeof(UInt64);
+			case 9:
+				return typeof(Double);
 			case 16:
 				return typeof(String);
 			case 144:
@@ -95,8 +102,11 @@ namespace BD2.Frontend.Table
 				return typeof(DateTime);
 			case 32:
 				return typeof(Guid);
+			case 36:
+				return typeof(byte[]);
+			default:
+				throw new Exception (string.Format ("Serialization for type <{0}> is not supported", id));
 			}
-			return null;
 		}
 		#endregion
 		public override object Deserialize (System.IO.BinaryReader binaryReader)
@@ -124,6 +134,8 @@ namespace BD2.Frontend.Table
 				return binaryReader.ReadInt64 ();
 			case 131:
 				return binaryReader.ReadUInt64 ();
+			case 9:
+				return binaryReader.ReadDouble ();
 			case 16:
 				return binaryReader.ReadString ();
 			case 144:
@@ -132,8 +144,11 @@ namespace BD2.Frontend.Table
 				return new DateTime (binaryReader.ReadInt64 ());
 			case 32:
 				return new Guid (binaryReader.ReadBytes (16));
+			case 36:
+				return binaryReader.ReadBytes (binaryReader.ReadInt32 ());
+			default:
+				throw new Exception (string.Format ("Serialization for type <{0}> is not supported", typeID));
 			}
-			return null;
 		}
 
 		public override void Serialize (object obj, System.IO.BinaryWriter binaryWriter)
@@ -179,12 +194,21 @@ namespace BD2.Frontend.Table
 			case 144:
 				binaryWriter.Write ((char)obj);
 				break;
+			case 9:
+				binaryWriter.Write ((Double)obj);
+				break;
 			case 24:
 				binaryWriter.Write (((DateTime)obj).Ticks);
 				break;
 			case 32:
 				binaryWriter.Write (((Guid)obj).ToByteArray ());
 				break;
+			case 36:
+				binaryWriter.Write (((byte[])obj).Length);
+				binaryWriter.Write ((byte[])obj);
+				break;
+			default:
+				throw new Exception (string.Format ("Serialization for type <{0}> is not supported", obj.GetType ()));
 			}
 		}
 	}

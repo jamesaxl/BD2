@@ -43,12 +43,24 @@ namespace BD2.Test.Frontend.Table
 			  new BD2.Core.Frontend[] { new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ()) }, databaseName);
 			BD2.Frontend.Table.FrontendInstance frontendInstance =
 				(BD2.Frontend.Table.FrontendInstance)(db.GetFrontend ("BD2.Frontend.Table")).CreateInstanse (db.GetSnapshot ("Primary"));
-			foreach (var R in frontendInstance.GetTable ("Moshtary").GetRows ()) {
-				foreach (var V in R.GetValues ()) {
-					Console.WriteLine (V);
+			foreach (var T in frontendInstance.GetTables()) {
+				foreach (var R in T.GetRows ()) {
+					foreach (var V in R.GetValues ()) {
+						if (V == null)
+							continue;
+						if (V is Guid)
+							continue;
+						string S = V.ToString ();
+						if (S.Contains ("1390")) {
+							Console.WriteLine ("{0}: ", T.Name);
+							foreach (var V2 in R.GetValues ()) {
+								Console.WriteLine (V2);
+							}
+							Console.WriteLine ();
+						}
+					}
 				}
 			}
-			frontendInstance.Flush ();
 		}
 	}
 }

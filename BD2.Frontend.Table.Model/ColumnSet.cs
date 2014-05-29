@@ -31,6 +31,7 @@ using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
+	[BaseDataObjectTypeIdAttribute("bca848f2-70b8-476d-86af-77cde2fdc5fd", typeof(ColumnSet),"Deserialize")]
 	public sealed class ColumnSet : BaseDataObject
 	{
 		Column[] columns;
@@ -49,6 +50,20 @@ namespace BD2.Frontend.Table.Model
 			this.columns = columns;
 		}
 		#region implemented abstract members of Serializable
+		public static BaseDataObject Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+		{
+			using (System.IO.MemoryStream MS = new MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new BinaryReader (MS)) {
+					int columnCount = BR.ReadInt32 ();
+					Column[] columns = new Column[columnCount];
+					for (int n = 0; n != columnCount; n++) {
+						columns [n] = ((FrontendInstance)fib).GetColumnByID (BR.ReadBytes (32));
+					}
+					return new ColumnSet (fib, chunkID, columns);
+				}
+			}
+		}
+
 		public override void Serialize (Stream stream)
 		{
 			using (BinaryWriter BW =  new BinaryWriter (stream)) {

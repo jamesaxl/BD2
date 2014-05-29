@@ -96,6 +96,8 @@ namespace BD2.CLI
 			string command;
 			do {
 				command = Query ("Command>");
+				if (command == null)
+					return;
 				OffsetedArray<string> commandparts = command.Split (' ');
 				string[] CommandParts = (string[])((string[])commandparts).Clone ();
 				commandparts.Offset = ExtractModifiers (CommandParts);

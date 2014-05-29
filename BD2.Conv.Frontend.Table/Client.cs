@@ -98,7 +98,8 @@ namespace BD2.Conv.Frontend.Table
 			Console.WriteLine ("GetRowsResponseMessageReceived()");
 			GetRowsResponseMessage GRRM = (GetRowsResponseMessage)message;
 			Table table = tableDataRequests [GRRM.RequestID];
-			BD2.Frontend.Table.Table frontendTable = new BD2.Frontend.Table.Table (frontendInstance, null, table.Name);
+			BD2.Frontend.Table.Model.Table frontendTable = frontendInstance.GetTable (table.Name);
+			frontendInstance.Flush ();
 			SortedSet<BD2.Frontend.Table.Model.Column> fcs = new SortedSet<BD2.Frontend.Table.Model.Column> ();
 			Console.WriteLine ("Table: {0}", table.Name);
 			Console.WriteLine ("Enumerating columns...");
@@ -179,6 +180,7 @@ namespace BD2.Conv.Frontend.Table
 				agent.SendMessage (new GetColumnsRequestMessage (reqID, t.ID));
 				AREGetColumns.WaitOne ();
 			}
+			db.Close ();
 		}
 
 		public void Convert ()

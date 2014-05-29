@@ -57,13 +57,15 @@ namespace BD2.Frontend.Table
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					Table table = ((BD2.Frontend.Table.FrontendInstance)fib).GetTableByID (BR.ReadBytes (32));
+					Table table = (Table)((BD2.Frontend.Table.FrontendInstance)fib).GetTableByID (BR.ReadBytes (32));
 					ColumnSet columnSet = ((BD2.Frontend.Table.FrontendInstance)fib).GetColumnSetByID (BR.ReadBytes (32));
-					return new Row (fib, 
-					                chunkID,
-					                table,
-					                columnSet,
-					                columnSet.DeserializeObjects (BR.ReadBytes (BR.ReadInt32 ())));
+					Row R = new Row (fib, 
+					                 chunkID,
+					                 table,
+					                 columnSet,
+					                 columnSet.DeserializeObjects (BR.ReadBytes (BR.ReadInt32 ())));
+					table.InsertRow (R);
+					return R;
 				}
 			}
 		}

@@ -38,6 +38,16 @@ namespace BD2.Frontend.Table
 		{
 		}
 		#region implemented abstract members of Serializable
+		public static Column Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					//todo: have the base class to deserialize it's own data
+					return new Column (fib, chunkID, BR.ReadString (), ((Frontend)fib.Frontend).ValueDeserializer.IDToType (BR.ReadByte ()), BR.ReadBoolean (), BR.ReadInt64 ());
+				}
+			}
+		}
+
 		public override void Serialize (System.IO.Stream stream)
 		{
 			base.Serialize (stream);

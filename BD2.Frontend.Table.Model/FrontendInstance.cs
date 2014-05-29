@@ -44,6 +44,14 @@ namespace BD2.Frontend.Table.Model
 		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
 
 		public abstract ValueSerializerBase ValueSerializer { get; }
+
+		public abstract Column GetColumnByID (byte[] id);
+
+		public abstract Table GetTableByID (byte[] id);
+
+		public abstract Row GetRowByID (byte[] id);
+
+		public abstract ColumnSet GetColumnSetByID (byte[] id);
 	}
 }
 

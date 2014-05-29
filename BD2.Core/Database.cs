@@ -102,12 +102,30 @@ namespace BD2.Core
 					Console.WriteLine ("{0} objects", tup.Value.Count);
 					MSRP.Write (MSC.ToArray (), 0, 4);
 				}
+				System.Collections.Generic.SortedDictionary <BaseDataObject, LinkedListNode<BaseDataObject>> ss = new  System.Collections.Generic.SortedDictionary <BaseDataObject, LinkedListNode<BaseDataObject>> ();
+				System.Collections.Generic.LinkedList <BaseDataObject> ll = new LinkedList<BaseDataObject> ();
 				foreach (BaseDataObject bdo in tup.Value) {
-					n++;
+					if (!ss.ContainsKey (bdo))
+						ss.Add (bdo, ll.AddLast (bdo));
+
 					foreach (BaseDataObject dependency in bdo.GetDependenies ()) {
-						if (!dependencies.Contains (dependency.GetPersistentUniqueObjectID ()))
-							dependencies.Add (dependency.GetPersistentUniqueObjectID ());
+						byte[] dep = dependency.ChunkID;
+						if (dep == null) {
+							if (ss.ContainsKey (bdo)) {
+							
+							} else {
+
+								ss.Add (dependency, ll.AddBefore (ss [bdo], dependency));
+
+							}
+						} else {
+							if (!dependencies.Contains (dependency.ChunkID))
+								dependencies.Add (dependency.ChunkID);
+						}
 					}
+				}
+				foreach (BaseDataObject bdo in ll) {
+					n++;
 					System.IO.MemoryStream MST = new System.IO.MemoryStream ();
 					MST.Write (bdo.ObjectType.ToByteArray (), 0, 16);
 					bdo.Serialize (MST);
@@ -117,7 +135,6 @@ namespace BD2.Core
 						System.IO.MemoryStream MSC = new System.IO.MemoryStream ();
 						System.IO.BinaryWriter BWC = new System.IO.BinaryWriter (MSC);
 						BWC.Write (bytes.Length);
-						Console.WriteLine ("{0} bytes", bytes.Length);
 						MSRP.Write (MSC.ToArray (), 0, 4);
 					}
 				
@@ -128,7 +145,12 @@ namespace BD2.Core
 				MSBW.Write (encoded.Length);
 				MSBW.Write (encoded);
 			}
+			if (n == 0) {
+				Console.WriteLine ("No objects to save, nothing to do");
+				return;
+			}
 			System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create ();
+			Console.WriteLine ("{0} dependencies", dependencies.Count);
 			List<byte[]> deps = new List<byte[]> (dependencies);
 			Console.WriteLine ("Writing {0} bytes representing {1} objects to backend", MS.Length, n);
 			byte[] buf = MS.ToArray ();
@@ -144,26 +166,29 @@ namespace BD2.Core
 		void Load ()
 		{
 			SortedSet<byte[]> pendingData = new SortedSet<byte[]> (backends.Enumerate (), BD2.Common.ByteSequenceComparer.Shared);
-			SortedSet<byte[]> loaded = new SortedSet<byte[]> (BD2.Common.ByteSequenceComparer.Shared);
 			RawProxy.RawProxyCollection rpc = new BD2.RawProxy.RawProxyCollection ();
 			foreach (var rp in backends.EnumerateRawProxyData()) {
 				rpc.Add (RawProxy.RawProxyAttribute.DeserializeFromRawData (rp.Value));
 			}
 			while (pendingData.Count != 0)
 				foreach (var tup in new SortedSet<byte[]>(pendingData, BD2.Common.ByteSequenceComparer.Shared)) {
+					Console.WriteLine ("Testing object");
 					byte[] nchunk = tup;
-					while (loaded.Contains (nchunk)) {
-						byte[][] deps = backends.PullDependencies (nchunk);
-						foreach (byte[] dep in deps) {
-							if (pendingData.Contains (dep)) {
-								nchunk = dep;
-								break;
-							}
+					byte[][] deps = backends.PullDependencies (nchunk);
+					Console.WriteLine ("dependency count = {0}", deps.Length);
+					if (deps == null)
+						continue;
+					foreach (byte[] dep in deps) {
+						if (pendingData.Contains (dep)) {
+							Console.WriteLine ("Found an unloaded dependency, skipping...");
+							nchunk = null;
 						}
 					}
+					if (nchunk == null)
+						continue;
+					Console.WriteLine ("All the dependencies are loaded, proceeding...");
 					byte[] chunkData = backends.PullData (nchunk);
 					LoadChunk (nchunk, chunkData, rpc);
-					loaded.Add (nchunk);
 					pendingData.Remove (nchunk);
 				}	
 		}
@@ -262,6 +287,21 @@ namespace BD2.Core
 				}
 			}
 			return snap;
+		}
+
+		public void Close ()
+		{
+			SaveAllSnapshots ();
+			foreach (var fib in frontendInstances) {
+				//fib.Close ();
+			}
+			foreach (var s in snapshots) {
+				//s.Close ();
+			}
+			foreach (var f in frontends) {
+				//f.Value.Close ();
+			}
+			//backends.Close ();
 		}
 	}
 }

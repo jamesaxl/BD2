@@ -60,6 +60,8 @@ namespace BD2.Core
 
 		internal byte[] ChunkID {
 			get {
+				if (chunkID == null)
+					return null;
 				return (byte[])chunkID.Clone ();
 			}
 		}

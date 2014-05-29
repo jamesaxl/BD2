@@ -48,6 +48,12 @@ namespace BD2.Frontend.Table
 		SortedDictionary<byte[], Row> Rows = new SortedDictionary<byte[], Row> (new BD2.Common.ByteSequenceComparer ());
 		SortedDictionary<IndexBase, SortedDictionary<byte[], Row>> rowsByIndices = new SortedDictionary<IndexBase, SortedDictionary<byte[], Row>> ();
 
+		public void InsertRow (Row row)
+		{
+			Rows.Add (row.ObjectID, row);
+			//todo Add items to rowsByIndices after it gets implemented
+		}
+
 		internal Row GetRowByID (byte[] id)
 		{
 			return Rows [id];
@@ -84,6 +90,15 @@ namespace BD2.Frontend.Table
 			}
 		}
 		#region implemented abstract members of Serializable
+		public static BaseDataObject Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					return new BD2.Frontend.Table.Table (fib, chunkID, BR.ReadString ());
+				}
+			}
+		}
+
 		public override void Serialize (System.IO.Stream stream)
 		{
 			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {

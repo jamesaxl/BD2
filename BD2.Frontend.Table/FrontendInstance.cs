@@ -63,10 +63,11 @@ namespace BD2.Frontend.Table
 					Console.WriteLine ("Deserializing {0} objects", objectCount);
 					for (int n = 0; n != objectCount; n++) {
 						int objectLengeth = BR.ReadInt32 ();
+						//Console.WriteLine ("Length:{0}", objectLengeth);
 						Guid objectTypeID = new Guid (BR.ReadBytes (16));
 						BaseDataObjectTypeIdAttribute typeDescriptor = BaseDataObjectTypeIdAttribute.GetAttribFor (objectTypeID);
-						BaseDataObject BDO = typeDescriptor.Deserialize (this, chunkID, BR.ReadBytes (objectLengeth));
-						Console.WriteLine (BDO.GetType ().FullName);
+						BaseDataObject BDO = typeDescriptor.Deserialize (this, chunkID, BR.ReadBytes (objectLengeth - 16));
+						//Console.WriteLine (BDO.GetType ().FullName);
 						if (BDO is Table) {
 							tables.Add (BDO.ObjectID, (Table)BDO);
 						} else if (BDO is Column) {
@@ -155,14 +156,37 @@ namespace BD2.Frontend.Table
 			}
 		}
 		#endregion
-		public ColumnSet GetColumnSetByID (byte[] id)
+		public override ColumnSet GetColumnSetByID (byte[] id)
 		{
+			if (!columnSets.ContainsKey (id))
+				System.Diagnostics.Debugger.Break ();
 			return columnSets [id];
 		}
 
-		public Table GetTableByID (byte[] id)
+		public override BD2.Frontend.Table.Model.Table GetTableByID (byte[] id)
 		{
+			if (!tables.ContainsKey (id))
+				System.Diagnostics.Debugger.Break ();
 			return tables [id];
+		}
+
+		public override BD2.Frontend.Table.Model.Column GetColumnByID (byte[] id)
+		{
+			if (!columns.ContainsKey (id))
+				System.Diagnostics.Debugger.Break ();
+			return columns [id];
+		}
+
+		public override BD2.Frontend.Table.Model.Row GetRowByID (byte[] id)
+		{
+			if (!rows.ContainsKey (id))
+				System.Diagnostics.Debugger.Break ();
+			return rows [id];
+		}
+
+		public IEnumerable<Table> GetTables ()
+		{
+			return new SortedSet<Table> (tables.Values);
 		}
 	}
 }
