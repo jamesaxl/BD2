@@ -38,12 +38,12 @@
     <Compile Include="Relation.cs" />
     <Compile Include="Row.cs" />
     <Compile Include="Table.cs" />
-    <Compile Include="MultiColumnIndex.cs" />
-    <Compile Include="SingleColumnIndex.cs" />
-    <Compile Include="ColumnSetRawDataAlignment.cs" />
     <Compile Include="Frontend.cs" />
     <Compile Include="FrontendInstance.cs" />
     <Compile Include="GenericValueDeserializer.cs" />
+    <Compile Include="Transaction.cs" />
+    <Compile Include="TransactionSource.cs" />
+    <Compile Include="Index.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Behrooz Amoozad
+ * Copyright (c) 2014 Behrooz Amoozad
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,12 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
-namespace BD2.Frontend.Table
+using System;
+
+namespace BD2.Core
 {
-	public enum ColumnSetRawDataAlignment : short
+	public interface ITransactionSource
 	{
-		Ordinal = 0,
-		FixedFirst = 1,
-		FastString = 2,
+		Transaction CreateTransaction ();
 	}
 }
+

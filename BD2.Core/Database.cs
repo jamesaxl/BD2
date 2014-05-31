@@ -74,17 +74,21 @@ namespace BD2.Core
 			Load ();
 		}
 
-		public void SaveAllSnapshots ()
+		public void SaveSnapshots (IEnumerable<Snapshot> snaps)
 		{
 			SortedDictionary<Snapshot, SortedSet<BaseDataObject>> bdos = new SortedDictionary<Snapshot, SortedSet<BaseDataObject>> ();
-			foreach (Snapshot snapshot in snapshots) {
-				bdos.Add (snapshot, snapshot.GetVolatileData ());
+			foreach (Snapshot snapshot in snaps) {
+				bdos.Add (snapshot, snapshot.GetAndClearVolatileData ());
 			}
 			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
 			System.IO.MemoryStream MSRP = new System.IO.MemoryStream ();
 			System.IO.BinaryWriter MSBW = new System.IO.BinaryWriter (MS);
 			SortedSet<byte[]> dependencies = new SortedSet<byte[]> (BD2.Common.ByteSequenceComparer.Shared);
-			MSBW.Write (1);
+			ChunkHeaderv1 ch = new ChunkHeaderv1 (DateTime.UtcNow, "");
+			MSBW.Write (ch.Version);
+			byte[] chbytes = ch.Serialize ();
+			MSBW.Write (chbytes.Length);
+			MSBW.Write (chbytes);
 			MSBW.Write (bdos.Count);
 			Console.WriteLine ("{0} sections", bdos.Count);
 			int n = 0;
@@ -112,7 +116,7 @@ namespace BD2.Core
 						byte[] dep = dependency.ChunkID;
 						if (dep == null) {
 							if (ss.ContainsKey (bdo)) {
-							
+
 							} else {
 
 								ss.Add (dependency, ll.AddBefore (ss [bdo], dependency));
@@ -137,7 +141,7 @@ namespace BD2.Core
 						BWC.Write (bytes.Length);
 						MSRP.Write (MSC.ToArray (), 0, 4);
 					}
-				
+
 					MSRP.Write (bytes, 0, bytes.Length);
 				}
 				byte[] encoded = rpc.ChainEncode (MSRP.ToArray ());
@@ -161,6 +165,11 @@ namespace BD2.Core
 					bdo.SetChunkID (chunkID);
 				}
 			}
+		}
+
+		public void SaveAllSnapshots ()
+		{
+			SaveSnapshots (snapshots);
 		}
 
 		void Load ()
@@ -193,12 +202,21 @@ namespace BD2.Core
 				}	
 		}
 
+		SortedDictionary<byte[], ChunkHeaderv1> chunkHeaders = new SortedDictionary<byte[], ChunkHeaderv1> (BD2.Common.ByteSequenceComparer.Shared);
+
+		public ChunkHeaderv1 GetHeadersForChunk (byte[] id)
+		{
+			return chunkHeaders [id];
+		}
+
 		void LoadChunk (byte[] chunkID, byte[] chunkData, RawProxy.RawProxyCollection rpc)
 		{
 			Console.WriteLine ("Pulled a chunk with a size of {0}", chunkData.Length);
 			System.IO.MemoryStream MS = new System.IO.MemoryStream (chunkData);
 			System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
 			int chunkVersion = BR.ReadInt32 ();
+			ChunkHeaderv1 ch = ChunkHeaderv1.Deserialzie (BR.ReadBytes (BR.ReadInt32 ())); 
+			chunkHeaders.Add (chunkID, ch);
 			int sectionCount = BR.ReadInt32 ();
 			for (int sectionID =  0; sectionID != sectionCount; sectionID++) {
 				switch (chunkVersion) {

@@ -26,56 +26,28 @@
   * */
 using System;
 using BD2.Core;
+using System.Collections.Generic;
+using BD2.Frontend.Table.Model;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Frontend.Table
 {
-	public sealed class RowDrop : BaseDataObject
+	internal interface IPTransactionSource : BD2.Core.ITransactionSource
 	{
-		Row row;
+		void CommitObjects (IEnumerable<BaseDataObject> objects);
+	}
 
-		public Row Row {
-			get {
-				return row;
-			}
-		}
+	interface ITransactionSource : IPTransactionSource
+	{
 
-		public RowDrop (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Row  row)
-			:base (frontendInstanceBase, chunkID)
-		{
-			if (row == null)
-				throw new ArgumentNullException ("row");
-			this.row = row;
-		}
-		#region implemented abstract members of Serializable
-		public static RowDrop Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
-		{
-			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
-				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new RowDrop (fib, chunkID, ((BD2.Frontend.Table.Model.FrontendInstance)fib).GetRowByID (BR.ReadBytes (32)));
-				}
-			}
-		}
+		IEnumerable<Row> GetRows ();
 
-		public override void Serialize (System.IO.Stream stream)
-		{
-			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
-				BW.Write (row.ObjectID);
-			}
-		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override Guid ObjectType {
-			get {
-				return Guid.Parse ("1ede8774-cdd5-4d88-bce2-daa9af54aa51");
-			}
-		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override System.Collections.Generic.IEnumerable<BaseDataObject> GetDependenies ()
-		{
-			yield return row;
-		}
-		#endregion
+		IEnumerable<Column> GetColumns ();
+
+		IEnumerable<ColumnSet> GetColumnSets ();
+
+		IEnumerable<Table> GetTables ();
+
+		IEnumerable<Relation> GetRelations ();
 	}
 }
 

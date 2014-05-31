@@ -31,6 +31,33 @@ namespace BD2.Frontend.Table.Model
 	public abstract	class ColumnSetConverter
 	{
 		public abstract object[] Convert (object[] data, ColumnSet inColumnSet, ColumnSet outColumnSet);
+
+		System.Collections.Generic.IEnumerable<ColumnSet> inColumnSets;
+
+		public System.Collections.Generic.IEnumerable<ColumnSet> InColumnSets {
+			get {
+				return inColumnSets;
+			}
+		}
+
+		System.Collections.Generic.IEnumerable<ColumnSet> outColumnSets;
+
+		public System.Collections.Generic.IEnumerable<ColumnSet> OutColumnSets {
+			get {
+				return outColumnSets;
+			}
+		}
+
+		protected ColumnSetConverter (System.Collections.Generic.IEnumerable<ColumnSet> inColumnSets, System.Collections.Generic.IEnumerable<ColumnSet> outColumnSets)
+		{
+			if (inColumnSets == null)
+				throw new ArgumentNullException ("inColumnSets");
+			if (outColumnSets == null)
+				throw new ArgumentNullException ("outColumnSets");
+			this.inColumnSets = inColumnSets;
+			this.outColumnSets = outColumnSets;
+
+		}
 	}
 }
 

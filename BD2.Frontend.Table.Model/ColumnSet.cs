@@ -97,5 +97,14 @@ namespace BD2.Frontend.Table.Model
 		{
 			return ((FrontendInstance)FrontendInstanceBase).ValueSerializer.DeserializeArray (data);
 		}
+
+		public int IndexOf (string fieldName, StringComparison comparisonType)
+		{
+			for (int n = 0; n != columns.Length; n++) {
+				if (columns [n].Name.Equals (fieldName, comparisonType))
+					return n;
+			}
+			return -1;
+		}
 	}
 }

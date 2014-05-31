@@ -53,9 +53,26 @@ namespace BD2.Core
 		public SortedSet<BaseDataObject> GetVolatileData ()
 		{
 			lock (syncVolatileData) {
+				return new SortedSet<BaseDataObject> (volatileData);
+			}
+		}
+
+		internal SortedSet<BaseDataObject> GetAndClearVolatileData ()
+		{
+			lock (syncVolatileData) {
 				SortedSet<BaseDataObject> oldSet = volatileData;
 				volatileData = new SortedSet<BaseDataObject> ();
 				return oldSet;
+			}
+		}
+
+		public void PurgeVolatileData ()
+		{
+			lock (syncVolatileData) {
+				foreach (BaseDataObject bdo in volatileData) {
+					bdo.FrontendInstanceBase.Purge (bdo);
+				}
+				volatileData = new SortedSet<BaseDataObject> ();
 			}
 		}
 

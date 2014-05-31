@@ -35,20 +35,6 @@ namespace BD2.Frontend.Table.Model
 	{
 		public abstract string Name { get; }
 
-		public abstract IEnumerable<Relation> GetParentRelations ();
-
-		public abstract IEnumerable<Row> GetRows ();
-
-		public abstract IEnumerable<Row> GetRows (IndexBase index);
-
-		public abstract IEnumerable<Row> GetRows (ColumnSet columnSet);
-
-		public abstract IEnumerable<Row> GetRows (ColumnSet columnSet, IndexBase index);
-
-		public abstract IEnumerable<IndexBase> GetIndices ();
-
-		public abstract IEnumerable<ColumnSet> GetColumnSets ();
-
 		protected Table (FrontendInstanceBase frontendInstanceBase, byte[] chunkID)
 			: base (frontendInstanceBase, chunkID)
 		{

@@ -61,27 +61,27 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract object[] GetValues ();
 
+		public object[] GetValues (ColumnSet outputColumnSet)
+		{
+			return ((BD2.Frontend.Table.Model.FrontendInstance)FrontendInstanceBase).GetColumnSetConverter (columnSet, outputColumnSet).Convert (GetValues (), columnSet, outputColumnSet);
+		}
+
+		public abstract object GetValue (string fieldName);
+
+		public abstract object GetValue (int fieldIndex);
+
 		public abstract IEnumerable<KeyValuePair<BD2.Frontend.Table.Model.Column, object>> GetValuesWithColumns ();
 
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
 			yield return table;
 			yield return columnSet;
-			foreach (Relation rel in table.GetParentRelations ()) {
-				foreach (Column relCol in rel.ChildColumns) {
-					foreach (Column setCol in columnSet.Columns) {
-						if (relCol == setCol)
-							goto matchOne;
-					}
-					goto noMatch;
-					matchOne:
-					;
+			BD2.Frontend.Table.Model.FrontendInstance fi = ((BD2.Frontend.Table.Model.FrontendInstance)FrontendInstanceBase);
+			foreach (Relation rel in fi.GetParentRelations (table)) {
+				foreach (Row row in fi.GetRows(rel.ChildTable, rel.ChildColumns, rel.ParentColumns.GetValues(columnSet,this.GetValues ()))) {
+
+					yield return ;
 				}
-				foreach (Row row in  rel.ParentColumns.Table.GetRows (rel.ParentColumns)) {
-					yield return row;
-				}
-				noMatch:
-				;
 			}
 		}
 	}

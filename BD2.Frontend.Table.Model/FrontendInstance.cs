@@ -25,10 +25,11 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using System.Collections.Generic;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
+	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase, BD2.Core.ITransactionSource
 	{
 		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
 			: base(snapshot, frontend)
@@ -41,9 +42,38 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract Table GetTable (string name);
 
+		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table, Column[] columns, object[] match);
+
 		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
 
 		public abstract ValueSerializerBase ValueSerializer { get; }
+		//TODO: Implement a real SPF algorithm
+		System.Collections.Generic.SortedDictionary<ColumnSet, System.Collections.Generic.SortedDictionary<ColumnSet, ColumnSetConverter>> cscs = new System.Collections.Generic.SortedDictionary<ColumnSet, System.Collections.Generic.SortedDictionary<ColumnSet, ColumnSetConverter>> ();
+
+		public void AddColumnSetConverter (ColumnSetConverter csc)
+		{
+			foreach (ColumnSet ocs in csc.OutColumnSets) {
+				if (!cscs.ContainsKey (ocs)) {
+					cscs.Add (ocs, new System.Collections.Generic.SortedDictionary<ColumnSet, ColumnSetConverter> ());
+				}
+				System.Collections.Generic.SortedDictionary<ColumnSet, ColumnSetConverter> sources = cscs [ocs];
+				foreach (ColumnSet ics in csc.InColumnSets) {
+					sources.Add (ics, csc);
+				}
+			}
+		}
+
+		public ColumnSetConverter GetColumnSetConverter (ColumnSet columnSet, ColumnSet outputColumnSet)
+		{
+			if (cscs.ContainsKey (outputColumnSet)) {
+				System.Collections.Generic.SortedDictionary<ColumnSet, ColumnSetConverter> sources = cscs [outputColumnSet];
+				if (sources.ContainsKey (columnSet)) {
+					return sources [columnSet];
+				} else
+					throw new NotSupportedException ("Conversion from source ColumnSet is not supported.");			
+			} else
+				throw new NotSupportedException ("Conversion to destination ColumnSet is not supported.");
+		}
 
 		public abstract Column GetColumnByID (byte[] id);
 
@@ -52,6 +82,16 @@ namespace BD2.Frontend.Table.Model
 		public abstract Row GetRowByID (byte[] id);
 
 		public abstract ColumnSet GetColumnSetByID (byte[] id);
+
+		public abstract IEnumerable<Table> GetTables ();
+
+		public abstract IEnumerable<ColumnSet> GetColumnSets ();
+
+		public abstract IEnumerable<Row> GetRows ();
+
+		public abstract IEnumerable<Relation> GetParentRelations (Table table);
+
+		public abstract BD2.Core.Transaction CreateTransaction ();
 	}
 }
 

@@ -46,6 +46,7 @@
     <Compile Include="FrontendInstance.cs" />
     <Compile Include="ColumnSetConverter.cs" />
     <Compile Include="ValueSerializerBase.cs" />
+    <Compile Include="GenericColumnSetConverter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

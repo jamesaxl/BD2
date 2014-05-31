@@ -47,7 +47,10 @@ namespace BD2.Frontend.Table.Model
 
 		IndexBase parentColumns;
 		Column[] childColumns;
+		ColumnSet childColumnSet;
 		Table childTable;
+		//it's purpose is to allow for relations to cross ColumnSets without one relation being processed twice 
+		string name;
 
 		protected Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, IndexBase parentColumns, Table childTable, Column[] childColumns)
 		: base (frontendInstanceBase, chunkID)
@@ -68,6 +71,12 @@ namespace BD2.Frontend.Table.Model
 		public Table ChildTable { get { return childTable; } }
 
 		public Column[] ChildColumns { get { return childColumns; } }
+
+		public ColumnSet ChildColumnSet {
+			get {
+				return childColumnSet;
+			}
+		}
 		#region implemented abstract members of Serializable
 		public override void Serialize (System.IO.Stream stream)
 		{

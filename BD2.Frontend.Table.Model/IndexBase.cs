@@ -65,6 +65,17 @@ namespace BD2.Frontend.Table.Model
 			}
 			return false;
 		}
+
+		public object GetValues (ColumnSet columnSet, object[] @object)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void Serialize (System.IO.Stream stream)
+		{
+			stream.Write (table.ObjectID, 0, 32);
+			stream.WriteByte ((byte)(unique ? 1 : 0));
+		}
 	}
 }
 

@@ -25,57 +25,58 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using BD2.Core;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Chunk
 {
-	public sealed class RowDrop : BaseDataObject
+	public class ChunkHeaderv1
 	{
-		Row row;
-
-		public Row Row {
+		public virtual int Version { 
 			get {
-				return row;
+				return 1;
 			}
 		}
 
-		public RowDrop (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Row  row)
-			:base (frontendInstanceBase, chunkID)
-		{
-			if (row == null)
-				throw new ArgumentNullException ("row");
-			this.row = row;
+		DateTime dateCreated;
+
+		public DateTime DateCreated {
+			get {
+				return dateCreated;
+			}
 		}
-		#region implemented abstract members of Serializable
-		public static RowDrop Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+
+		string comments;
+
+		public string Comments {
+			get {
+				return comments;
+			}
+		}
+
+		public ChunkHeaderv1 (DateTime dateCreated, string comments)
 		{
-			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
+			this.dateCreated = dateCreated;
+			this.comments = comments;
+		}
+
+		public static ChunkHeaderv1 Deserialzie (byte[] buffer)
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new RowDrop (fib, chunkID, ((BD2.Frontend.Table.Model.FrontendInstance)fib).GetRowByID (BR.ReadBytes (32)));
+					return new ChunkHeaderv1 (DateTime.FromBinary (BR.ReadInt64 ()), BR.ReadString ());
 				}
 			}
 		}
 
-		public override void Serialize (System.IO.Stream stream)
+		public byte[] Serialize ()
 		{
-			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
-				BW.Write (row.ObjectID);
+			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (dateCreated.ToBinary ());
+					BW.Write (comments);
+				}
+				return MS.ToArray ();
 			}
 		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override Guid ObjectType {
-			get {
-				return Guid.Parse ("1ede8774-cdd5-4d88-bce2-daa9af54aa51");
-			}
-		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override System.Collections.Generic.IEnumerable<BaseDataObject> GetDependenies ()
-		{
-			yield return row;
-		}
-		#endregion
 	}
 }
 

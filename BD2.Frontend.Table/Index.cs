@@ -31,7 +31,7 @@ using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	public sealed class MultiColumnIndex : IndexBase
+	public sealed class Index : IndexBase
 	{
 		IndexColumnBase[] indexColumns;
 
@@ -41,7 +41,7 @@ namespace BD2.Frontend.Table
 				yield return indexColumn;
 		}
 
-		public MultiColumnIndex (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Model.Table table, bool unique, IndexColumnBase[] indexColumns)
+		public Index (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Model.Table table, bool unique, IndexColumnBase[] indexColumns)
 		:base(frontendInstanceBase, chunkID, table, unique)
 		{
 			if (indexColumns == null)

@@ -34,6 +34,7 @@ namespace BD2.Frontend.Table
 {
 	public class FrontendInstance : BD2.Frontend.Table.Model.FrontendInstance
 	{
+		SortedDictionary<Table, SortedDictionary<byte[], Row>> perTableRows = new SortedDictionary<Table, SortedDictionary<byte[], Row>> ();
 		SortedDictionary<byte[], Row> rows = new SortedDictionary<byte[], Row> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], Table> tables = new SortedDictionary<byte[], Table> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], Relation> relations = new SortedDictionary<byte[], Relation> (BD2.Common.ByteSequenceComparer.Shared);
@@ -66,19 +67,23 @@ namespace BD2.Frontend.Table
 						//Console.WriteLine ("Length:{0}", objectLengeth);
 						Guid objectTypeID = new Guid (BR.ReadBytes (16));
 						BaseDataObjectTypeIdAttribute typeDescriptor = BaseDataObjectTypeIdAttribute.GetAttribFor (objectTypeID);
-						BaseDataObject BDO = typeDescriptor.Deserialize (this, chunkID, BR.ReadBytes (objectLengeth - 16));
-						//Console.WriteLine (BDO.GetType ().FullName);
-						if (BDO is Table) {
-							tables.Add (BDO.ObjectID, (Table)BDO);
-						} else if (BDO is Column) {
-							columns.Add (BDO.ObjectID, (Column)BDO);
-						} else if (BDO is ColumnSet) {
-							columnSets.Add (BDO.ObjectID, (ColumnSet)BDO);
-						} else if (BDO is Row) {
-							rows.Add (BDO.ObjectID, (Row)BDO);
-						}
+						InsertObject (typeDescriptor.Deserialize (this, chunkID, BR.ReadBytes (objectLengeth - 16)));
 					}
 				}
+			}
+		}
+
+		void InsertObject (BaseDataObject bdo)
+		{
+			if (bdo is Table) {
+				tables.Add (bdo.ObjectID, (Table)bdo);
+			} else if (bdo is Column) {
+				columns.Add (bdo.ObjectID, (Column)bdo);
+			} else if (bdo is ColumnSet) {
+				columnSets.Add (bdo.ObjectID, (ColumnSet)bdo);
+			} else if (bdo is Row) {
+				rows.Add (bdo.ObjectID, (Row)bdo);
+				RemovePreviousVersions ((Row)bdo);
 			}
 		}
 
@@ -101,7 +106,7 @@ namespace BD2.Frontend.Table
 		public override BD2.Frontend.Table.Model.Column GetColumn (string name, Type type, bool allowNull, long length)
 		{
 			Column nc = new Column (this, null, name, type, allowNull, length);
-			byte[] hash = nc.GetPersistentUniqueObjectID ();
+			byte[] hash = nc.ObjectID;
 			if (columns.ContainsKey (hash)) 
 				return columns [hash];
 			Snapshot.AddVolatileData (nc);
@@ -123,17 +128,18 @@ namespace BD2.Frontend.Table
 			return cs;
 		}
 
-		public BD2.Frontend.Table.Row CreateRow (BD2.Frontend.Table.Model.Table table, BD2.Frontend.Table.Model.ColumnSet columnSet, object[] objects)
+		public BD2.Frontend.Table.Row CreateRow (BD2.Frontend.Table.Model.Table table, BD2.Frontend.Table.Model.ColumnSet columnSet, byte[][] previousID, object[] objects)
 		{
-			Row r = new Row (this, null, table, columnSet, objects);
+			Row r = new Row (this, null, table, columnSet, previousID, objects);
 			rows.Add (r.ObjectID, r);
 			Snapshot.AddVolatileData (r);
+			RemovePreviousVersions (r);
 			return r;
 		}
 
 		public void Flush ()
 		{
-			Snapshot.Database.SaveAllSnapshots ();
+			Snapshot.Database.SaveSnapshots (new Snapshot[] { Snapshot });
 		}
 		#region implemented abstract members of FrontendInstance
 		public override BD2.Frontend.Table.Model.Table GetTable (string name)
@@ -149,11 +155,7 @@ namespace BD2.Frontend.Table
 
 		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (BD2.Frontend.Table.Model.Table table)
 		{
-			foreach (var rt in rows) {
-				if (rt.Value.Table == table) {
-					yield return rt.Value;
-				}
-			}
+			return table.GetRows ();
 		}
 		#endregion
 		public override ColumnSet GetColumnSetByID (byte[] id)
@@ -184,9 +186,80 @@ namespace BD2.Frontend.Table
 			return rows [id];
 		}
 
-		public IEnumerable<Table> GetTables ()
+		public override IEnumerable<BD2.Frontend.Table.Model.Table> GetTables ()
 		{
-			return new SortedSet<Table> (tables.Values);
+			return new SortedSet<BD2.Frontend.Table.Model.Table> (tables.Values);
+		}
+
+		public override IEnumerable<ColumnSet> GetColumnSets ()
+		{
+			return new SortedSet<ColumnSet> (columnSets.Values);
+		}
+
+		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows ()
+		{
+			return new SortedSet<BD2.Frontend.Table.Model.Row> (rows.Values);
+		}
+
+		SortedDictionary<byte[], SortedSet<Row>> removedRows = new SortedDictionary<byte[], SortedSet<Row>> (BD2.Common.ByteSequenceComparer.Shared);
+
+		void RemovePreviousVersions (Row row)
+		{
+			foreach (byte[] id in row.PreviousVersionID) {
+				if (!rows.ContainsKey (id)) {
+					//multiple updates to one row
+					foreach (Row r in removedRows [id]) {
+						r.SetCurrentVersion (row);
+						row.SetCurrentVersion (r);
+					}
+				} else {
+					Row pr = rows [id];
+					row.SetPreviousVersion (pr);
+					rows.Remove (id);
+					if (removedRows.ContainsKey (pr.ObjectID))
+						removedRows [pr.ObjectID].Add (row);
+					else {
+						SortedSet<Row> newSS = new SortedSet<Row> ();
+						removedRows.Add (pr.ObjectID, newSS);
+						newSS.Add (row);
+					}
+				}
+			}
+		}
+
+		void FallbackToPreviousVersions (Row row)
+		{
+			foreach (byte[] pid in row.PreviousVersionID) {
+				foreach (Row r in removedRows[pid]) {
+					rows.Add (r.ObjectID, r);
+				}
+				removedRows.Remove (pid);
+			}
+		}
+		#region implemented abstract members of FrontendInstanceBase
+		public override void Purge (BaseDataObject bdo)
+		{
+			if (!bdo.IsVolatile)
+				throw new Exception ("BD2 does not and never will support purging non-volatile data.");
+			if (bdo is Table) {
+				tables.Remove (bdo.ObjectID);
+			} else if (bdo is Column) {
+				columns.Remove (bdo.ObjectID);
+			} else if (bdo is ColumnSet) {
+				columnSets.Remove (bdo.ObjectID);
+			} else if (bdo is Row) {
+				rows.Remove (bdo.ObjectID);
+				FallbackToPreviousVersions ((Row)bdo);
+			} else if (bdo is RowDrop) {
+				Row R = (Row)((RowDrop)bdo).Row;
+				rows.Add (R.ObjectID, R);
+			}
+
+		}
+		#endregion
+		public override BD2.Core.Transaction CreateTransaction ()
+		{
+			return new Transaction (this);
 		}
 	}
 }

@@ -31,6 +31,7 @@ namespace BD2.Core
 {
 	public abstract class FrontendInstanceBase
 	{
+
 		Snapshot snapshot;
 
 		public Snapshot Snapshot {
@@ -61,6 +62,8 @@ namespace BD2.Core
 		{
 			OnCreateObjects (chunkID, bytes);
 		}
+
+		public abstract void Purge (BaseDataObject bdo);
 
 		protected abstract void OnCreateObjects (byte[] chunkID, byte[] bytes);
 

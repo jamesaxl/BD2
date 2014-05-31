@@ -43,24 +43,26 @@ namespace BD2.Test.Frontend.Table
 			  new BD2.Core.Frontend[] { new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ()) }, databaseName);
 			BD2.Frontend.Table.FrontendInstance frontendInstance =
 				(BD2.Frontend.Table.FrontendInstance)(db.GetFrontend ("BD2.Frontend.Table")).CreateInstanse (db.GetSnapshot ("Primary"));
-			foreach (var T in frontendInstance.GetTables()) {
-				foreach (var R in T.GetRows ()) {
-					foreach (var V in R.GetValues ()) {
-						if (V == null)
-							continue;
-						if (V is Guid)
-							continue;
-						string S = V.ToString ();
-						if (S.Contains ("1390")) {
-							Console.WriteLine ("{0}: ", T.Name);
-							foreach (var V2 in R.GetValues ()) {
-								Console.WriteLine (V2);
-							}
-							Console.WriteLine ();
-						}
-					}
-				}
+			int count = 0;
+			System.Diagnostics.Stopwatch a = new System.Diagnostics.Stopwatch ();
+			a.Start ();
+			foreach (var CS in frontendInstance.GetColumnSets()) {
+			
 			}
+			BD2.Frontend.Table.Transaction trans = (BD2.Frontend.Table.Transaction)frontendInstance.CreateTransaction ();
+			trans.CommitObjects ();
+			foreach (var R in frontendInstance.GetRows (frontendInstance.GetTable("Moshtary"))) {
+				string tel = (string)R.GetValue ("Tel");
+				if (tel.Equals ("", StringComparison.Ordinal)) {
+					count ++;
+					frontendInstance ();
+					//frontendInstance.CreateRow (R.Table, R.ColumnSet, new byte[][] { R.ObjectID }, newData);
+				}			
+			}
+			frontendInstance.Flush ();
+			a.Stop ();
+			Console.WriteLine (a.Elapsed);
+			Console.WriteLine (count);
 		}
 	}
 }

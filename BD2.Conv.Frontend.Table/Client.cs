@@ -100,7 +100,7 @@ namespace BD2.Conv.Frontend.Table
 			Table table = tableDataRequests [GRRM.RequestID];
 			BD2.Frontend.Table.Model.Table frontendTable = frontendInstance.GetTable (table.Name);
 			frontendInstance.Flush ();
-			SortedSet<BD2.Frontend.Table.Model.Column> fcs = new SortedSet<BD2.Frontend.Table.Model.Column> ();
+			List<BD2.Frontend.Table.Model.Column> fcs = new List<BD2.Frontend.Table.Model.Column> ();
 			Console.WriteLine ("Table: {0}", table.Name);
 			Console.WriteLine ("Enumerating columns...");
 			if (!tableColumns.ContainsKey (table)) {
@@ -123,7 +123,7 @@ namespace BD2.Conv.Frontend.Table
 			BD2.Frontend.Table.Model.ColumnSet columnSet = frontendInstance.GetColumnSet (cols);
 			frontendInstance.Flush ();
 			foreach (BD2.Conv.Frontend.Table.Row r in message.Rows) {
-				frontendInstance.CreateRow (frontendTable, columnSet, r.Fields);
+				frontendInstance.CreateRow (frontendTable, columnSet, new byte[][] { }, r.Fields);
 				rc++;
 			}
 			Console.WriteLine (rc);

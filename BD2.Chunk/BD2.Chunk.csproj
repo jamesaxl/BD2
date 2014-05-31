@@ -39,6 +39,7 @@
     <Compile Include="ChunkPushedEventArgs.cs" />
     <Compile Include="ChunkData.cs" />
     <Compile Include="WeakChunkReference.cs" />
+    <Compile Include="ChunkHeader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

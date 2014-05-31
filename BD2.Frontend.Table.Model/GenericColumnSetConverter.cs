@@ -25,57 +25,25 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
-	public sealed class RowDrop : BaseDataObject
+	public sealed class GenericColumnSetConverter : ColumnSetConverter
 	{
-		Row row;
+		Func<object[], ColumnSet, ColumnSet, object[]> convertFunc;
 
-		public Row Row {
-			get {
-				return row;
-			}
-		}
-
-		public RowDrop (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Row  row)
-			:base (frontendInstanceBase, chunkID)
+		public override object[] Convert (object[] data, ColumnSet inColumnSet, ColumnSet outColumnSet)
 		{
-			if (row == null)
-				throw new ArgumentNullException ("row");
-			this.row = row;
-		}
-		#region implemented abstract members of Serializable
-		public static RowDrop Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
-		{
-			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream (buffer)) {
-				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new RowDrop (fib, chunkID, ((BD2.Frontend.Table.Model.FrontendInstance)fib).GetRowByID (BR.ReadBytes (32)));
-				}
-			}
+			return convertFunc (data, inColumnSet, outColumnSet);
 		}
 
-		public override void Serialize (System.IO.Stream stream)
+		public GenericColumnSetConverter (System.Collections.Generic.IEnumerable<ColumnSet> inColumnSets, System.Collections.Generic.IEnumerable<ColumnSet> outColumnSets, Func<object[], ColumnSet, ColumnSet, object[]> convertFunc)
+			:base(inColumnSets, outColumnSets)
 		{
-			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
-				BW.Write (row.ObjectID);
-			}
+			if (convertFunc == null)
+				throw new ArgumentNullException ("convertFunc");
+			this.convertFunc = convertFunc;
 		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override Guid ObjectType {
-			get {
-				return Guid.Parse ("1ede8774-cdd5-4d88-bce2-daa9af54aa51");
-			}
-		}
-		#endregion
-		#region implemented abstract members of BaseDataObject
-		public override System.Collections.Generic.IEnumerable<BaseDataObject> GetDependenies ()
-		{
-			yield return row;
-		}
-		#endregion
 	}
 }
 

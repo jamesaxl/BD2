@@ -41,10 +41,23 @@ namespace BD2.Frontend.Table
 		
 		}
 		#region implemented abstract members of Serializable
+		public static Relation Deserialize(FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+		{
+			BD2.Frontend.Table.FrontendInstance fi = (BD2.Frontend.Table.FrontendInstance)fib;
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					IndexBase index = fi.GetIndexByID (BR.ReadBytes(32));
+					Table table = fi.GetTableByID (BR.ReadBytes (32));
+					Column[] columns = new BD2.Frontend.Table.Model.Column[BR.ReadInt32 ()];
+					for (int n = 0; n != columns.Length; n++) {
+						columns [n] = fi.GetColumnByID (BR.ReadBytes (32));
+					}
+					return new Relation (fib, chunkID, index, table, columns);
+				}
+			}
+		}
 		public override void Serialize (System.IO.Stream stream)
 		{
-			base.Serialize (stream);
-		}
 
 		public override Guid ObjectType {
 			get {

@@ -45,20 +45,6 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		SortedDictionary<byte[], Row> Rows = new SortedDictionary<byte[], Row> (new BD2.Common.ByteSequenceComparer ());
-		SortedDictionary<IndexBase, SortedDictionary<byte[], Row>> rowsByIndices = new SortedDictionary<IndexBase, SortedDictionary<byte[], Row>> ();
-
-		public void InsertRow (Row row)
-		{
-			Rows.Add (row.ObjectID, row);
-			//todo Add items to rowsByIndices after it gets implemented
-		}
-
-		internal Row GetRowByID (byte[] id)
-		{
-			return Rows [id];
-		}
-
 		string name;
 
 		public override string Name { get { return name; } }
@@ -67,27 +53,6 @@ namespace BD2.Frontend.Table
 			:base(frontendInstanceBase, chunkID)
 		{
 			this.name = name;
-		}
-
-		internal void InsertColumnSet (ColumnSet columnSet)
-		{
-			columnSets.Add (columnSet.ObjectID, columnSet);
-		}
-
-		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (new BD2.Common.ByteSequenceComparer ());
-
-		internal SortedDictionary<byte[], ColumnSet> ColumnSets {
-			get {
-				return new SortedDictionary<byte[], ColumnSet> (columnSets);
-			}
-		}
-
-		SortedDictionary<byte[], BD2.Frontend.Table.Model.Relation> relations = new SortedDictionary<byte[], BD2.Frontend.Table.Model.Relation> (new BD2.Common.ByteSequenceComparer ());
-
-		public SortedDictionary<byte[], BD2.Frontend.Table.Model.Relation> Relations {
-			get {
-				return new SortedDictionary<byte[], BD2.Frontend.Table.Model.Relation> (relations);
-			}
 		}
 		#region implemented abstract members of Serializable
 		public static BaseDataObject Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
@@ -109,61 +74,12 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of BaseDataObject
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			foreach (ColumnSet cs in columnSets.Values)
-				yield return cs;
 			yield break;
 		}
 
 		public override Guid ObjectType {
 			get {
 				return Guid.Parse ("3be06a16-6727-4639-b702-060b522af660");
-			}
-		}
-		#endregion
-		#region implemented abstract members of Table
-		public override IEnumerable<BD2.Frontend.Table.Model.Relation> GetParentRelations ()
-		{
-			return Relations.Values;
-		}
-
-		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows ()
-		{
-			foreach (KeyValuePair<byte[], Row> r in Rows) {
-				yield return r.Value;
-			}
-		}
-
-		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (IndexBase index)
-		{
-			return rowsByIndices [index].Values;
-		}
-
-		public override IEnumerable<IndexBase> GetIndices ()
-		{
-			return rowsByIndices.Keys;
-		}
-
-		public override IEnumerable<ColumnSet> GetColumnSets ()
-		{
-			return columnSets.Values;
-		}
-		#endregion
-		#region implemented abstract members of Table
-		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (ColumnSet columnSet)
-		{
-			foreach (Row r in Rows.Values) {
-				if (r.ColumnSet == columnSet) {
-					yield return r;
-				}
-			}
-		}
-
-		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (ColumnSet columnSet, IndexBase index)
-		{
-			foreach (Row r in rowsByIndices[index].Values) {
-				if (r.ColumnSet == columnSet) {
-					yield return r;
-				}
 			}
 		}
 		#endregion

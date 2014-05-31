@@ -19,7 +19,6 @@ namespace BD2.Core
 
 		byte[] chunkID;
 		FrontendInstanceBase frontendInstanceBase;
-		byte[] objectID;
 
 		protected BaseDataObject (FrontendInstanceBase frontendInstanceBase, byte[] chunkID)
 		{
@@ -58,7 +57,7 @@ namespace BD2.Core
 			}
 		}
 
-		internal byte[] ChunkID {
+		public byte[] ChunkID {
 			get {
 				if (chunkID == null)
 					return null;
@@ -70,7 +69,7 @@ namespace BD2.Core
 
 		byte[] puoid;
 
-		public byte[] GetPersistentUniqueObjectID ()
+		byte[] GetPersistentUniqueObjectID ()
 		{
 			if (puoid != null)
 				return puoid;
@@ -82,9 +81,7 @@ namespace BD2.Core
 
 		public byte[] ObjectID {
 			get {
-				if (objectID == null)
-					objectID = GetPersistentUniqueObjectID ();
-				return objectID;
+				return GetPersistentUniqueObjectID ();
 			}
 		}
 		#region IComparable implementation

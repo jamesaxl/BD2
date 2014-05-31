@@ -34,6 +34,36 @@ namespace BD2.Frontend.Table
 	[BaseDataObjectTypeIdAttribute("10ec2d31-3291-43ae-96fe-da8537b22af6", typeof(Row), "Deserialize")]
 	public sealed class Row : Model.Row
 	{
+		byte[][] previousVersionsID;
+
+		public byte[][] PreviousVersionID {
+			get {
+				return (byte[][])previousVersionsID.Clone ();
+			}
+		}
+
+		SortedDictionary<byte[], Row> previousVersions = new SortedDictionary<byte[], Row> ();
+
+		public void SetPreviousVersion (Row pr)
+		{
+			previousVersions.Add (pr.ObjectID, pr);
+		}
+
+		SortedSet<Row> currentVersion;
+
+		public SortedSet<Row> CurrentVersion {
+			get {
+				return new SortedSet<Row> (currentVersion);
+			}
+		}
+
+		public void SetCurrentVersion (Row row)
+		{
+			if (currentVersion == null)
+				currentVersion = new SortedSet<Row> ();
+			currentVersion.Add (row);
+		}
+
 		object[] data;
 
 		public object GetRawDataClone ()
@@ -41,7 +71,7 @@ namespace BD2.Frontend.Table
 			return data.Clone ();
 		}
 
-		internal Row (FrontendInstanceBase  frontendInstanceBase, byte[] chunkID, Model.Table table, ColumnSet columnSet, object[] data)
+		internal Row (FrontendInstanceBase  frontendInstanceBase, byte[] chunkID, Model.Table table, ColumnSet columnSet, byte[][] previousVersionsID, object[] data)
 			: base(frontendInstanceBase, chunkID, table, columnSet)
 		{
 			if (table == null)
@@ -50,6 +80,9 @@ namespace BD2.Frontend.Table
 				throw new ArgumentNullException ("columnSet");
 			if (data == null)
 				throw new ArgumentNullException ("data");
+			if (previousVersionsID == null)
+				throw new ArgumentNullException ("previousVersionsID");
+			this.previousVersionsID = previousVersionsID;
 			this.data = data;
 		}
 		#region implemented abstract members of Serializable
@@ -59,12 +92,17 @@ namespace BD2.Frontend.Table
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					Table table = (Table)((BD2.Frontend.Table.FrontendInstance)fib).GetTableByID (BR.ReadBytes (32));
 					ColumnSet columnSet = ((BD2.Frontend.Table.FrontendInstance)fib).GetColumnSetByID (BR.ReadBytes (32));
+					int previousVersionCount = BR.ReadInt32 ();
+					byte[][] previousVersions = new byte[previousVersionCount][];
+					for (int n  = 0; n != previousVersionCount; n++) {
+						previousVersions [n] = BR.ReadBytes (32);
+					}
 					Row R = new Row (fib, 
 					                 chunkID,
 					                 table,
 					                 columnSet,
+					                 previousVersions,
 					                 columnSet.DeserializeObjects (BR.ReadBytes (BR.ReadInt32 ())));
-					table.InsertRow (R);
 					return R;
 				}
 			}
@@ -75,6 +113,9 @@ namespace BD2.Frontend.Table
 			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
 				BW.Write (Table.ObjectID, 0, 32);
 				BW.Write (ColumnSet.ObjectID, 0, 32);
+				BW.Write (previousVersionsID.Length);
+				for (int n = 0; n != previousVersionsID.Length; n++)
+					BW.Write (previousVersionsID [n]);
 				byte[] buf = ColumnSet.SerializeObjects (data);
 				BW.Write (buf.Length);
 				BW.Write (buf);
@@ -85,6 +126,16 @@ namespace BD2.Frontend.Table
 		public override object[] GetValues ()
 		{
 			return data;
+		}
+
+		public override object GetValue (string fieldName)
+		{
+			return data [ColumnSet.IndexOf (fieldName, StringComparison.Ordinal)];
+		}
+
+		public override object GetValue (int fieldIndex)
+		{
+			return data [fieldIndex];
 		}
 
 		public override IEnumerable<KeyValuePair<BD2.Frontend.Table.Model.Column, object>> GetValuesWithColumns ()
@@ -105,7 +156,11 @@ namespace BD2.Frontend.Table
 
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
-			return base.GetDependenies ();
+			foreach (BaseDataObject bdo in  base.GetDependenies ()) {
+				yield return bdo;
+			}
+			foreach (Row r in previousVersions.Values)
+				yield return r;
 		}
 		#endregion
 	}
