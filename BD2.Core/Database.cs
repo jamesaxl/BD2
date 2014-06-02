@@ -65,7 +65,7 @@ namespace BD2.Core
 			this.backends = new ChunkRepositoryCollection ();
 			foreach (ChunkRepository CR in backends)
 				this.backends.AddRepository (CR);
-			primary = CreateSnapshot ("Primary");
+			primary = GetSnapshot ("Primary");
 			foreach (Frontend Frontend in frontends) {
 				this.frontends.Add (Frontend.Name, Frontend);
 				Frontend.Database = this;
