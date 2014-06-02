@@ -35,29 +35,34 @@ namespace BD2.Frontend.Table
 	public sealed class Relation : Model.Relation
 	{
 
-		public Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, IndexBase parentColumns, Model.Table childTable, Model.Column[] childColumns)
-			:base (frontendInstanceBase, chunkID,parentColumns,childTable,childColumns)
+		public Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, IndexBase parentColumns, Model.Table childTable, ColumnSet childColumnSet, Model.Column[] childColumns)
+			:base (frontendInstanceBase, chunkID,name,parentColumns,childTable, childColumnSet,childColumns)
 		{
 		
 		}
 		#region implemented abstract members of Serializable
-		public static Relation Deserialize(FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+		public static Relation Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
 		{
 			BD2.Frontend.Table.FrontendInstance fi = (BD2.Frontend.Table.FrontendInstance)fib;
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					IndexBase index = fi.GetIndexByID (BR.ReadBytes(32));
-					Table table = fi.GetTableByID (BR.ReadBytes (32));
-					Column[] columns = new BD2.Frontend.Table.Model.Column[BR.ReadInt32 ()];
+					string name = BR.ReadString ();
+					IndexBase index = fi.GetIndexByID (BR.ReadBytes (32));
+					Table table = (Table)fi.GetTableByID (BR.ReadBytes (32));
+					ColumnSet childColumnSet = fi.GetColumnSetByID (BR.ReadBytes (32));
+					Column[] columns = new Column[BR.ReadInt32 ()];
 					for (int n = 0; n != columns.Length; n++) {
-						columns [n] = fi.GetColumnByID (BR.ReadBytes (32));
+						columns [n] = (Column)fi.GetColumnByID (BR.ReadBytes (32));
 					}
-					return new Relation (fib, chunkID, index, table, columns);
+					return new Relation (fib, chunkID, name, index, table, childColumnSet, columns);
 				}
 			}
 		}
+
 		public override void Serialize (System.IO.Stream stream)
 		{
+
+		}
 
 		public override Guid ObjectType {
 			get {

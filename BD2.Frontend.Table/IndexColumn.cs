@@ -25,31 +25,29 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using BD2.Core;
-using System.Collections.Generic;
-using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	internal interface IPTransactionSource : BD2.Core.ITransactionSource
+	public class IndexColumn : BD2.Frontend.Table.Model.IndexColumnBase
 	{
-		void CommitObjects (IEnumerable<BaseDataObject> objects);
-	}
+		public IndexColumn (BD2.Frontend.Table.Model.Column column, bool sortAscending)
+			:base(column, sortAscending)
+		{
+		}
 
-	interface ITransactionSource : IPTransactionSource
-	{
+		public static IndexColumn Deserialize (BD2.Frontend.Table.Model.FrontendInstance frontendInstanceBase, byte[] buffer)
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
+				bool sortAscending;
+				BD2.Frontend.Table.Model.Column column;
+				BD2.Frontend.Table.Model.IndexColumnBase.Deserialize (frontendInstanceBase, MS, out column, out sortAscending);
+				return new IndexColumn (column, sortAscending);
+			}
+		}
 
-		IEnumerable<Row> GetRows ();
-
-		IEnumerable<Row> GetRows (Table table);
-
-		IEnumerable<Column> GetColumns ();
-
-		IEnumerable<ColumnSet> GetColumnSets ();
-
-		IEnumerable<Table> GetTables ();
-
-		IEnumerable<Relation> GetRelations ();
+		public override byte[] Serialize ()
+		{
+			return base.Serialize ();
+		}
 	}
 }
-

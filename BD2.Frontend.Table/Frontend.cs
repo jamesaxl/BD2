@@ -46,7 +46,7 @@ namespace BD2.Frontend.Table
 
 		SortedDictionary<BD2.Core.Snapshot, BD2.Frontend.Table.FrontendInstance> instances = new SortedDictionary<BD2.Core.Snapshot, FrontendInstance> ();
 
-		public override BD2.Core.FrontendInstanceBase CreateInstanse (BD2.Core.Snapshot snapshot)
+		public override BD2.Core.FrontendInstanceBase GetInstanse (BD2.Core.Snapshot snapshot)
 		{
 			if (instances.ContainsKey (snapshot))
 				return instances [snapshot];

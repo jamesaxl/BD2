@@ -69,7 +69,7 @@ namespace BD2.Core
 			foreach (Frontend Frontend in frontends) {
 				this.frontends.Add (Frontend.Name, Frontend);
 				Frontend.Database = this;
-				this.frontendInstances.Add (Frontend.CreateInstanse (primary));
+				this.frontendInstances.Add (Frontend.GetInstanse (primary));
 			}
 			Load ();
 		}
@@ -263,7 +263,7 @@ namespace BD2.Core
 				ChunkRepository repo = (ChunkRepository)(Type.GetType (Tuple.Item1).Assembly.GetType ("Repository").GetConstructor (new Type[] { typeof(string) }).Invoke (null, new object[] { Tuple.Item2 }));
 				this.backends.AddRepository (repo);
 			}
-			primary = CreateSnapshot ("Primary");
+			primary = GetSnapshot ("Primary");
 		}
 
 		public string Name {
@@ -289,22 +289,10 @@ namespace BD2.Core
 						return ss;
 					}
 				}
+				Snapshot snap = new Snapshot (this, snapshotName, backends.Enumerate ());
+				snapshots.Add (snap);
+				return snap;
 			}
-			return new Snapshot (this, snapshotName, backends.Enumerate ());
-		}
-
-		public Snapshot CreateSnapshot (string snapshotName)
-		{
-			if (snapshotName == null)
-				throw new ArgumentNullException ("name");
-			Snapshot snap;
-			lock (snapState) {
-				snap = new Snapshot (this, snapshotName, backends.Enumerate ());
-				lock (snapshots) {
-					snapshots.Add (snap);
-				}
-			}
-			return snap;
 		}
 
 		public void Close ()

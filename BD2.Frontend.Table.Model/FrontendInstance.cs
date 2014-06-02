@@ -42,7 +42,7 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract Table GetTable (string name);
 
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table, Column[] columns, object[] match);
+		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table, ColumnSet columnSet, Column[] columns, object[] match);
 
 		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
 
@@ -82,6 +82,10 @@ namespace BD2.Frontend.Table.Model
 		public abstract Row GetRowByID (byte[] id);
 
 		public abstract ColumnSet GetColumnSetByID (byte[] id);
+
+		public abstract Relation GetRelationByID (byte[] id);
+
+		public abstract IndexBase GetIndexByID (byte[] id);
 
 		public abstract IEnumerable<Table> GetTables ();
 

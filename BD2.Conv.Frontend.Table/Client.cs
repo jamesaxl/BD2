@@ -88,7 +88,7 @@ namespace BD2.Conv.Frontend.Table
 			frontends = new BD2.Core.Frontend[] { frontend };
 			db = new BD2.Core.Database (new BD2.Chunk.ChunkRepository[] { repo }, frontends, databaseName);
 			ss = db.GetSnapshot ("Primary");
-			frontendInstance = (BD2.Frontend.Table.FrontendInstance)frontend.CreateInstanse (ss);
+			frontendInstance = (BD2.Frontend.Table.FrontendInstance)frontend.GetInstanse (ss);
 			tableColumns = new System.Collections.Concurrent.ConcurrentDictionary<Table, System.Collections.Concurrent.BlockingCollection<Column>> ();
 			tables = new SortedDictionary<Guid, Tuple<Table, List<Column>>> ();
 		}

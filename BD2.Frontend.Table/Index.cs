@@ -31,11 +31,18 @@ using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
+	[BaseDataObjectTypeIdAttribute("aa8d2cde-5ab2-4656-b172-510d64f831ab", typeof(Index), "Deserialize")]
 	public sealed class Index : IndexBase
 	{
+		#region implemented abstract members of IndexBase
+		public override int GetColumnCount ()
+		{
+			return indexColumns.Length;
+		}
+		#endregion
 		IndexColumnBase[] indexColumns;
 
-		public override IEnumerator<IndexColumnBase> GetIndexColumns ()
+		public override IEnumerable<IndexColumnBase> GetIndexColumns ()
 		{
 			foreach (IndexColumnBase indexColumn in indexColumns)
 				yield return indexColumn;
@@ -53,9 +60,33 @@ namespace BD2.Frontend.Table
 			this.indexColumns = ((IndexColumnBase[])indexColumns.Clone ());
 		}
 		#region implemented abstract members of Serializable
+		public static Index Deserialize (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, byte[] buffer)
+		{
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
+				Model.Table table;
+				bool unique;
+				BD2.Frontend.Table.Model.IndexBase.Deserialize ((BD2.Frontend.Table.Model.FrontendInstance)frontendInstanceBase, MS, out table, out unique);
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
+					IndexColumnBase[] indexColumns = new IndexColumnBase[BR.ReadInt32 ()];
+					for (int n = 0; n != indexColumns.Length; n++) {
+						indexColumns [n] = IndexColumn.Deserialize ((BD2.Frontend.Table.Model.FrontendInstance)frontendInstanceBase, BR.ReadBytes (BR.ReadInt32 ()));
+					}
+					return new Index (frontendInstanceBase, chunkID, table, unique, indexColumns);
+				}
+			}
+		}
+
 		public override void Serialize (System.IO.Stream stream)
 		{
-			throw new NotImplementedException ();
+			base.Serialize (stream);
+			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
+				BW.Write (indexColumns.Length);
+				for (int n = 0; n != indexColumns.Length; n++) {
+					byte[] buf = indexColumns [n].Serialize ();
+					BW.Write (buf.Length);
+					BW.Write (buf);
+				}
+			}
 		}
 		#endregion
 		#region implemented abstract members of BaseDataObject
@@ -64,14 +95,11 @@ namespace BD2.Frontend.Table
 			foreach (BaseDataObject bdo in base.GetDependenies ()) {
 				yield return bdo;
 			}
-			foreach (BaseDataObject bdo in indexColumns) {
-				yield return bdo;
-			}
 		}
 
 		public override Guid ObjectType {
 			get {
-				throw new NotImplementedException ();
+				return Guid.Parse ("aa8d2cde-5ab2-4656-b172-510d64f831ab");
 			}
 		}
 		#endregion

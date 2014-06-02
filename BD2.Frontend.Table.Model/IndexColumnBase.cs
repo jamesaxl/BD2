@@ -29,7 +29,7 @@ using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class IndexColumnBase : BaseDataObject
+	public abstract class IndexColumnBase
 	{
 		Column column;
 
@@ -47,24 +47,29 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		IndexBase indexBase;
-
-		public IndexBase IndexBase {
-			get {
-				return indexBase;
-			}
-		}
-
-		protected IndexColumnBase (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, IndexBase indexBase, Column column, bool sortAscending = true)
-			:base (frontendInstanceBase, chunkID)
+		protected IndexColumnBase (Column column, bool sortAscending = true)
 		{
-			if (indexBase == null)
-				throw new ArgumentNullException ("indexBase");
-			this.indexBase = indexBase;
 			if (column == null)
 				throw new ArgumentNullException ("column");
 			this.column = column;
 			this.sortAscending = sortAscending;
+		}
+
+		public static void Deserialize (FrontendInstance frontendInstanceBase, System.IO.Stream stream, out Column column, out bool sortAscending)
+		{
+			byte[] columnID = new byte[32];
+			stream.Read (columnID, 0, 32);
+			column = frontendInstanceBase.GetColumnByID (columnID);
+			sortAscending = stream.ReadByte () != 0;
+		}
+
+		public virtual byte[] Serialize ()
+		{
+			using (System.IO.MemoryStream stream = new System.IO.MemoryStream ()) {
+				stream.Write (column.ObjectID, 0, 32);
+				stream.WriteByte ((byte)(sortAscending ? 1 : 0));
+				return stream.ToArray ();
+			}
 		}
 	}
 }

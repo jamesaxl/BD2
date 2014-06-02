@@ -8,7 +8,7 @@
     <ProjectGuid>{19E7BB88-BD82-4428-B256-6B8A7C8682B3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>BD2.Engine.TextStream</RootNamespace>
-    <AssemblyName>BD2.Engine.TextStream</AssemblyName>
+    <AssemblyName>BD2.Frontend.TextStream</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

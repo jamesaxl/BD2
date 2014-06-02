@@ -106,5 +106,14 @@ namespace BD2.Frontend.Table.Model
 			}
 			return -1;
 		}
+
+		public int IndexOf (Column column)
+		{
+			for (int n = 0; n != columns.Length; n++) {
+				if (columns [n] == column)
+					return n;
+			}
+			return -1;
+		}
 	}
 }

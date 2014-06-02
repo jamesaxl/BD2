@@ -40,6 +40,7 @@ namespace BD2.Frontend.Table
 		SortedDictionary<byte[], Relation> relations = new SortedDictionary<byte[], Relation> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], Column> columns = new SortedDictionary<byte[], Column> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (BD2.Common.ByteSequenceComparer.Shared);
+		SortedDictionary<byte[], Index> indices = new SortedDictionary<byte[], Index> (BD2.Common.ByteSequenceComparer.Shared);
 		ValueSerializerBase valueSerializer;
 		//SortedDictionary<byte[], BaseDataObject> volatileData = new SortedDictionary<byte[], BaseDataObject> (BD2.Common.ByteSequenceComparer.Shared);
 		public override ValueSerializerBase ValueSerializer {
@@ -77,6 +78,7 @@ namespace BD2.Frontend.Table
 		{
 			if (bdo is Table) {
 				tables.Add (bdo.ObjectID, (Table)bdo);
+				perTableRows.Add ((Table)bdo, new SortedDictionary<byte[], Row> (BD2.Common.ByteSequenceComparer.Shared));
 			} else if (bdo is Column) {
 				columns.Add (bdo.ObjectID, (Column)bdo);
 			} else if (bdo is ColumnSet) {
@@ -89,6 +91,7 @@ namespace BD2.Frontend.Table
 
 		protected override BaseDataObject GetObjectWithID (byte[] objectID)
 		{
+			//todo:use TryGetValue
 			if (rows.ContainsKey (objectID))
 				return rows [objectID];
 			if (columns.ContainsKey (objectID))
@@ -99,6 +102,8 @@ namespace BD2.Frontend.Table
 				return tables [objectID];
 			if (relations.ContainsKey (objectID))
 				return relations [objectID];
+			if (indices.ContainsKey (objectID))
+				return indices [objectID];
 			return null;
 		}
 		#endregion
@@ -132,6 +137,7 @@ namespace BD2.Frontend.Table
 		{
 			Row r = new Row (this, null, table, columnSet, previousID, objects);
 			rows.Add (r.ObjectID, r);
+			perTableRows [(Table)table].Add (r.ObjectID, r);
 			Snapshot.AddVolatileData (r);
 			RemovePreviousVersions (r);
 			return r;
@@ -150,12 +156,13 @@ namespace BD2.Frontend.Table
 			}
 			Snapshot.AddVolatileData (temp);
 			tables.Add (temp.ObjectID, temp);
+			perTableRows.Add (temp, new SortedDictionary<byte[], Row> (BD2.Common.ByteSequenceComparer.Shared));
 			return temp;
 		}
 
 		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (BD2.Frontend.Table.Model.Table table)
 		{
-			return table.GetRows ();
+			return perTableRows [(Table)table].Values;
 		}
 		#endregion
 		public override ColumnSet GetColumnSetByID (byte[] id)
@@ -184,6 +191,20 @@ namespace BD2.Frontend.Table
 			if (!rows.ContainsKey (id))
 				System.Diagnostics.Debugger.Break ();
 			return rows [id];
+		}
+
+		public override BD2.Frontend.Table.Model.Relation GetRelationByID (byte[] id)
+		{
+			if (!relations.ContainsKey (id))
+				System.Diagnostics.Debugger.Break ();
+			return relations [id];
+		}
+
+		public override IndexBase GetIndexByID (byte[] id)
+		{
+			if (!indices.ContainsKey (id))
+				System.Diagnostics.Debugger.Break ();
+			return indices [id];
 		}
 
 		public override IEnumerable<BD2.Frontend.Table.Model.Table> GetTables ()
@@ -261,5 +282,32 @@ namespace BD2.Frontend.Table
 		{
 			return new Transaction (this);
 		}
+		#region implemented abstract members of FrontendInstance
+		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (BD2.Frontend.Table.Model.Table table,
+		                                                                   BD2.Frontend.Table.Model.ColumnSet columnSet,
+		                                                                   BD2.Frontend.Table.Model.Column[] columns, object[] match)
+		{
+			int[] columnIndices = new int[columns.Length];
+			for (int n = 0; n != columns.Length; n++) {
+			}
+			foreach (BD2.Frontend.Table.Model.Row r in GetRows (table)) {
+				object[] fields = r.GetValues (columnSet);
+				bool isMatch = true;
+				for (int n = 0; n != columns.Length; n++) {
+					if (fields [columnIndices [n]] != match [n]) {
+						isMatch = false;
+						continue;
+					}
+				}
+				if (isMatch)
+					yield return r;
+			}
+		}
+
+		public override IEnumerable<BD2.Frontend.Table.Model.Relation> GetParentRelations (BD2.Frontend.Table.Model.Table table)
+		{
+			throw new NotImplementedException ();
+		}
+		#endregion
 	}
 }

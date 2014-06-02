@@ -52,18 +52,30 @@ namespace BD2.Frontend.Table.Model
 		//it's purpose is to allow for relations to cross ColumnSets without one relation being processed twice 
 		string name;
 
-		protected Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, IndexBase parentColumns, Table childTable, Column[] childColumns)
+		public string Name {
+			get {
+				return name;
+			}
+		}
+
+		protected Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, IndexBase parentColumns, Table childTable, ColumnSet childColumnSet, Column[] childColumns)
 		: base (frontendInstanceBase, chunkID)
 		{
+			if (name == null)
+				throw new ArgumentNullException ("name");
 			if (parentColumns == null)
 				throw new ArgumentNullException ("parentColumns");
 			if (childTable == null)
 				throw new ArgumentNullException ("childTable");
+			if (childColumnSet == null)
+				throw new ArgumentNullException ("childColumnSet");
 			if (childColumns == null)
 				throw new ArgumentNullException ("childColumns");
+			this.name = name;
 			this.parentColumns = parentColumns;
-			this.childColumns = childColumns;
 			this.childTable = childTable;
+			this.childColumnSet = childColumnSet;
+			this.childColumns = childColumns;
 		}
 
 		public IndexBase ParentColumns { get { return parentColumns; } }

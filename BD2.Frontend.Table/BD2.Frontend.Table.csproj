@@ -8,7 +8,7 @@
     <ProjectGuid>{285B9E10-0FC7-4D60-9D1D-5068E8963988}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>BD2.Frontend.Table</RootNamespace>
-    <AssemblyName>BD2.Engine.Table</AssemblyName>
+    <AssemblyName>BD2.Frontend.Table</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +44,7 @@
     <Compile Include="Transaction.cs" />
     <Compile Include="TransactionSource.cs" />
     <Compile Include="Index.cs" />
+    <Compile Include="IndexColumn.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

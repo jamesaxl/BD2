@@ -42,8 +42,8 @@ namespace BD2.Frontend.Table
 			if (!OtherIV.index.SignatureEquals (index))
 				throw new ArgumentException ("obj must have the same index signature", "obj");
 			//Row OtherRow = OtherIV.row;
-			IEnumerator<IndexColumnBase> OtherIndices = OtherIV.index.GetIndexColumns ();
-			IEnumerator<IndexColumnBase> ThisIndices = this.index.GetIndexColumns ();
+			IEnumerator<IndexColumnBase> OtherIndices = OtherIV.index.GetIndexColumns ().GetEnumerator ();
+			IEnumerator<IndexColumnBase> ThisIndices = this.index.GetIndexColumns ().GetEnumerator ();
 			while (ThisIndices.MoveNext () && OtherIndices.MoveNext ()) {
 				//int CompareValue;
 				//TODO:HACK:XXX

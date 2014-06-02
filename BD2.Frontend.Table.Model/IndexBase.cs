@@ -46,29 +46,43 @@ namespace BD2.Frontend.Table.Model
 
 		public Table Table { get { return table; } }
 
-		public abstract IEnumerator<IndexColumnBase> GetIndexColumns ();
+		public abstract IEnumerable<IndexColumnBase> GetIndexColumns ();
 
 		public bool Unique { get { return unique; } }
 
+		public abstract int GetColumnCount ();
+
 		public bool SignatureEquals (IndexBase index)
 		{
-			if (table.Equals (index.table)) {
-				IEnumerator<IndexColumnBase> othericbe = index.GetIndexColumns ();
-				IEnumerator<IndexColumnBase> icbe = GetIndexColumns ();
-				while (icbe.MoveNext()) {
-					if (!othericbe.MoveNext ())
-						return false;
-					if (icbe.Current != othericbe.Current)
-						return false;
-				}
-				return !othericbe.MoveNext ();
+			if (!table.Equals (index.table))
+				return false;
+			IEnumerator<IndexColumnBase> othericbe = index.GetIndexColumns ().GetEnumerator ();
+			IEnumerator<IndexColumnBase> icbe = GetIndexColumns ().GetEnumerator ();
+			while (icbe.MoveNext()) {
+				if (!othericbe.MoveNext ())
+					return false;
+				if (icbe.Current != othericbe.Current)
+					return false;
 			}
-			return false;
+			return !othericbe.MoveNext ();
 		}
 
-		public object GetValues (ColumnSet columnSet, object[] @object)
+		public object[] GetValues (ColumnSet columnSet, object[] values)
 		{
-			throw new NotImplementedException ();
+			int n = 0;
+			object[] rv = new object[GetColumnCount ()];
+			foreach (IndexColumnBase icb in GetIndexColumns ()) {
+				rv [n++] = values [columnSet.IndexOf (icb.Column)];
+			}
+			return rv;
+		}
+
+		public static void Deserialize (FrontendInstance frontendInstance, System.IO.Stream stream, out Table table, out bool unique)
+		{
+			byte[] tableID = new byte[32]; 
+			stream.Read (tableID, 0, 32);
+			table = frontendInstance.GetTableByID (tableID);
+			unique = stream.ReadByte () != 0;
 		}
 
 		public override void Serialize (System.IO.Stream stream)

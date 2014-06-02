@@ -31,21 +31,16 @@ using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	public class Transaction:BD2.Core.Transaction, ITransactionSource
+	public class Transaction : BD2.Core.Transaction, ITransactionSource
 	{
 		SortedDictionary<byte[], Row> rows = new SortedDictionary<byte[], Row> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], Table> tables = new SortedDictionary<byte[], Table> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], Relation> relations = new SortedDictionary<byte[], Relation> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], Column> columns = new SortedDictionary<byte[], Column> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (BD2.Common.ByteSequenceComparer.Shared);
+		SortedDictionary<byte[], IndexBase> indices = new  SortedDictionary<byte[], IndexBase> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedDictionary<byte[], RowDrop> rowDrops = new SortedDictionary<byte[], RowDrop> (BD2.Common.ByteSequenceComparer.Shared);
 		SortedSet<byte[]> dropedRows = new SortedSet<byte[]> (BD2.Common.ByteSequenceComparer.Shared);
-
-		ITransactionSource TransactionSource {
-			get {
-				return (ITransactionSource)base.TransactionSource;
-			}
-		}
 
 		public Transaction (BD2.Core.ITransactionSource transactionSource)
 			: base(transactionSource)
@@ -54,7 +49,7 @@ namespace BD2.Frontend.Table
 		#region implemented abstract members of Transaction
 		public override void Commit ()
 		{
-			TransactionSource.CommitObjects (GetChanges ());
+			((ITransactionSource)TransactionSource).CommitObjects (GetChanges ());
 			Rollback ();
 		}
 
@@ -92,9 +87,22 @@ namespace BD2.Frontend.Table
 		}
 		#endregion
 		#region ITransactionSource implementation
+		public System.Collections.Generic.IEnumerable<Row> GetRows (BD2.Frontend.Table.Table table)
+		{
+			foreach (var t in ((ITransactionSource)TransactionSource).GetRows (table)) {
+				if (!dropedRows.Contains (t.ObjectID))
+					yield return t;
+			}
+			foreach (var t in rows) {
+				if (!dropedRows.Contains (t.Key))
+				if (t.Value.Table == table)
+					yield return t.Value;
+			}
+		}
+
 		public System.Collections.Generic.IEnumerable<Row> GetRows ()
 		{
-			foreach (var t in TransactionSource.GetRows ()) {
+			foreach (var t in ((ITransactionSource)TransactionSource).GetRows ()) {
 				if (!dropedRows.Contains (t.ObjectID))
 					yield return t;
 			}
@@ -106,7 +114,7 @@ namespace BD2.Frontend.Table
 
 		public System.Collections.Generic.IEnumerable<Column> GetColumns ()
 		{
-			foreach (var t in TransactionSource.GetColumns ()) {
+			foreach (var t in ((ITransactionSource)TransactionSource).GetColumns ()) {
 				yield return t;
 			}
 			foreach (var t in columns) {
@@ -116,7 +124,7 @@ namespace BD2.Frontend.Table
 
 		public System.Collections.Generic.IEnumerable<BD2.Frontend.Table.Model.ColumnSet> GetColumnSets ()
 		{
-			foreach (var t in TransactionSource.GetColumnSets ()) {
+			foreach (var t in ((ITransactionSource)TransactionSource).GetColumnSets ()) {
 				yield return t;
 			}
 			foreach (var t in columnSets) {
@@ -126,7 +134,7 @@ namespace BD2.Frontend.Table
 
 		public System.Collections.Generic.IEnumerable<Table> GetTables ()
 		{
-			foreach (var t in TransactionSource.GetTables ()) {
+			foreach (var t in ((ITransactionSource)TransactionSource).GetTables ()) {
 				yield return t;
 			}
 			foreach (var t in tables) {
@@ -136,7 +144,7 @@ namespace BD2.Frontend.Table
 
 		public System.Collections.Generic.IEnumerable<Relation> GetRelations ()
 		{
-			foreach (var t in TransactionSource.GetRelations ()) {
+			foreach (var t in ((ITransactionSource)TransactionSource).GetRelations ()) {
 				yield return t;
 			}
 			foreach (var t in relations) {
@@ -144,9 +152,27 @@ namespace BD2.Frontend.Table
 			}
 		}
 		#endregion
-		public Transaction CreateTransaction ()
+		public BD2.Core.Transaction CreateTransaction ()
 		{
 			return new Transaction (this);
+		}
+
+		public void CommitObjects (IEnumerable<BaseDataObject> objects)
+		{
+			foreach (BaseDataObject bdo in objects) {
+				if (bdo is Row)
+					rows.Add (bdo.ObjectID, (Row)bdo);
+				if (bdo is Column)
+					columns.Add (bdo.ObjectID, (Column)bdo);
+				if (bdo is ColumnSet)
+					columnSets.Add (bdo.ObjectID, (ColumnSet)bdo);
+				if (bdo is Table)
+					tables.Add (bdo.ObjectID, (Table)bdo);
+				if (bdo is Relation)
+					relations.Add (bdo.ObjectID, (Relation)bdo);
+				if (bdo is IndexBase)
+					indices.Add (bdo.ObjectID, (IndexBase)bdo);
+			}
 		}
 	}
 }

@@ -34,17 +34,6 @@ namespace BD2.Frontend.Table
 	[BaseDataObjectTypeIdAttribute("3be06a16-6727-4639-b702-060b522af660", typeof(Table), "Deserialize")]
 	public class Table : Model.Table
 	{
-		public class Comparer : IComparer<Table>
-		{
-			public int Compare (Table x, Table y)
-			{
-				int hashComp = x.GetHashCode ().CompareTo (y.GetHashCode ());
-				if (hashComp != 0)
-					return hashComp;
-				throw new NotImplementedException ();
-			}
-		}
-
 		string name;
 
 		public override string Name { get { return name; } }

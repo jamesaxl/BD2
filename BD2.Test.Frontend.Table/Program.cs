@@ -42,7 +42,7 @@ namespace BD2.Test.Frontend.Table
 				(new BD2.Chunk.ChunkRepository[] { new BD2.Repo.Leveldb.Repository ("/home/behrooz/Test") }, 
 			  new BD2.Core.Frontend[] { new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ()) }, databaseName);
 			BD2.Frontend.Table.FrontendInstance frontendInstance =
-				(BD2.Frontend.Table.FrontendInstance)(db.GetFrontend ("BD2.Frontend.Table")).CreateInstanse (db.GetSnapshot ("Primary"));
+				(BD2.Frontend.Table.FrontendInstance)(db.GetFrontend ("BD2.Frontend.Table")).GetInstanse (db.GetSnapshot ("Primary"));
 			int count = 0;
 			System.Diagnostics.Stopwatch a = new System.Diagnostics.Stopwatch ();
 			a.Start ();
@@ -50,12 +50,12 @@ namespace BD2.Test.Frontend.Table
 			
 			}
 			BD2.Frontend.Table.Transaction trans = (BD2.Frontend.Table.Transaction)frontendInstance.CreateTransaction ();
-			trans.CommitObjects ();
+			//trans.CommitObjects ();
 			foreach (var R in frontendInstance.GetRows (frontendInstance.GetTable("Moshtary"))) {
 				string tel = (string)R.GetValue ("Tel");
 				if (tel.Equals ("", StringComparison.Ordinal)) {
 					count ++;
-					frontendInstance ();
+					//frontendInstance ();
 					//frontendInstance.CreateRow (R.Table, R.ColumnSet, new byte[][] { R.ObjectID }, newData);
 				}			
 			}

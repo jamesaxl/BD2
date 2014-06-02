@@ -78,9 +78,8 @@ namespace BD2.Frontend.Table.Model
 			yield return columnSet;
 			BD2.Frontend.Table.Model.FrontendInstance fi = ((BD2.Frontend.Table.Model.FrontendInstance)FrontendInstanceBase);
 			foreach (Relation rel in fi.GetParentRelations (table)) {
-				foreach (Row row in fi.GetRows(rel.ChildTable, rel.ChildColumns, rel.ParentColumns.GetValues(columnSet,this.GetValues ()))) {
-
-					yield return ;
+				foreach (Row row in fi.GetRows(rel.ChildTable, rel.ChildColumnSet, rel.ChildColumns, rel.ParentColumns.GetValues(columnSet, GetValues ()))) {
+					yield return row;
 				}
 			}
 		}
