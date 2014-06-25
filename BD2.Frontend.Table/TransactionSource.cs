@@ -49,6 +49,8 @@ namespace BD2.Frontend.Table
 
 		IEnumerable<Table> GetTables ();
 
+		Table GetTable (string name);
+
 		IEnumerable<Relation> GetRelations ();
 	}
 }

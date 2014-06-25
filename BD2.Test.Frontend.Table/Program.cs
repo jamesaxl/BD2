@@ -43,26 +43,7 @@ namespace BD2.Test.Frontend.Table
 			  new BD2.Core.Frontend[] { new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ()) }, databaseName);
 			BD2.Frontend.Table.FrontendInstance frontendInstance =
 				(BD2.Frontend.Table.FrontendInstance)(db.GetFrontend ("BD2.Frontend.Table")).GetInstanse (db.GetSnapshot ("Primary"));
-			int count = 0;
-			System.Diagnostics.Stopwatch a = new System.Diagnostics.Stopwatch ();
-			a.Start ();
-			foreach (var CS in frontendInstance.GetColumnSets()) {
-			
-			}
-			BD2.Frontend.Table.Transaction trans = (BD2.Frontend.Table.Transaction)frontendInstance.CreateTransaction ();
-			//trans.CommitObjects ();
-			foreach (var R in frontendInstance.GetRows (frontendInstance.GetTable("Moshtary"))) {
-				string tel = (string)R.GetValue ("Tel");
-				if (tel.Equals ("", StringComparison.Ordinal)) {
-					count ++;
-					//frontendInstance ();
-					//frontendInstance.CreateRow (R.Table, R.ColumnSet, new byte[][] { R.ObjectID }, newData);
-				}			
-			}
-			frontendInstance.Flush ();
-			a.Stop ();
-			Console.WriteLine (a.Elapsed);
-			Console.WriteLine (count);
+			//use the db here
 		}
 	}
 }

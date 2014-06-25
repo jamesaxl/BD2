@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using BD2.Frontend.Table.Model;
 using BD2.Core;
+using BD2.Common;
 
 namespace BD2.Frontend.Table
 {
@@ -36,7 +37,7 @@ namespace BD2.Frontend.Table
 	{
 
 		public Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, IndexBase parentColumns, Model.Table childTable, ColumnSet childColumnSet, Model.Column[] childColumns)
-			:base (frontendInstanceBase, chunkID,name,parentColumns,childTable, childColumnSet,childColumns)
+			:base (frontendInstanceBase, chunkID, name, parentColumns, childTable, childColumnSet, childColumns)
 		{
 		
 		}
@@ -61,7 +62,7 @@ namespace BD2.Frontend.Table
 
 		public override void Serialize (System.IO.Stream stream)
 		{
-
+			base.Serialize (stream);
 		}
 
 		public override Guid ObjectType {
@@ -75,6 +76,31 @@ namespace BD2.Frontend.Table
 			foreach (BaseDataObject bdo in base.GetDependenies ()) {
 				yield return bdo;
 			}
+		}
+		#endregion
+		#region implemented abstract members of Relation
+		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetChildRows (BD2.Frontend.Table.Model.Row parent)
+		{
+			int count = ChildColumns.Length;
+			object[] values = new object[count];
+			int n = 0;
+			foreach (var ic in ParentColumns.GetIndexColumns ()) {
+				//HACK: There should be a way with siginficantly less overhead when we have the column reference itself.
+				values [n++] = parent.GetValue (ic.Column.Name);
+			}
+			return ((BD2.Frontend.Table.FrontendInstance)this.FrontendInstanceBase).GetRows (ChildTable, ChildColumnSet, ChildColumns, values);
+		}
+
+		public override BD2.Frontend.Table.Model.Row GetParentRow (BD2.Frontend.Table.Model.Row child)
+		{
+			int count = ChildColumns.Length;
+			object[] values = new object[count];
+			int n = 0;
+			foreach (var ic in ParentColumns.GetIndexColumns ()) {
+				//HACK: There should be a way with siginficantly less overhead when we have the column reference itself.
+				values [n++] = child.GetValue (ic.Column.Name);
+			}
+			return ((BD2.Frontend.Table.FrontendInstance)this.FrontendInstanceBase).GetRows (ParentColumns.Table, ParentColumns.ColumnSet, ChildColumns, values).GetEnumerator ().First ();
 		}
 		#endregion
 	}

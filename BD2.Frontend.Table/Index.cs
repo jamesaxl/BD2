@@ -48,8 +48,8 @@ namespace BD2.Frontend.Table
 				yield return indexColumn;
 		}
 
-		public Index (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Model.Table table, bool unique, IndexColumnBase[] indexColumns)
-		:base(frontendInstanceBase, chunkID, table, unique)
+		public Index (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Model.Table table, Model.ColumnSet columnSet, bool unique, IndexColumnBase[] indexColumns)
+		:base(frontendInstanceBase, chunkID, table, columnSet, unique)
 		{
 			if (indexColumns == null)
 				throw new ArgumentNullException ("indexColumn");
@@ -64,14 +64,15 @@ namespace BD2.Frontend.Table
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				Model.Table table;
+				Model.ColumnSet columnSet;
 				bool unique;
-				BD2.Frontend.Table.Model.IndexBase.Deserialize ((BD2.Frontend.Table.Model.FrontendInstance)frontendInstanceBase, MS, out table, out unique);
+				BD2.Frontend.Table.Model.IndexBase.Deserialize ((BD2.Frontend.Table.Model.FrontendInstance)frontendInstanceBase, MS, out table, out columnSet, out unique);
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					IndexColumnBase[] indexColumns = new IndexColumnBase[BR.ReadInt32 ()];
 					for (int n = 0; n != indexColumns.Length; n++) {
 						indexColumns [n] = IndexColumn.Deserialize ((BD2.Frontend.Table.Model.FrontendInstance)frontendInstanceBase, BR.ReadBytes (BR.ReadInt32 ()));
 					}
-					return new Index (frontendInstanceBase, chunkID, table, unique, indexColumns);
+					return new Index (frontendInstanceBase, chunkID, table, columnSet, unique, indexColumns);
 				}
 			}
 		}

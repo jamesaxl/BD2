@@ -111,6 +111,12 @@ namespace BD2.Common
 			}
 			return false;
 		}
+
+		public static T First<T> (this System.Collections.Generic.IEnumerator<T> obj)
+		{
+			obj.MoveNext ();
+			return obj.Current;
+		}
 	}
 }
 

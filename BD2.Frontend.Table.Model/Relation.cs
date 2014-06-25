@@ -102,5 +102,8 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 		#endregion
+		public abstract IEnumerable<Row> GetChildRows (Row parent);
+
+		public abstract Row GetParentRow (Row child);
 	}
 }

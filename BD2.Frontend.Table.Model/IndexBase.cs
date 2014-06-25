@@ -33,18 +33,24 @@ namespace BD2.Frontend.Table.Model
 	public abstract class IndexBase : BaseDataObject
 	{
 		Table table;
+		ColumnSet columnSet;
 		bool unique;
 
-		protected IndexBase (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, bool unique)
+		protected IndexBase (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet, bool unique)
 		:base (frontendInstanceBase, chunkID)
 		{
 			if (table == null)
 				throw new ArgumentNullException ("table");
+			if (columnSet == null)
+				throw new ArgumentNullException ("columnSet");
 			this.table = table;
+			this.columnSet = columnSet;
 			this.unique = unique; 
 		}
 
 		public Table Table { get { return table; } }
+
+		public ColumnSet ColumnSet { get { return columnSet; } }
 
 		public abstract IEnumerable<IndexColumnBase> GetIndexColumns ();
 
@@ -67,7 +73,7 @@ namespace BD2.Frontend.Table.Model
 			return !othericbe.MoveNext ();
 		}
 
-		public object[] GetValues (ColumnSet columnSet, object[] values)
+		public object[] GetValues (object[] values)
 		{
 			int n = 0;
 			object[] rv = new object[GetColumnCount ()];
@@ -77,17 +83,23 @@ namespace BD2.Frontend.Table.Model
 			return rv;
 		}
 
-		public static void Deserialize (FrontendInstance frontendInstance, System.IO.Stream stream, out Table table, out bool unique)
+		public static void Deserialize (FrontendInstance frontendInstance, System.IO.Stream stream, out Table table, out ColumnSet columnSet, out bool unique)
 		{
 			byte[] tableID = new byte[32]; 
 			stream.Read (tableID, 0, 32);
 			table = frontendInstance.GetTableByID (tableID);
+
+			byte[] columnSetID = new byte[32]; 
+			stream.Read (columnSetID, 0, 32);
+			columnSet = frontendInstance.GetColumnSetByID (columnSetID);
+
 			unique = stream.ReadByte () != 0;
 		}
 
 		public override void Serialize (System.IO.Stream stream)
 		{
 			stream.Write (table.ObjectID, 0, 32);
+			stream.Write (columnSet.ObjectID, 0, 32);
 			stream.WriteByte ((byte)(unique ? 1 : 0));
 		}
 	}

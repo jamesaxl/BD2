@@ -132,6 +132,18 @@ namespace BD2.Frontend.Table
 			}
 		}
 
+		public Table GetTable (string name)
+		{
+			Table t = ((ITransactionSource)TransactionSource).GetTable (name);
+			if (t != null)
+				return t;
+			foreach (var tup in tables)
+				if (tup.Value.Name == name) {
+					return tup.Value;
+				}
+			return null;
+		}
+
 		public System.Collections.Generic.IEnumerable<Table> GetTables ()
 		{
 			foreach (var t in ((ITransactionSource)TransactionSource).GetTables ()) {

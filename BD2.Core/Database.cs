@@ -33,7 +33,6 @@ namespace BD2.Core
 	public sealed class Database
 	{
 		string name;
-		object snapState = new object ();
 		SortedSet<Snapshot> snapshots = new SortedSet<Snapshot> ();
 		ChunkRepositoryCollection backends;
 		SortedSet<FrontendInstanceBase> frontendInstances = new SortedSet<FrontendInstanceBase> ();

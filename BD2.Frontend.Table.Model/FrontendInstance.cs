@@ -75,6 +75,13 @@ namespace BD2.Frontend.Table.Model
 				throw new NotSupportedException ("Conversion to destination ColumnSet is not supported.");
 		}
 
+		public object[] ConvertColumnSet (object[] input, ColumnSet inputColumnSet, ColumnSet outputColumnSet)
+		{
+			if (inputColumnSet == outputColumnSet)
+				return input;
+			return GetColumnSetConverter (inputColumnSet, outputColumnSet).Convert (input, inputColumnSet, outputColumnSet);
+		}
+
 		public abstract Column GetColumnByID (byte[] id);
 
 		public abstract Table GetTableByID (byte[] id);
