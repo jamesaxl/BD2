@@ -25,12 +25,13 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using System.Collections.Generic;
 
 namespace BD2.Chunk
 {
 	public class ChunkData
 	{
-		byte[] id;
+		readonly byte[] id;
 
 		public byte[] Id {
 			get {
@@ -38,7 +39,7 @@ namespace BD2.Chunk
 			}
 		}
 
-		byte[][] dependencies;
+		readonly byte[][] dependencies;
 
 		public byte[][] Dependencies {
 			get {
@@ -46,7 +47,15 @@ namespace BD2.Chunk
 			}
 		}
 
-		byte[] data;
+		readonly byte[] segment;
+
+		public byte[] Segment {
+			get {
+				return segment;
+			}
+		}
+
+		readonly byte[] data;
 
 		public byte[] Data {
 			get {
@@ -54,12 +63,24 @@ namespace BD2.Chunk
 			}
 		}
 
-		public ChunkData (byte[] id, byte[][] dependencies, byte[] data)
+		readonly SortedDictionary<byte[], byte[]> signatures;
+
+		public SortedDictionary<byte[], byte[]> Signatures {
+			get {
+				return new SortedDictionary<byte[], byte[]> (signatures);
+			}
+		}
+
+		public ChunkData (byte[] id, byte[][] dependencies, byte[] segment, SortedDictionary<byte[], byte[]> signatures, byte[] data)
 		{
 			if (id == null)
 				throw new ArgumentNullException ("id");
 			if (dependencies == null)
 				throw new ArgumentNullException ("dependencies");
+			if (segment == null)
+				throw new ArgumentNullException ("segment");
+			if (signatures == null)
+				throw new ArgumentNullException ("signatures");
 			if (data == null)
 				throw new ArgumentNullException ("data");
 			this.id = id;
@@ -69,7 +90,9 @@ namespace BD2.Chunk
 				}
 			}
 			this.dependencies = dependencies;
+			this.segment = segment;
 			this.data = data;
+			this.signatures = signatures;
 		}
 	}
 }

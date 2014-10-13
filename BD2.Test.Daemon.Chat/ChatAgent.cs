@@ -35,43 +35,27 @@ namespace BD2.Test.Daemon.Chat
 		ChatAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, bool run)
 			: base(serviceAgentMode, objectBusSession, flush, run)
 		{
-			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
-			#endif
 			objectBusSession.RegisterType (typeof(ChatMessage), ChatMessageReceived);
 		}
 
 		public static ServiceAgent CreateAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, byte[] parameters)
 		{
-			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
-			#endif
 			return new ChatAgent (serviceAgentMode, objectBusSession, flush, true);
 		}
 
 		void ChatMessageReceived (ObjectBusMessage message)
 		{
-			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
-			#endif
 			ChatMessage chatMessage = (ChatMessage)message;
 			Console.WriteLine (chatMessage.Text);
 		}
 
 		void SendMessage (string text)
 		{
-			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
-			#endif
-
 			ObjectBusSession.SendMessage (new ChatMessage (text));
 		}
 		#region implemented abstract members of ServiceAgent
 		protected override void Run ()
 		{
-			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
-			#endif
 			try {
 				int i = 0;
 				string nextMessage = "This is a test message.";
@@ -90,17 +74,11 @@ namespace BD2.Test.Daemon.Chat
 
 		protected override void DestroyRequestReceived ()
 		{
-			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
-			#endif
 			Thread.Abort ();
 		}
 
 		protected override void SessionDisconnected ()
 		{
-			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
-			#endif
 			DestroyRequestReceived ();
 		}
 		#endregion

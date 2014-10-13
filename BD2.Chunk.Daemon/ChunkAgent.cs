@@ -49,7 +49,9 @@ namespace BD2.Chunk.Daemon
 				throw new ArgumentNullException ("repository");
 			this.repository = repository;
 			objectBusSession.RegisterType (typeof(TopLevelChunksRequestMessage), RequestTopLevelChunkDeltaMessageReceived);
-			objectBusSession.RegisterType (typeof(TopLevelChunksRequestMessage), RequestTopLevelChunkDeltaMessageReceived);
+//			objectBusSession.RegisterType (typeof(BD2.Chunk.Daemon.Common.PollChunksRequestMessage), );
+//			objectBusSession.RegisterType (typeof(BD2.Chunk.Daemon.Common.PollNewChunksRequestMessage), );
+//			objectBusSession.RegisterType (typeof(BD2.Chunk.Daemon.Common.PushChunksRequestMessage), );
 			this.repository.Enumerate ();
 		}
 

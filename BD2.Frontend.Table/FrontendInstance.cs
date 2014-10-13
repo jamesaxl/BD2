@@ -49,14 +49,16 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		public FrontendInstance (Snapshot snapshot, Frontend frontend, ValueSerializerBase valueSerializer):
-			base(snapshot, frontend)
+		public FrontendInstance (Snapshot snapshot, Frontend frontend, ValueSerializerBase valueSerializer) :
+			base (snapshot, frontend)
 		{
 			if (valueSerializer == null)
 				throw new ArgumentNullException ("valueSerializer");
 			this.valueSerializer = valueSerializer;
 		}
-		#region implemented abstract members of FrontendInstanceBase
+
+		#region implemented abstract members of FrontendInstance
+
 		protected override void OnCreateObjects (byte[] chunkID, byte[] bytes)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes)) {
@@ -106,13 +108,13 @@ namespace BD2.Frontend.Table
 				return indices [objectID];
 			return null;
 		}
-		#endregion
+
 		//to avoid duplicates
 		public override BD2.Frontend.Table.Model.Column GetColumn (string name, Type type, bool allowNull, long length)
 		{
 			Column nc = new Column (this, null, name, type, allowNull, length);
 			byte[] hash = nc.ObjectID;
-			if (columns.ContainsKey (hash)) 
+			if (columns.ContainsKey (hash))
 				return columns [hash];
 			Snapshot.AddVolatileData (nc);
 			columns.Add (hash, nc);
@@ -147,7 +149,8 @@ namespace BD2.Frontend.Table
 		{
 			Snapshot.Database.SaveSnapshots (new Snapshot[] { Snapshot });
 		}
-		#region implemented abstract members of FrontendInstance
+
+	
 		public override BD2.Frontend.Table.Model.Table GetTable (string name)
 		{
 			Table temp = new Table (this, null, name);
@@ -164,7 +167,7 @@ namespace BD2.Frontend.Table
 		{
 			return perTableRows [(Table)table].Values;
 		}
-		#endregion
+
 		public override ColumnSet GetColumnSetByID (byte[] id)
 		{
 			if (!columnSets.ContainsKey (id))
@@ -257,9 +260,11 @@ namespace BD2.Frontend.Table
 				removedRows.Remove (pid);
 			}
 		}
-		#region implemented abstract members of FrontendInstanceBase
+
+	
 		public override void Purge (BaseDataObject bdo)
 		{
+			//TODO:make sure we remove all the related objects first, like the rows in a columnset or table
 			if (!bdo.IsVolatile)
 				throw new Exception ("BD2 does not and never will support purging non-volatile data.");
 			if (bdo is Table) {
@@ -277,18 +282,21 @@ namespace BD2.Frontend.Table
 			}
 
 		}
-		#endregion
+
+
 		public override BD2.Core.Transaction CreateTransaction ()
 		{
 			return new Transaction (this);
 		}
-		#region implemented abstract members of FrontendInstance
+
+
 		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (BD2.Frontend.Table.Model.Table table,
 		                                                                   BD2.Frontend.Table.Model.ColumnSet columnSet,
 		                                                                   BD2.Frontend.Table.Model.Column[] columns, object[] match)
 		{
 			int[] columnIndices = new int[columns.Length];
 			for (int n = 0; n != columns.Length; n++) {
+				columnIndices [n] = columnSet.IndexOf (columns [n]);
 			}
 			foreach (BD2.Frontend.Table.Model.Row r in GetRows (table)) {
 				object[] fields = r.GetValues (columnSet);
@@ -306,8 +314,34 @@ namespace BD2.Frontend.Table
 
 		public override IEnumerable<BD2.Frontend.Table.Model.Relation> GetParentRelations (BD2.Frontend.Table.Model.Table table)
 		{
-			throw new NotImplementedException ();
+			foreach (Relation rel in relations) {
+				if (rel.ChildTable == table)
+					yield return rel;
+			}
 		}
+
+		readonly System.Collections.Generic.SortedDictionary<BD2.Frontend.Table.Model.Table, Func<BaseDataObject, byte[]>> tableSegmentSelectors
+		= new SortedDictionary<BD2.Frontend.Table.Model.Table, Func<BaseDataObject, byte[]>> ();
+
+		public void SetTableSegmentSelector (BD2.Frontend.Table.Model.Table table, Func<BaseDataObject, byte[]> function)
+		{
+			tableSegmentSelectors.Add (table, function);
+		}
+
+		public override byte[] GetObjectSegment (BaseDataObject baseDataObject)
+		{
+			var row = baseDataObject as Row;
+			if (row != null) {
+				return tableSegmentSelectors [row.Table] (baseDataObject);
+			} else {
+				var rowDrop = baseDataObject as RowDrop;
+				if (rowDrop != null) {
+					return tableSegmentSelectors [rowDrop.Row.Table] (baseDataObject);
+				}
+			}
+			return base.GetObjectSegment (baseDataObject);
+		}
+
 		#endregion
 	}
 }

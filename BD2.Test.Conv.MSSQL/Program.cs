@@ -32,7 +32,7 @@ namespace BD2.Test.Conv.MSSQL
 	{
 		public static void Main (string[] args)
 		{
-			Console.WriteLine ("Hello World!");
+	
 		}
 	}
 }

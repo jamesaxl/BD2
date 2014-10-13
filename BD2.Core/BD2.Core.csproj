@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -31,6 +31,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="Mono.Security" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -42,7 +44,6 @@
     <Compile Include="Transaction.cs" />
     <Compile Include="FrontendInstanceBase.cs" />
     <Compile Include="BaseDataObjectTypeIdAttribute.cs" />
-    <Compile Include="DatabaseConfiguration.cs" />
     <Compile Include="ITransactionSource.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

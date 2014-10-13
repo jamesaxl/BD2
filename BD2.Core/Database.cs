@@ -27,6 +27,11 @@
 using System;
 using System.Collections.Generic;
 using BD2.Chunk;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using Mono.Security.Cryptography;
+using System.IO;
+using BD2.Common;
 
 namespace BD2.Core
 {
@@ -59,8 +64,15 @@ namespace BD2.Core
 			return frontends [frontendName];
 		}
 
-		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends)
+		byte[] segmentCriteria;
+
+		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends, byte[] segmentCriteria)
 		{
+			if (backends == null)
+				throw new ArgumentNullException ("backends");
+			if (frontends == null)
+				throw new ArgumentNullException ("frontends");
+			this.segmentCriteria = segmentCriteria;
 			this.backends = new ChunkRepositoryCollection ();
 			foreach (ChunkRepository CR in backends)
 				this.backends.AddRepository (CR);
@@ -70,7 +82,106 @@ namespace BD2.Core
 				Frontend.Database = this;
 				this.frontendInstances.Add (Frontend.GetInstanse (primary));
 			}
-			Load ();
+		}
+
+		public SortedDictionary<byte[], string> GetUsers ()
+		{
+			return backends.GetUsers ();
+		}
+
+		SortedDictionary<byte[], RSAParameters> loggedInUsers = new SortedDictionary<byte[], RSAParameters> ();
+
+		public bool UpdatePassword (byte[] userID, string password, string newPassword, string pepper)
+		{
+			byte[] privateKeyRaw = Backends.PullPrivateKey (userID);
+
+			{//verify password
+				System.IO.MemoryStream memoryStream = new System.IO.MemoryStream (privateKeyRaw);
+				Stream cryptoStream = CreateCryptoStream (memoryStream, userID, password, pepper, CryptoStreamMode.Read);
+				RSAParameters privateKey = DeserializeKey (cryptoStream);
+				RSAParameters pubKey = GetPublicKey (userID);
+				if ((ByteSequenceComparer.Shared.Compare (pubKey.Modulus, privateKey.Modulus) != 0) || (ByteSequenceComparer.Shared.Compare (pubKey.Exponent, privateKey.Exponent) != 0))
+					return false;
+
+			}
+
+			MemoryStream newKeyStream = new MemoryStream ();
+			Rijndael oldPassRij = CreateRijndael (userID, password, pepper);
+			Rijndael newPassRij = CreateRijndael (userID, newPassword, pepper);
+			System.Security.Cryptography.CryptoStream streamI = new CryptoStream (new System.IO.MemoryStream (privateKeyRaw), oldPassRij.CreateDecryptor (), CryptoStreamMode.Read);
+			System.Security.Cryptography.CryptoStream streamO = new CryptoStream (newKeyStream, newPassRij.CreateEncryptor (), CryptoStreamMode.Write);
+
+			var buffer = new byte[1024];
+			var read = streamI.Read (buffer, 0, buffer.Length);
+			while (read > 0) {
+				streamO.Write (buffer, 0, read);
+				read = streamI.Read (buffer, 0, buffer.Length);
+			}
+			streamO.FlushFinalBlock ();
+
+			byte[] newKeyRaw = newKeyStream.ToArray ();
+			Backends.PushPrivateKey (userID, newKeyRaw);
+			return true;
+		}
+
+		static Rijndael CreateRijndael (byte[] userID, string password, string pepper)
+		{
+			string passpepper = password + pepper;
+			Rijndael Rij = Rijndael.Create ();
+			Rij.Padding = System.Security.Cryptography.PaddingMode.ISO10126;
+			Rij.Mode = CipherMode.CBC;
+			Rfc2898DeriveBytes aesKey = new Rfc2898DeriveBytes (passpepper, userID);
+			Rij.Key = aesKey.GetBytes (Rij.KeySize / 8);
+			Rij.IV = aesKey.GetBytes (Rij.BlockSize / 8);
+			return Rij;
+		}
+
+		static CryptoStream CreateCryptoStream (Stream stream, byte[] userID, string password, string pepper, CryptoStreamMode cryptoStreamMode)
+		{
+			var Rij = CreateRijndael (userID, password, pepper);
+			ICryptoTransform RijTrans = Rij.CreateDecryptor ();
+			System.Security.Cryptography.CryptoStream cstream = new CryptoStream (stream, RijTrans, cryptoStreamMode);
+			return cstream;
+		}
+
+		static RSAParameters DeserializeKey (Stream stream)
+		{
+			System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer (typeof(RSAParameters));
+			RSAParameters key = (RSAParameters)xmls.Deserialize (stream);
+			return key;
+		}
+
+		public RSAParameters GetPublicKey (byte[] userID)
+		{
+			byte[] pubKeyRaw = backends.PullKey (userID);
+			System.IO.MemoryStream memoryStream = new System.IO.MemoryStream (pubKeyRaw);
+			var pubKey = DeserializeKey (memoryStream);
+			return pubKey;
+		}
+
+		public RSAParameters GetPrivateKey (byte[] userID, string password, string pepper)
+		{
+			byte[] privateKeyRaw = backends.PullPrivateKey (userID);
+			System.IO.MemoryStream memoryStream = new System.IO.MemoryStream (privateKeyRaw);
+			Stream cryptoStream = CreateCryptoStream (memoryStream, userID, password, pepper, CryptoStreamMode.Read);
+			RSAParameters privateKey = DeserializeKey (cryptoStream);
+			return privateKey;
+
+		}
+
+		public bool Login (byte[] userID, string password, string pepper)
+		{
+			RSAParameters pubKey = GetPublicKey (userID);
+			try {
+				RSAParameters privateKey = GetPrivateKey (userID, password, pepper);
+				loggedInUsers.Add (userID, privateKey);
+				if ((ByteSequenceComparer.Shared.Compare (pubKey.Modulus, privateKey.Modulus) != 0) || (ByteSequenceComparer.Shared.Compare (pubKey.Exponent, privateKey.Exponent) != 0))
+					return false;
+			} catch {
+				return false;
+			}
+			return true;
+
 		}
 
 		public void SaveSnapshots (IEnumerable<Snapshot> snaps)
@@ -83,8 +194,9 @@ namespace BD2.Core
 			System.IO.MemoryStream MSRP = new System.IO.MemoryStream ();
 			System.IO.BinaryWriter MSBW = new System.IO.BinaryWriter (MS);
 			SortedSet<byte[]> dependencies = new SortedSet<byte[]> (BD2.Common.ByteSequenceComparer.Shared);
+
 			ChunkHeaderv1 ch = new ChunkHeaderv1 (DateTime.UtcNow, "");
-			MSBW.Write (ch.Version);
+			MSBW.Write (ch.Version);	
 			byte[] chbytes = ch.Serialize ();
 			MSBW.Write (chbytes.Length);
 			MSBW.Write (chbytes);
@@ -158,7 +270,15 @@ namespace BD2.Core
 			Console.WriteLine ("Writing {0} bytes representing {1} objects to backend", MS.Length, n);
 			byte[] buf = MS.ToArray ();
 			byte[] chunkID = sha.ComputeHash (buf);
-			Backends.Push (chunkID, buf, deps.ToArray ());
+			SortedDictionary<byte[], byte[]> sigs = new SortedDictionary<byte[], byte[]> ();
+			foreach (var tup in loggedInUsers) {
+				RSA rsaa = RSA.Create ();
+				rsaa.ImportParameters (tup.Value);
+				byte[] signature = PKCS1.Sign_v15 (rsaa, System.Security.Cryptography.SHA256.Create (), chunkID);
+				sigs.Add (tup.Key, signature);
+			}
+			Backends.Push (chunkID, buf, new byte[]{ }, deps.ToArray ());
+			Backends.PushSignatures (chunkID, sigs);
 			foreach (var tup in bdos) {
 				foreach (var bdo in tup.Value) {
 					bdo.SetChunkID (chunkID);
@@ -171,7 +291,7 @@ namespace BD2.Core
 			SaveSnapshots (snapshots);
 		}
 
-		void Load ()
+		public void Load ()
 		{
 			SortedSet<byte[]> pendingData = new SortedSet<byte[]> (backends.Enumerate (), BD2.Common.ByteSequenceComparer.Shared);
 			RawProxy.RawProxyCollection rpc = new BD2.RawProxy.RawProxyCollection ();
@@ -180,7 +300,7 @@ namespace BD2.Core
 			}
 			while (pendingData.Count != 0)
 				foreach (var tup in new SortedSet<byte[]>(pendingData, BD2.Common.ByteSequenceComparer.Shared)) {
-					Console.WriteLine ("Testing object");
+					//Console.WriteLine ("Testing object");
 					byte[] nchunk = tup;
 					byte[][] deps = backends.PullDependencies (nchunk);
 					Console.WriteLine ("dependency count = {0}", deps.Length);
@@ -195,8 +315,17 @@ namespace BD2.Core
 					if (nchunk == null)
 						continue;
 					Console.WriteLine ("All the dependencies are loaded, proceeding...");
-					byte[] chunkData = backends.PullData (nchunk);
-					LoadChunk (nchunk, chunkData, rpc);
+					byte[] chunkSegment = backends.PullSegment (nchunk);
+					int mb = Math.Min (chunkSegment.Length, segmentCriteria.Length);
+					bool skip = false;
+					for (int n = 0; n != mb; n++) {
+						if ((segmentCriteria [n] & chunkSegment [n]) != segmentCriteria [n])
+							skip = true;
+					}
+					if (!skip) { //this is a really bad idea, I KNOW
+						byte[] chunkData = backends.PullData (nchunk);
+						LoadChunk (nchunk, chunkData, rpc);
+					}
 					pendingData.Remove (nchunk);
 				}	
 		}
@@ -214,10 +343,13 @@ namespace BD2.Core
 			System.IO.MemoryStream MS = new System.IO.MemoryStream (chunkData);
 			System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
 			int chunkVersion = BR.ReadInt32 ();
-			ChunkHeaderv1 ch = ChunkHeaderv1.Deserialzie (BR.ReadBytes (BR.ReadInt32 ())); 
-			chunkHeaders.Add (chunkID, ch);
+			if (chunkVersion == 1) {
+				ChunkHeaderv1 ch = ChunkHeaderv1.Deserialzie (BR.ReadBytes (BR.ReadInt32 ())); 
+				chunkHeaders.Add (chunkID, ch);
+			} else
+				throw new Exception (string.Format ("Chunk meta data version is 0x{0:x} which is not supported by this version of BD2.", chunkVersion));
 			int sectionCount = BR.ReadInt32 ();
-			for (int sectionID =  0; sectionID != sectionCount; sectionID++) {
+			for (int sectionID = 0; sectionID != sectionCount; sectionID++) {
 				switch (chunkVersion) {
 				case 1:
 					int SectionVersion = BR.ReadInt32 ();
@@ -248,21 +380,10 @@ namespace BD2.Core
 
 		}
 
-		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends, string name)
-			:this(backends, frontends)
+		public Database (IEnumerable<ChunkRepository> backends, IEnumerable<Frontend> frontends, byte[] segmentCriteria, string name)
+			: this (backends, frontends, segmentCriteria)
 		{
 			this.name = name;
-		}
-
-		public Database (DatabaseConfiguration databaseConfiguration)
-		{
-			if (databaseConfiguration == null)
-				throw new ArgumentNullException ("databaseConfiguration");
-			foreach (var Tuple in databaseConfiguration.Backends) {
-				ChunkRepository repo = (ChunkRepository)(Type.GetType (Tuple.Item1).Assembly.GetType ("Repository").GetConstructor (new Type[] { typeof(string) }).Invoke (null, new object[] { Tuple.Item2 }));
-				this.backends.AddRepository (repo);
-			}
-			primary = GetSnapshot ("Primary");
 		}
 
 		public string Name {

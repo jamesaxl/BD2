@@ -69,7 +69,7 @@ namespace BD2.Chunk
 
 		public byte[] Serialize ()
 		{
-			using (System.IO.MemoryStream MS =  new System.IO.MemoryStream ()) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (dateCreated.ToBinary ());
 					BW.Write (comments);
@@ -78,5 +78,6 @@ namespace BD2.Chunk
 			}
 		}
 	}
+
 }
 

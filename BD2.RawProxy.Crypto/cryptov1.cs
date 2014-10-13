@@ -35,16 +35,6 @@ namespace BD2.RawProxy.crypto
 	public class cryptov1 : RawProxyv1
 	{
 
-		static System.Collections.Generic.SortedDictionary<Guid, X509Certificate2> certificates = new System.Collections.Generic.SortedDictionary<Guid, X509Certificate2> ();
-
-		public static void ImportCertificate (Guid id, X509Certificate2 certificate)
-		{
-			if (certificate == null)
-				throw new ArgumentNullException ("certificate");
-			lock (certificates) {
-				certificates.Add (id, certificate);
-			}
-		}
 		//todo:add procedure for retrieving the proxies
 		#region implemented abstract members of RawProxyv1
 		public override string Name {
@@ -78,90 +68,7 @@ namespace BD2.RawProxy.crypto
 		{
 			return Encode (Input, DefaultEncoder);
 		}
-
-		public override byte[] Encode (byte[] Input, byte[] Attributes)
-		{
-			if (Input == null)
-				throw new ArgumentNullException ("Input");
-			if (Attributes == null)
-				throw new ArgumentNullException ("Attributes");
-			if (Input.Length == 0)
-				throw new ArgumentException ("Input cannot be empty.", "Input");
-			if (Attributes.Length == 0)
-				throw new ArgumentException ("Attributes cannot be empty.", "Attributes");
-			MemoryStream MS = new MemoryStream ();
-			MS.Write (Input, 0, Input.Length);
-			MS.Seek (0, SeekOrigin.Begin);
-			System.Security.Cryptography.Aes aes = System.Security.Cryptography.Aes.Create ();
-			aes.Mode = System.Security.Cryptography.CipherMode.CBC;
-			aes.Key = Attributes;
-			//System.Security.Cryptography.CryptoStream cs = 
-				new System.Security.Cryptography.CryptoStream (MS, aes.CreateEncryptor (), System.Security.Cryptography.CryptoStreamMode.Read);
-
-			throw new NotImplementedException ();
-		}
-
-		byte[] defaultEncoder;
-
-		public byte[] DefaultEncoder {
-			get {
-				if (defaultEncoder == null) {
-					throw new InvalidOperationException ("Default Encoder is not set.");
-				}
-				return defaultEncoder;
-			}
-		}
-
-		public void SetDefaultEncoder (byte[] hash)
-		{
-			if (hash == null)
-				throw new ArgumentNullException ("hash");
-			if (hash.Length == 0)
-				throw new ArgumentException ("hash cannot be empty.", "Input");
-			//X509Certificate2 cert = 
-				GetCertificate (hash);//load certificate into memory
-			defaultEncoder = hash;
-		}
-		#endregion
-
-		public void AddCertificate (X509Certificate2 cert)
-		{
-			if (cert == null)
-				throw new ArgumentNullException ("cert");
-			storage.Put (cert.GetCertHash (),
-			             cert.Export (X509ContentType.Pkcs12));
-		}
-
-		System.Collections.Generic.SortedDictionary<byte[], X509Certificate2> certs = new System.Collections.Generic.SortedDictionary<byte[], X509Certificate2> ();
-
-		public X509Certificate2 GetCertificate (byte[] hash)
-		{
-			lock (certs) {
-				X509Certificate2 ret;
-				if (certs.TryGetValue (hash, out ret)) {
-					return ret;
-				}
-				byte[] rawcert = GetRawCertificate (hash);
-				try {
-					ret = new X509Certificate2 (rawcert);
-				} catch (Exception ex) {
-					throw new InvalidDataException ("Certificate information is damaged/wrong and unusable.", ex);
-				}
-				certs.Add (hash, ret);
-				return ret;
-			}
-		}
-
-		public byte[] GetRawCertificate (byte[] hash)
-		{
-			if (hash == null)
-				throw new ArgumentNullException ("hash");
-			byte[] ret = storage.GetRaw (hash);
-			if (ret == null)
-				throw new ArgumentException ("No certificate associated with given hash", "hash");
-			return ret;
-		}
-
+		 
 		#region implemented abstract members of RawProxyv1
 
 		protected override byte[] DoSerialize ()

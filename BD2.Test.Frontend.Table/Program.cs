@@ -38,12 +38,19 @@ namespace BD2.Test.Frontend.Table
 			typeof(BD2.Frontend.Table.Column).GetCustomAttributes (true);
 			typeof(BD2.Frontend.Table.Model.ColumnSet).GetCustomAttributes (true);
 			string databaseName = "Esfand";
-			BD2.Core.Database db = new BD2.Core.Database 
-				(new BD2.Chunk.ChunkRepository[] { new BD2.Repo.Leveldb.Repository ("/home/behrooz/Test") }, 
-			  new BD2.Core.Frontend[] { new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ()) }, databaseName);
+			BD2.Core.Database db = new BD2.Core.Database (new BD2.Chunk.ChunkRepository[] { new BD2.Repo.Leveldb.Repository ("/home/behrooz/Test") }, 
+				                       new BD2.Core.Frontend[] { new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ()) }, new byte[]{ }, databaseName);
 			BD2.Frontend.Table.FrontendInstance frontendInstance =
 				(BD2.Frontend.Table.FrontendInstance)(db.GetFrontend ("BD2.Frontend.Table")).GetInstanse (db.GetSnapshot ("Primary"));
 			//use the db here
+			BD2.Frontend.Table.Table M = (BD2.Frontend.Table.Table)frontendInstance.GetTable ("Moshtary");
+			foreach (var R in frontendInstance.GetRows (M)) {
+				object[] values = R.GetValues ();
+				values [0] = null;
+				frontendInstance.CreateRow (M, R.ColumnSet, new byte[][] { R.ObjectID }, values);
+			}
+			//
+			frontendInstance.Flush ();
 		}
 	}
 }

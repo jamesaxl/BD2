@@ -67,12 +67,13 @@ namespace BD2.Core
 
 		protected abstract void OnCreateObjects (byte[] chunkID, byte[] bytes);
 
-		/// <summary>
-		/// Returns a SNAPSHOT of current volatile objects.
-		/// </summary>
-		/// <returns>The volatile objects.</returns>
-
+	
 
 		protected abstract BaseDataObject GetObjectWithID (byte[] objectID);
+
+		public virtual byte[] GetObjectSegment (BaseDataObject baseDataObject)
+		{
+			return new byte[]{ };
+		}
 	}
 }

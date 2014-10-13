@@ -61,15 +61,27 @@ namespace BD2.Chunk
 
 		public abstract Guid ID { get; }
 
-		public virtual void Push (IEnumerable<Tuple<byte[], byte[],  byte[][]>> chunks)
+		public virtual void Push (IEnumerable<Tuple<byte[], byte[], byte[],  byte[][]>> chunks)
 		{
 			if (chunks == null)
 				throw new ArgumentNullException ("chunks");
 			foreach (var chunk in chunks)
-				Push (chunk.Item1, chunk.Item2, chunk.Item3);
+				Push (chunk.Item1, chunk.Item2, chunk.Item3, chunk.Item4);
 		}
 
+		public abstract SortedDictionary<byte[], string> GetUsers ();
+
+		public abstract void AddUser (byte[] id, string name);
+
 		public abstract void PushIndex (byte[] index, byte[] value);
+
+		public abstract void PushSegment (byte[] chunkID, byte[] value);
+
+		public abstract void PushKey (byte[] keyID, byte[] value);
+
+		public abstract void PushPrivateKey (byte[] keyID, byte[] value);
+
+		public abstract void PushSignatures (byte[] chunkID, SortedDictionary<byte[], byte[]> sigList);
 
 		public abstract byte[] PullIndex (byte[] index);
 
@@ -77,25 +89,34 @@ namespace BD2.Chunk
 
 		public abstract byte[] PullRawProxyData (byte[] index);
 
-		public abstract void Push (byte[] chunkId, byte[] data, byte[][] dependencies);
+		public abstract void Push (byte[] chunkID, byte[] data, byte[] segment, byte[][] dependencies);
 
 		public abstract byte[] PullData (byte[] chunkID);
 
+		public abstract byte[] PullSegment (byte[] chunkID);
+
+		public abstract byte[] PullKey (byte[] keyID);
+
+		public abstract byte[] PullPrivateKey (byte[] keyID);
+
+		public abstract SortedDictionary<byte[], byte[]> PullSignatures (byte[] chunkID);
+
 		public abstract byte[][] PullDependencies (byte[] chunkID);
 
-		public virtual IEnumerator<Tuple<byte[], byte[], byte[][]>> Pull (IEnumerable<byte[]> chunkIDs)
+		public virtual IEnumerator<Tuple<byte[], byte[], byte[], byte[][]>> Pull (IEnumerable<byte[]> chunkIDs)
 		{
 			if (chunkIDs == null)
 				throw new ArgumentNullException ("chunkIDs");
 			foreach (byte[] chunkID in chunkIDs) {
 				byte[] data;
+				byte[] section;
 				byte[][] dependencies;
-				Pull (chunkID, out data, out dependencies);
-				yield return new Tuple <byte[], byte[], byte[][]> (chunkID, data, dependencies); 
+				Pull (chunkID, out data, out section, out dependencies);
+				yield return new Tuple <byte[], byte[], byte[], byte[][]> (chunkID, data, section, dependencies); 
 			}
 		}
 
-		public abstract void Pull (byte[] chunkID, out byte[] data, out byte[][] dependencies);
+		public abstract void Pull (byte[] chunkID, out byte[] data, out byte[] segment, out byte[][] dependencies);
 
 		public abstract IEnumerable<byte[]> Enumerate ();
 

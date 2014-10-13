@@ -27,6 +27,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using BD2.Common;
+using System.Security.Cryptography;
 
 namespace BD2.Chunk
 {
@@ -53,6 +55,29 @@ namespace BD2.Chunk
 			}
 		}
 
+		#region implemented abstract members of ChunkRepository
+
+		public override SortedDictionary<byte[], string> GetUsers ()
+		{
+			SortedDictionary<byte[], string> users = new SortedDictionary<byte[], string> (ByteSequenceComparer.Shared);
+			foreach (var Repo in GetRepositories ()) {
+				foreach (var tup in Repo.GetUsers ()) {
+					if (!users.ContainsKey (tup.Key)) {
+						users.Add (tup.Key, tup.Value);
+					}
+				}
+			}
+			return users;
+		}
+
+		public override void AddUser (byte[] id, string name)
+		{
+			foreach (var Repo in GetRepositories ()) {
+				Repo.AddUser (id, name);
+			}
+		}
+
+	 
 		public override byte[] PullData (byte[] chunkID)
 		{
 			if (chunkID == null)
@@ -102,7 +127,27 @@ namespace BD2.Chunk
 			return null;
 		}
 
-		public override void Push (byte[] chunkID, byte[] data, byte[][] dependencies)
+		public override void PushSegment (byte[] chunkID, byte[] value)
+		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			if (value == null)
+				throw new ArgumentNullException ("value");
+			foreach (ChunkRepository CR in repositories)
+				CR.PushSegment (chunkID, value);
+		}
+
+		public override byte[] PullSegment (byte[] chunkID)
+		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			int cost;
+			ChunkRepository repo;
+			GetLeastCost (chunkID, out cost, out repo);
+			return repo.PullIndex (chunkID);
+		}
+
+		public override void Push (byte[] chunkID, byte[] data, byte[] segment, byte[][] dependencies)
 		{
 			if (chunkID == null)
 				throw new ArgumentNullException ("chunkID");
@@ -111,7 +156,7 @@ namespace BD2.Chunk
 			if (dependencies == null)
 				throw new ArgumentNullException ("dependencies");
 			foreach (ChunkRepository CR in repositories)
-				CR.Push (chunkID, data, dependencies);
+				CR.Push (chunkID, data, segment, dependencies);
 		}
 
 		public override int GetLeastCost (int currentMinimum, byte[] chunkID)
@@ -178,8 +223,8 @@ namespace BD2.Chunk
 		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateData ()
 		{
 			SortedSet<byte[]> temp = null;
-			foreach (ChunkRepository CR in GetRepositories()) 
-				foreach (var tup in CR.EnumerateData ()) 
+			foreach (ChunkRepository CR in GetRepositories())
+				foreach (var tup in CR.EnumerateData ())
 					if (!temp.Contains (tup.Key)) {
 						temp.Add (tup.Key);
 						yield return tup;
@@ -193,13 +238,13 @@ namespace BD2.Chunk
 				MaxCost = Math.Min (MaxCost, repo.GetMaxCostForAny ());
 			return MaxCost;
 		}
-		#region implemented abstract members of ChunkRepository
-		public override void Pull (byte[] chunkID, out byte[] data, out byte[][] dependencies)
+
+		public override void Pull (byte[] chunkID, out byte[] data, out byte[] segment, out byte[][] dependencies)
 		{
 			int cost;
 			ChunkRepository repo;
 			GetLeastCost (chunkID, out cost, out repo);
-			repo.Pull (chunkID, out data, out dependencies);
+			repo.Pull (chunkID, out data, out segment, out dependencies);
 		}
 
 		public override IEnumerable<byte[]> EnumerateTopLevels ()
@@ -244,8 +289,7 @@ namespace BD2.Chunk
 				return id;
 			}
 		}
-		#endregion
-		#region implemented abstract members of ChunkRepository
+
 		public override void PushRawProxyData (byte[] index, byte[] value)
 		{
 			if (index == null)
@@ -281,6 +325,76 @@ namespace BD2.Chunk
 				}
 			}
 		}
+
+		public override void PushSignatures (byte[] chunkID, SortedDictionary<byte[], byte[]> value)
+		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			if (value == null)
+				throw new ArgumentNullException ("value");
+			foreach (ChunkRepository CR in repositories)
+				CR.PushSignatures (chunkID, value);
+		}
+
+		public override SortedDictionary<byte[], byte[]> PullSignatures (byte[] chunkID)
+		{
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			foreach (var Repo in GetRepositories ()) {
+				SortedDictionary<byte[], byte[]> value = Repo.PullSignatures (chunkID);
+				if (value != null) {
+					return value;
+				}
+			}
+			return null;
+		}
+
+		public override void PushKey (byte[] keyID, byte[] value)
+		{
+			if (keyID == null)
+				throw new ArgumentNullException ("keyID");
+			if (value == null)
+				throw new ArgumentNullException ("value");
+			foreach (ChunkRepository CR in repositories)
+				CR.PushKey (keyID, value);
+		}
+
+		public override byte[] PullKey (byte[] keyID)
+		{
+			if (keyID == null)
+				throw new ArgumentNullException ("keyID");
+			foreach (var Repo in GetRepositories ()) {
+				byte[] value = Repo.PullKey (keyID);
+				if (value != null) {
+					return value;
+				}
+			}
+			return null;
+		}
+
+		public override void PushPrivateKey (byte[] keyID, byte[] value)
+		{
+			if (keyID == null)
+				throw new ArgumentNullException ("keyID");
+			if (value == null)
+				throw new ArgumentNullException ("value");
+			foreach (ChunkRepository CR in repositories)
+				CR.PushPrivateKey (keyID, value);
+		}
+
+		public override byte[] PullPrivateKey (byte[] keyID)
+		{
+			if (keyID == null)
+				throw new ArgumentNullException ("keyID");
+			foreach (var Repo in GetRepositories ()) {
+				byte[] value = Repo.PullPrivateKey (keyID);
+				if (value != null) {
+					return value;
+				}
+			}
+			return null;
+		}
+
 		#endregion
 	}
 }

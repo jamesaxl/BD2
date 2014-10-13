@@ -25,18 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
+using System.Dynamic;
 
 namespace BD2.RawProxy
 {
 	public abstract class RawProxyv1
-	{		
-		byte[] objectID;
+	{
+	
+		public abstract byte[] Decode (byte[] input);
 
-		public abstract byte[] Decode (byte[] Input);
+		public abstract byte[] Encode (byte[] input);
 
-		public abstract byte[] Encode (byte[] Input);
-
-		public abstract byte[] Encode (byte[] Input, byte[] Attributes);
+		public abstract byte[] Encode (byte[] input, byte[] attributes);
 
 		public abstract string Name { get; }
 
@@ -53,14 +53,19 @@ namespace BD2.RawProxy
 
 		protected abstract byte[] DoSerialize ();
 
-		public byte[] ObjectID {
+		readonly object configuration;
+
+		protected object Configuration {
 			get {
-				if (objectID == null) {
-					System.Security.Cryptography.SHA1 sha1 = System.Security.Cryptography.SHA1.Create ();
-					objectID = sha1.ComputeHash (Serialize ());
-				}
-				return objectID;
+				return configuration;
 			}
+		}
+
+		protected RawProxyv1 (object configuration)
+		{
+			if (configuration == null)
+				throw new ArgumentNullException ("configuration");
+			this.configuration = configuration;
 		}
 	}
 }

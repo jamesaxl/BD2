@@ -34,7 +34,58 @@ namespace BD2.Repo.File
 	public class Repository : ChunkRepository
 	{
 		#region implemented abstract members of ChunkRepository
-		public override void Push (byte[] chunkId, byte[] data, byte[][] dependencies)
+
+		public override SortedDictionary<byte[], string> GetUsers ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void AddUser (byte[] id, string name)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void PushIndex (byte[] index, byte[] value)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void PushSegment (byte[] chunkID, byte[] value)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void PushKey (byte[] keyID, byte[] value)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void PushPrivateKey (byte[] keyID, byte[] value)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void PushSignatures (byte[] chunkID, SortedDictionary<byte[], byte[]> sigList)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override byte[] PullIndex (byte[] index)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void PushRawProxyData (byte[] index, byte[] value)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override byte[] PullRawProxyData (byte[] index)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override void Push (byte[] chunkID, byte[] data, byte[] segment, byte[][] dependencies)
 		{
 			throw new NotImplementedException ();
 		}
@@ -44,12 +95,42 @@ namespace BD2.Repo.File
 			throw new NotImplementedException ();
 		}
 
+		public override byte[] PullSegment (byte[] chunkID)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override byte[] PullKey (byte[] keyID)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override byte[] PullPrivateKey (byte[] keyID)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override SortedDictionary<byte[], byte[]> PullSignatures (byte[] chunkID)
+		{
+			throw new NotImplementedException ();
+		}
+
 		public override byte[][] PullDependencies (byte[] chunkID)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override void Pull (byte[] chunkID, out byte[] data, out byte[][] dependencies)
+		public override void Pull (byte[] chunkID, out byte[] data, out byte[] segment, out byte[][] dependencies)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateData ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateRawProxyData ()
 		{
 			throw new NotImplementedException ();
 		}
@@ -78,7 +159,9 @@ namespace BD2.Repo.File
 		{
 			throw new NotImplementedException ();
 		}
+
 		#endregion
+
 		SortedSet<byte[]> publicChunks;
 		Mono.Data.Sqlite.SqliteConnection Base;
 		string path;
@@ -111,20 +194,20 @@ namespace BD2.Repo.File
 				try {
 					id = Guid.NewGuid ();
 					Base.Open ();
-					using (Mono.Data.Sqlite.SqliteCommand Comm  = new Mono.Data.Sqlite.SqliteCommand (
-					"CREATE TABLE CHUNKS(" +
-					"ID BLOB(64) NOT NULL, " +
-					"Path TEXT(400) NOT NULL)",Base))
+					using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand (
+						                                              "CREATE TABLE CHUNKS(" +
+						                                              "ID BLOB(64) NOT NULL, " +
+						                                              "Path TEXT(400) NOT NULL)", Base))
 						Comm.ExecuteNonQuery ();
-					using (Mono.Data.Sqlite.SqliteCommand Comm  = new Mono.Data.Sqlite.SqliteCommand (
-					"CREATE TABLE ATTRIBUTES(" +
-					"NAME TEXT(128) PRIMARY KEY NOT NULL, " +
-					"VALUE BLOB(1024) NOT NULL)",Base))
+					using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand (
+						                                              "CREATE TABLE ATTRIBUTES(" +
+						                                              "NAME TEXT(128) PRIMARY KEY NOT NULL, " +
+						                                              "VALUE BLOB(1024) NOT NULL)", Base))
 						Comm.ExecuteNonQuery ();
-					using (Mono.Data.Sqlite.SqliteCommand Comm  = new Mono.Data.Sqlite.SqliteCommand (
-					"INSERT INTO ATTRIBUTES(" +
-					"NAME, " +
-					"VALUE) VALUES('ID', @p0)",Base)) {
+					using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand (
+						                                              "INSERT INTO ATTRIBUTES(" +
+						                                              "NAME, " +
+						                                              "VALUE) VALUES('ID', @p0)", Base)) {
 						Comm.Parameters.AddWithValue ("p0", ID.ToByteArray ());
 						Comm.ExecuteNonQuery ();
 					}
@@ -166,7 +249,7 @@ namespace BD2.Repo.File
 
 		public  byte[] Pull (byte[] ChunkDescriptor)
 		{
-			using (Mono.Data.Sqlite.SqliteCommand Comm  = new Mono.Data.Sqlite.SqliteCommand ("SELECT PATH FROM CHUNKS WHERE ID = @p0", Base)) {
+			using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand ("SELECT PATH FROM CHUNKS WHERE ID = @p0", Base)) {
 				Comm.Parameters.AddWithValue ("p0", ChunkDescriptor);
 				Mono.Data.Sqlite.SqliteDataReader DR = Comm.ExecuteReader ();
 				string NName = "TODO:FIX";//ChunkDescriptor.ToHexadecimal ();
@@ -201,38 +284,6 @@ namespace BD2.Repo.File
 				return id;
 			}
 		}
-		#region implemented abstract members of ChunkRepository
-		public override void PushIndex (byte[] index, byte[] value)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override byte[] PullIndex (byte[] index)
-		{
-			throw new NotImplementedException ();
-		}
-		#endregion
-		#region implemented abstract members of ChunkRepository
-		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateData ()
-		{
-			throw new NotImplementedException ();
-		}
-		#endregion
-		#region implemented abstract members of ChunkRepository
-		public override void PushRawProxyData (byte[] index, byte[] value)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override byte[] PullRawProxyData (byte[] index)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateRawProxyData ()
-		{
-			throw new NotImplementedException ();
-		}
-		#endregion
+ 
 	}
 }
