@@ -40,7 +40,9 @@ namespace BD2.RawProxy
 			rps = new List<RawProxyv1> ();
 			rpd = new SortedDictionary<byte[], RawProxyv1> ();
 		}
+
 		#region ICollection implementation
+
 		public void Add (RawProxyv1 item)
 		{
 			rps.Add (item);
@@ -78,19 +80,27 @@ namespace BD2.RawProxy
 				return false;
 			}
 		}
+
 		#endregion
+
 		#region IEnumerable implementation
+
 		public IEnumerator<RawProxyv1> GetEnumerator ()
 		{
 			return rps.GetEnumerator ();
 		}
+
 		#endregion
+
 		#region IEnumerable implementation
+
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
 		{
 			return rps.GetEnumerator ();
 		}
+
 		#endregion
+
 		public byte[] ChainDecode (byte[] payload)
 		{
 			List<RawProxyv1> rrps = new List<RawProxyv1> (rps);

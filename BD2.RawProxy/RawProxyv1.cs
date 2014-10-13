@@ -31,7 +31,8 @@ namespace BD2.RawProxy
 {
 	public abstract class RawProxyv1
 	{
-	
+		byte[] objectID;
+
 		public abstract byte[] Decode (byte[] input);
 
 		public abstract byte[] Encode (byte[] input);
@@ -52,6 +53,16 @@ namespace BD2.RawProxy
 		}
 
 		protected abstract byte[] DoSerialize ();
+
+		public byte[] ObjectID {
+			get {
+				if (objectID == null) {
+					System.Security.Cryptography.SHA1 sha1 = System.Security.Cryptography.SHA1.Create ();
+					objectID = sha1.ComputeHash (Serialize ());
+				}
+				return objectID;
+			}
+		}
 
 		readonly object configuration;
 
