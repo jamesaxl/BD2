@@ -25,11 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
+using BD2.Daemon.Buses;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("43a54d04-52b8-4052-94bf-bd1512995dec")]
-	[ObjectBusMessageDeserializerAttribute(typeof(ServiceDestroyMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("43a54d04-52b8-4052-94bf-bd1512995dec")]
+	[ObjectBusMessageDeserializerAttribute (typeof(ServiceDestroyMessage), "Deserialize")]
 	public class ServiceDestroyMessage : ObjectBusMessage
 	{
 		Guid sessionID;
@@ -53,7 +54,9 @@ namespace BD2.Daemon
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -69,6 +72,7 @@ namespace BD2.Daemon
 				return Guid.Parse ("43a54d04-52b8-4052-94bf-bd1512995dec");
 			}
 		}
+
 		#endregion
 	}
 }

@@ -31,7 +31,7 @@ namespace BD2.Frontend.Table.Model
 {
 	public abstract class IndexColumnBase
 	{
-		Column column;
+		readonly Column column;
 
 		public Column Column {
 			get {
@@ -39,7 +39,7 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		bool sortAscending;
+		readonly bool sortAscending;
 
 		public bool SortAscending {
 			get {

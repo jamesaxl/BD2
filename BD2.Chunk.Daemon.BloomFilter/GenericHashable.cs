@@ -31,8 +31,8 @@ namespace BD2.BloomFilter
 {
 	public class GenericHashable : IHashable, IComparable
 	{
-		int[] availableSizes;
-		byte[] bytes;
+		readonly int[] availableSizes;
+		readonly byte[] bytes;
 
 		public GenericHashable (byte[] bytes, int[] availableSizes)
 		{
@@ -43,10 +43,12 @@ namespace BD2.BloomFilter
 		}
 
 		public GenericHashable (byte[] bytes)
-			:this(bytes, null)
+			: this (bytes, null)
 		{
 		}
+
 		#region IHashable implementation
+
 		int[] IHashable.GetAvailableHashSizes ()
 		{
 			if (availableSizes == null) {
@@ -101,8 +103,11 @@ namespace BD2.BloomFilter
 			}
 			return hashBytes;
 		}
+
 		#endregion
+
 		#region IComparable implementation
+
 		int IComparable.CompareTo (object obj)
 		{
 			if (obj == null)
@@ -121,6 +126,7 @@ namespace BD2.BloomFilter
 			}
 			return 0;
 		}
+
 		#endregion
 	}
 }

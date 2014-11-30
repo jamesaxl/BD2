@@ -29,10 +29,10 @@ using System.Collections.Generic;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase, BD2.Core.ITransactionSource
+	public abstract class FrontendInstance : BD2.Core.FrontendInstanceBase
 	{
-		protected FrontendInstance (BD2.Core.Snapshot snapshot, Frontend frontend)
-			: base(snapshot, frontend)
+		protected FrontendInstance (Frontend frontend)
+			: base (frontend)
 		{
 		}
 
@@ -102,7 +102,6 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract IEnumerable<Relation> GetParentRelations (Table table);
 
-		public abstract BD2.Core.Transaction CreateTransaction ();
 	}
 }
 

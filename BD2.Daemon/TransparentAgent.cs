@@ -25,6 +25,8 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using BD2.Daemon.Buses;
+using BD2.Daemon.Streams;
 
 namespace BD2.Daemon
 {
@@ -39,7 +41,7 @@ namespace BD2.Daemon
 		}
 
 		public TransparentAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, byte[] parameters)
-			: base(serviceAgentMode, objectBusSession, flush, false)
+			: base (serviceAgentMode, objectBusSession, flush, false)
 		{
 			this.parameters = parameters;
 		}

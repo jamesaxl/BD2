@@ -28,19 +28,11 @@ using System;
 using System.Collections.Generic;
 using BD2.Core;
 using BD2.Frontend.Table.Model;
-using BD2.Common;
 
 namespace BD2.Frontend.Table
 {
 	public class FrontendInstance : BD2.Frontend.Table.Model.FrontendInstance
 	{
-		SortedDictionary<Table, SortedDictionary<byte[], Row>> perTableRows = new SortedDictionary<Table, SortedDictionary<byte[], Row>> ();
-		SortedDictionary<byte[], Row> rows = new SortedDictionary<byte[], Row> (BD2.Common.ByteSequenceComparer.Shared);
-		SortedDictionary<byte[], Table> tables = new SortedDictionary<byte[], Table> (BD2.Common.ByteSequenceComparer.Shared);
-		SortedDictionary<byte[], Relation> relations = new SortedDictionary<byte[], Relation> (BD2.Common.ByteSequenceComparer.Shared);
-		SortedDictionary<byte[], Column> columns = new SortedDictionary<byte[], Column> (BD2.Common.ByteSequenceComparer.Shared);
-		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (BD2.Common.ByteSequenceComparer.Shared);
-		SortedDictionary<byte[], Index> indices = new SortedDictionary<byte[], Index> (BD2.Common.ByteSequenceComparer.Shared);
 		ValueSerializerBase valueSerializer;
 		//SortedDictionary<byte[], BaseDataObject> volatileData = new SortedDictionary<byte[], BaseDataObject> (BD2.Common.ByteSequenceComparer.Shared);
 		public override ValueSerializerBase ValueSerializer {
@@ -314,9 +306,9 @@ namespace BD2.Frontend.Table
 
 		public override IEnumerable<BD2.Frontend.Table.Model.Relation> GetParentRelations (BD2.Frontend.Table.Model.Table table)
 		{
-			foreach (Relation rel in relations) {
-				if (rel.ChildTable == table)
-					yield return rel;
+			foreach (var rel in relations) {
+				if (rel.Value.ChildTable == table)
+					yield return rel.Value;
 			}
 		}
 

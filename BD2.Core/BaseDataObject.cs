@@ -1,40 +1,43 @@
 using System;
 using System.Collections.Generic;
-using BD2.Common;
+using BD2.Core;
 
 namespace BD2.Core
 {
-	public abstract class BaseDataObject : Serializable, IComparable<BaseDataObject>
+	public sealed class BaseDataObject : IComparable<BaseDataObject>
 	{
-		public virtual IEnumerable<BaseDataObject> GetDependenies ()
-		{
-			yield break;
-		}
+		bool fullyLoaded;
+		readonly FrontendInstanceBase frontendInstanceBase;
+		readonly SortedDictionary<byte[], BaseDataObjectVersion> versions = new SortedDictionary<byte[], BaseDataObjectVersion> ();
 
-		public bool IsVolatile {
+		public bool FullyLoaded {
 			get {
-				return chunkID == null;
+				return fullyLoaded;
+			}
+			internal set {
+				fullyLoaded = value; 
 			}
 		}
 
-		byte[] chunkID;
-		FrontendInstanceBase frontendInstanceBase;
+		public SortedDictionary<byte[], BaseDataObjectVersion> Versions {
+			get {
+				return versions;
+			}
+		}
 
-		protected BaseDataObject (FrontendInstanceBase frontendInstanceBase, byte[] chunkID)
+		public void InternVersion (BaseDataObjectVersion version)
 		{
+			versions.Add (version.ChunkID, version);
+		}
+
+		public BaseDataObject (FrontendInstanceBase frontendInstanceBase, byte[] objectID)
+		{
+			if (objectID == null)
+				throw new ArgumentNullException ("objectID");
 			if (frontendInstanceBase == null)
 				throw new ArgumentNullException ("frontendInstanceBase");
 			this.frontendInstanceBase = frontendInstanceBase;
-			this.chunkID = chunkID;
-		}
-
-		internal void SetChunkID (byte[] newChunkID)
-		{
-			if (newChunkID == null)
-				throw new ArgumentNullException ("newChunkID");
-			if (chunkID != null)
-				throw new InvalidOperationException ();
-			chunkID = newChunkID;
+			this.objectID = objectID;
 		}
 
 		public FrontendInstanceBase FrontendInstanceBase {
@@ -57,34 +60,18 @@ namespace BD2.Core
 			}
 		}
 
-		public byte[] ChunkID {
-			get {
-				if (chunkID == null)
-					return null;
-				return (byte[])chunkID.Clone ();
-			}
-		}
 		//for de/serialization purposes
-		public abstract Guid ObjectType { get; }
 
-		byte[] puoid;
-
-		byte[] GetPersistentUniqueObjectID ()
-		{
-			if (puoid != null)
-				return puoid;
-			System.IO.MemoryStream MS = new System.IO.MemoryStream ();
-			Serialize (MS);
-			puoid = MS.ToArray ().SHA256 ();
-			return puoid;
-		}
+		byte[] objectID;
 
 		public byte[] ObjectID {
 			get {
-				return GetPersistentUniqueObjectID ();
+				return objectID;
 			}
 		}
+
 		#region IComparable implementation
+
 		public int CompareTo (BaseDataObject other)
 		{
 			if (other == null)
@@ -95,6 +82,7 @@ namespace BD2.Core
 			}
 			return R;
 		}
+
 		#endregion
 	}
 }

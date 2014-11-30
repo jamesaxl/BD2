@@ -30,26 +30,32 @@ using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class Column : BaseDataObject
+	public abstract class Column : BaseDataObjectVersion
 	{
-		string name;
+		readonly string name;
 
 		public string Name { get { return name; } }
 
-		Type type;
+		readonly Type type;
 
 		public Type Type { get { return type; } }
 
-		long length;
+		readonly long length;
 
 		public long Length { get { return length; } }
 
-		bool allowNull;
+		readonly bool allowNull;
 
 		public bool AllowNull { get { return allowNull; } }
 
-		protected Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, Type type, bool allowNull, long length)
-			:base (frontendInstanceBase, chunkID)
+		protected Column (byte[] chunkID,
+		                  BaseDataObject baseDataObject,
+		                  byte[][] previousVersionChunkIDs,
+		                  BaseDataObjectVersion[] previousVersions, string name, Type type, bool allowNull, long length)
+			: base (chunkID,
+			        baseDataObject,
+			        previousVersionChunkIDs,
+			        previousVersions)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");
@@ -59,9 +65,9 @@ namespace BD2.Frontend.Table.Model
 			this.length = length;
 		}
 
-		public override void Serialize (System.IO.Stream stream)
+		public override void Serialize (System.IO.Stream stream, EncryptedStorageManager encryptedStorageManager)
 		{
-			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
+			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
 				BW.Write (name);
 				BW.Write (((Frontend)FrontendInstanceBase.Frontend).ValueDeserializer.TypeToID (type));
 				BW.Write (allowNull);

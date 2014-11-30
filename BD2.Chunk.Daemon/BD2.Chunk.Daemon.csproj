@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C60A5077-8EFF-4791-8AA2-89A2EBE58653}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -32,7 +32,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="Mono.Upnp, Version=1.0.5012.29973, Culture=neutral">
-      <Private>False</Private>
       <Package>mono.upnp</Package>
     </Reference>
   </ItemGroup>
@@ -50,10 +49,6 @@
       <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
       <Name>BD2.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
-      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
-      <Name>BD2.Chunk</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Daemon\BD2.Daemon.csproj">
       <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>
       <Name>BD2.Daemon</Name>
@@ -61,6 +56,10 @@
     <ProjectReference Include="..\BD2.Chunk.Daemon.Common\BD2.Chunk.Daemon.Common.csproj">
       <Project>{7759DDFD-E328-4788-B67C-6967E65811B6}</Project>
       <Name>BD2.Chunk.Daemon.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.Core\BD2.Core.csproj">
+      <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
+      <Name>BD2.Core</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

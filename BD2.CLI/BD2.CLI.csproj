@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -52,22 +52,7 @@
     <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <Deployment.LinuxDeployData scriptName="bd2" />
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Repo.LevelDB\BD2.Repo.Leveldb.csproj">
-      <Project>{AD303744-084C-4FC6-84C9-46F6179C670C}</Project>
-      <Name>BD2.Repo.Leveldb</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
-      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
-      <Name>BD2.Chunk</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Chunk.Daemon\BD2.Chunk.Daemon.csproj">
       <Project>{C60A5077-8EFF-4791-8AA2-89A2EBE58653}</Project>
       <Name>BD2.Chunk.Daemon</Name>

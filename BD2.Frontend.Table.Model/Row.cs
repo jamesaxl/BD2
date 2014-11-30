@@ -30,9 +30,9 @@ using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class Row : BaseDataObject
+	public abstract class Row : BaseDataObjectVersion
 	{
-		ColumnSet columnSet;
+		readonly ColumnSet columnSet;
 
 		public ColumnSet ColumnSet {
 			get {
@@ -40,7 +40,7 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		Table table;
+		readonly Table table;
 
 		public Table Table {
 			get {
@@ -48,7 +48,7 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		protected Row (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet)
+		protected Row (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet, int valueSets)
 			: base (frontendInstanceBase, chunkID)
 		{
 			if (table == null)

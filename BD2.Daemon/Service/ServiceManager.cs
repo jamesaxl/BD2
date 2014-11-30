@@ -26,6 +26,7 @@
  * */
 using System;
 using System.Collections.Generic;
+using BD2.Daemon.Buses;
 
 namespace BD2.Daemon
 {
@@ -96,8 +97,8 @@ namespace BD2.Daemon
 			ServiceRequestMessage serviceRequest = (ServiceRequestMessage)message;
 			Func<ServiceAgentMode , ObjectBusSession, Action, Byte[], ServiceAgent> agentFunc;
 			lock (localServices)
-				lock (localServiceAgents)
-					agentFunc = localServiceAgents [localServices [serviceRequest.ServiceID]];
+			lock (localServiceAgents)
+				agentFunc = localServiceAgents [localServices [serviceRequest.ServiceID]];
 			Guid responseID = Guid.NewGuid ();
 			ObjectBusSession session = objectBus.CreateSession (responseID, SessionDisconnected);
 			ServiceResponseMessage response = new ServiceResponseMessage (responseID, serviceRequest.ID, ServiceResponseStatus.Accepted);
@@ -155,10 +156,10 @@ namespace BD2.Daemon
 			if (func == null)
 				throw new ArgumentNullException ("func");
 			lock (localServices)
-				lock (localServiceAgents) {
-					localServices.Add (serviceAnnouncement.ID, serviceAnnouncement);
-					localServiceAgents.Add (serviceAnnouncement, func);
-				}
+			lock (localServiceAgents) {
+				localServices.Add (serviceAnnouncement.ID, serviceAnnouncement);
+				localServiceAgents.Add (serviceAnnouncement, func);
+			}
 			objectBus.SendMessage (serviceAnnouncement);
 		}
 

@@ -29,11 +29,10 @@ using BD2.Daemon;
 
 namespace BD2.Test.Daemon.FileShare
 {
-	[ObjectBusMessageTypeIDAttribute("8d9e5850-6e85-4265-9dbe-729f72db74ab")]
-	[ObjectBusMessageDeserializerAttribute(typeof(FileShareMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("8d9e5850-6e85-4265-9dbe-729f72db74ab")]
+	[ObjectBusMessageDeserializerAttribute (typeof(FileShareMessage), "Deserialize")]
 	public class FileShareMessage : ObjectBusMessage
 	{
-
 		string text;
 
 		public string Text {
@@ -64,7 +63,9 @@ namespace BD2.Test.Daemon.FileShare
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -81,6 +82,7 @@ namespace BD2.Test.Daemon.FileShare
 				return Guid.Parse ("8d9e5850-6e85-4265-9dbe-729f72db74ab");
 			}
 		}
+
 		#endregion
 	}
 }

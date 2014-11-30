@@ -30,14 +30,14 @@ using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class IndexBase : BaseDataObject
+	public abstract class IndexBase : BaseDataObjectVersion
 	{
 		Table table;
 		ColumnSet columnSet;
 		bool unique;
 
 		protected IndexBase (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet, bool unique)
-		:base (frontendInstanceBase, chunkID)
+			: base (frontendInstanceBase, chunkID)
 		{
 			if (table == null)
 				throw new ArgumentNullException ("table");
@@ -64,7 +64,7 @@ namespace BD2.Frontend.Table.Model
 				return false;
 			IEnumerator<IndexColumnBase> othericbe = index.GetIndexColumns ().GetEnumerator ();
 			IEnumerator<IndexColumnBase> icbe = GetIndexColumns ().GetEnumerator ();
-			while (icbe.MoveNext()) {
+			while (icbe.MoveNext ()) {
 				if (!othericbe.MoveNext ())
 					return false;
 				if (icbe.Current != othericbe.Current)

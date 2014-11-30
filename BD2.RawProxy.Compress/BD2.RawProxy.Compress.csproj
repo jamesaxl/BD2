@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{9B5ABA79-CDA4-4762-B03E-1D04E79F8088}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -39,10 +39,4 @@
     <Compile Include="compressv1.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <ProjectReference Include="..\BD2.RawProxy\BD2.RawProxy.csproj">
-      <Project>{C73FD016-664C-4888-86AA-1293FFC3E264}</Project>
-      <Name>BD2.RawProxy</Name>
-    </ProjectReference>
-  </ItemGroup>
 </Project>

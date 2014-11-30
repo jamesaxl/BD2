@@ -31,10 +31,10 @@ using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
-	[BaseDataObjectTypeIdAttribute("bca848f2-70b8-476d-86af-77cde2fdc5fd", typeof(ColumnSet),"Deserialize")]
-	public sealed class ColumnSet : BaseDataObject
+	[BaseDataObjectTypeIdAttribute ("bca848f2-70b8-476d-86af-77cde2fdc5fd", typeof(ColumnSet), "Deserialize")]
+	public sealed class ColumnSet : BaseDataObjectVersion
 	{
-		Column[] columns;
+		readonly Column[] columns;
 
 		public Column[] Columns {
 			get {
@@ -43,13 +43,15 @@ namespace BD2.Frontend.Table.Model
 		}
 
 		public ColumnSet (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Column[] columns)
-			: base(frontendInstanceBase, chunkID)
+			: base (frontendInstanceBase, chunkID)
 		{
 			if (columns == null)
 				throw new ArgumentNullException ("columns");
 			this.columns = columns;
 		}
+
 		#region implemented abstract members of Serializable
+
 		public static BaseDataObject Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
 		{
 			using (System.IO.MemoryStream MS = new MemoryStream (buffer)) {
@@ -66,28 +68,36 @@ namespace BD2.Frontend.Table.Model
 
 		public override void Serialize (Stream stream)
 		{
-			using (BinaryWriter BW =  new BinaryWriter (stream)) {
+			using (BinaryWriter BW = new BinaryWriter (stream)) {
 				BW.Write (columns.Length);
 				for (int n = 0; n != columns.Length; n++) {
 					BW.Write (columns [n].ObjectID);
 				}
 			}
 		}
+
 		#endregion
+
 		#region implemented abstract members of BaseDataObject
+
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
 			foreach (Column column in columns)
 				yield return column;
 		}
+
 		#endregion
+
 		#region implemented abstract members of BaseDataObject
+
 		public override Guid ObjectType {
 			get {
 				return Guid.Parse ("bca848f2-70b8-476d-86af-77cde2fdc5fd");
 			}
 		}
+
 		#endregion
+
 		public byte[] SerializeObjects (object[] data)
 		{
 			return ((FrontendInstance)FrontendInstanceBase).ValueSerializer.SerializeArray (data);

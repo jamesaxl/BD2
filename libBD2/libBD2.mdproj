@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ItemType>PackagingProject</ItemType>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{91DF3FF1-3F46-4E07-BCC5-E921F8579803}</ProjectGuid>
+    <Packages>
+      <Packages>
+        <Package name="Linux Binaries(Debug)">
+          <Builder targetFile="..\BD2.tar.gz" platform="Linux" configuration="Debug|x86" ctype="BinariesZipPackageBuilder">
+            <ChildEntries>
+              <SolutionItemReference path="..\BD2.Chunk.Daemon\BD2.Chunk.Daemon.csproj" />
+              <SolutionItemReference path="..\BD2.Chunk.Daemon.BloomFilter\BD2.Chunk.Daemon.BloomFilter.csproj" />
+              <SolutionItemReference path="..\leveldb-sharp\leveldb-sharp.csproj" />
+              <SolutionItemReference path="..\BD2.CLI\BD2.CLI.csproj" />
+              <SolutionItemReference path="..\BD2.Conv.Generic.DataTranslator\BD2.Conv.Generic.DataTranslator.csproj" />
+              <SolutionItemReference path="..\BD2.Conv.Generic.TableNameTranslator\BD2.Conv.Generic.TableNameTranslator.csproj" />
+              <SolutionItemReference path="..\BD2.Conv.Daemon.MSSQL\BD2.Conv.Daemon.MSSQL.csproj" />
+              <SolutionItemReference path="..\BD2.Frentend.TextStream\BD2.Frontend.TextStream.csproj" />
+              <SolutionItemReference path="..\BD2.Frontend.Table\BD2.Frontend.Table.csproj" />
+              <SolutionItemReference path="..\BD2.Frontend.Table.Linq\BD2.Frontend.Table.Linq.csproj" />
+              <SolutionItemReference path="..\BD2.LockManager\BD2.LockManager.csproj" />
+              <SolutionItemReference path="..\BD2.Repo.Net\BD2.Repo.Net.csproj" />
+              <SolutionItemReference path="..\BD2.Repo.File\BD2.Repo.File.csproj" />
+              <SolutionItemReference path="..\Squad\Squad.csproj" />
+              <SolutionItemReference path="..\BD2.Common\BD2.Common.csproj" />
+              <SolutionItemReference path="..\BD2.Daemon\BD2.Daemon.csproj" />
+              <SolutionItemReference path="..\BD2.Test.Daemon.Chat\BD2.Test.Daemon.Chat.csproj" />
+              <SolutionItemReference path="..\BD2.Test.Daemon.FileShare\BD2.Test.Daemon.FileShare.csproj" />
+              <SolutionItemReference path="..\BD2.Conv\BD2.Conv.csproj" />
+              <SolutionItemReference path="..\BD2.Conv.Frontend.Table\BD2.Conv.Frontend.Table.csproj" />
+              <SolutionItemReference path="..\BD2.Conv.Frontend.Raw\BD2.Conv.Frontend.Raw.csproj" />
+              <SolutionItemReference path="..\BD2.Core\BD2.Core.csproj" />
+              <SolutionItemReference path="..\BD2.Conv.Daemon.Sqlite\BD2.Conv.Daemon.Sqlite.csproj" />
+              <SolutionItemReference path="..\BD2.Conv.Daemon.DB4O\BD2.Conv.Daemon.DB4O.csproj" />
+              <SolutionItemReference path="..\BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj" />
+              <SolutionItemReference path="..\BD2\BD2.csproj" />
+              <SolutionItemReference path="..\BD2.Test.Daemon.StreamPair\BD2.Test.Daemon.StreamPair.csproj" />
+              <SolutionItemReference path="..\BD2.Test.Conv.MSSQL\BD2.Test.Conv.MSSQL.csproj" />
+              <SolutionItemReference path="..\BD2.Test.Frontend.Table\BD2.Test.Frontend.Table.csproj" />
+              <SolutionItemReference path="..\BD2.Test.Repo.LevelDB\BD2.Test.Repo.LevelDB.csproj" />
+              <SolutionItemReference path="..\BD2.Chunk.Daemon.Common\BD2.Chunk.Daemon.Common.csproj" />
+              <SolutionItemReference path="..\BD2.Test.Daemon.Discovery\BD2.Test.Daemon.Discovery.csproj" />
+              <SolutionItemReference path="..\BD2.Test.Core.UserRepository\BD2.Test.Core.UserRepository.csproj" />
+              <SolutionItemReference path="libBD2.mdproj" />
+            </ChildEntries>
+            <RootEntry path="..\BD2.sln" id=":root:" />
+          </Builder>
+        </Package>
+      </Packages>
+    </Packages>
+  </PropertyGroup>
+</Project>

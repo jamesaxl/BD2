@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0395A016-3F02-4D16-904D-868CA51EF1B0}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -34,13 +34,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StreamHandler.cs" />
-    <Compile Include="TransparentStream\TransparentStreamMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamServer.cs" />
-    <Compile Include="TransparentStream\TransparentStream.cs" />
-    <Compile Include="ObjectBus\ObjectBus.cs" />
-    <Compile Include="ObjectBus\ObjectBusMessage.cs" />
-    <Compile Include="ObjectBus\ObjectBusMessageTypeIDAttribute.cs" />
-    <Compile Include="ObjectBus\ObjectBusSession.cs" />
     <Compile Include="Service\ServiceAgent.cs" />
     <Compile Include="Service\ServiceAgentMode.cs" />
     <Compile Include="Service\ServiceAnnounceMessage.cs" />
@@ -49,55 +42,68 @@
     <Compile Include="Service\ServiceRequestMessage.cs" />
     <Compile Include="Service\ServiceResponseMessage.cs" />
     <Compile Include="Service\ServiceResponseStatus.cs" />
-    <Compile Include="TransparentStream\TransparentStreamReadRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamReadResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamWriteRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamWriteResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamAsyncResult.cs" />
-    <Compile Include="TransparentStream\TransparentStreamGetReadTimeoutRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamGetWriteTimeoutRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamGetReadTimeoutResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamGetWriteTimeoutResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamGetLengthRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamGetLengthResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSetLengthRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSetLengthResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamFlushRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamFlushResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCloseRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCloseResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSetReadTimeoutRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSetReadTimeoutResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSetWriteTimeoutRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSetWriteTimeoutResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamMessageBase.cs" />
-    <Compile Include="TransparentStream\TransparentStreamGetPositionRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamGetPositionResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSetPositionRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSetPositionResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCanTimeoutResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCanTimeoutRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCanReadRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCanReadResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCanWriteRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCanWriteResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCanSeekRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamCanSeekResponseMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSeekRequestMessage.cs" />
-    <Compile Include="TransparentStream\TransparentStreamSeekResponseMessage.cs" />
-    <Compile Include="ObjectBus\ObjectBusMessageDeserializerAttribute.cs" />
     <Compile Include="TransparentAgent.cs" />
-    <Compile Include="TransparentStream\FifoStream\StreamPair.cs" />
-    <Compile Include="TransparentStream\FifoStream\IStream.cs" />
-    <Compile Include="TransparentStream\FifoStream\OStream.cs" />
     <Compile Include="Service\ServiceManagerReadyMessage.cs" />
-    <Compile Include="ObjectBus\BusReadyMessage.cs" />
+    <Compile Include="Discovery\Raw.cs" />
+    <Compile Include="Discovery\HTTPRequest.cs" />
+    <Compile Include="Discovery\SimpleDiscovery.cs" />
+    <Compile Include="Discovery\DiscoverMessageReceivedEventArgs.cs" />
+    <Compile Include="Discovery\CachedDiscoveryManager.cs" />
+    <Compile Include="Streams\TransparentStreamMessage.cs" />
+    <Compile Include="Streams\TransparentStreamServer.cs" />
+    <Compile Include="Streams\TransparentStream.cs" />
+    <Compile Include="Streams\TransparentStreamReadRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamReadResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamWriteRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamWriteResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamAsyncResult.cs" />
+    <Compile Include="Streams\TransparentStreamGetReadTimeoutRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamGetWriteTimeoutRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamGetReadTimeoutResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamGetWriteTimeoutResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamGetLengthRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamGetLengthResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSetLengthRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSetLengthResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamFlushRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamFlushResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCloseRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCloseResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSetReadTimeoutRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSetReadTimeoutResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSetWriteTimeoutRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSetWriteTimeoutResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamMessageBase.cs" />
+    <Compile Include="Streams\TransparentStreamGetPositionRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamGetPositionResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSetPositionRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSetPositionResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCanTimeoutResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCanTimeoutRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCanReadRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCanReadResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCanWriteRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCanWriteResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCanSeekRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamCanSeekResponseMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSeekRequestMessage.cs" />
+    <Compile Include="Streams\TransparentStreamSeekResponseMessage.cs" />
+    <Compile Include="Streams\FifoStream\StreamPair.cs" />
+    <Compile Include="Streams\FifoStream\IStream.cs" />
+    <Compile Include="Streams\FifoStream\OStream.cs" />
+    <Compile Include="Buses\ObjectBus.cs" />
+    <Compile Include="Buses\ObjectBusMessage.cs" />
+    <Compile Include="Buses\ObjectBusMessageTypeIDAttribute.cs" />
+    <Compile Include="Buses\ObjectBusSession.cs" />
+    <Compile Include="Buses\ObjectBusMessageDeserializerAttribute.cs" />
+    <Compile Include="Buses\BusReadyMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="TransparentStream\" />
-    <Folder Include="ObjectBus\" />
     <Folder Include="Service\" />
-    <Folder Include="TransparentStream\FifoStream\" />
+    <Folder Include="Discovery\" />
+    <Folder Include="Streams\" />
+    <Folder Include="Streams\FifoStream\" />
+    <Folder Include="Buses\" />
   </ItemGroup>
 </Project>

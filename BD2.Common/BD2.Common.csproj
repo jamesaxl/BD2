@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -35,17 +35,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ArrayManipulation.cs" />
-    <Compile Include="OffsetedArray.cs" />
-    <Compile Include="TamperSafeByteArray.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Serializable.cs" />
-    <Compile Include="WeakReference.cs" />
-    <Compile Include="ByteSequenceComparer.cs" />
-    <Compile Include="Configuration.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="Messaging\" />
+    <ProjectReference Include="..\leveldb-sharp\leveldb-sharp.csproj">
+      <Project>{8DD96596-38AC-46DD-80C1-75D9EBE585EA}</Project>
+      <Name>leveldb-sharp</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

@@ -26,7 +26,6 @@
  * */
 using System;
 using System.Collections.Generic;
-using BD2.Common;
 using BD2.Chunk.Daemon.Common;
 
 namespace BD2.Chunk.Daemon
@@ -97,7 +96,9 @@ namespace BD2.Chunk.Daemon
 				}
 			}
 		}
+
 		#region IRangedFilter implementation
+
 		public float Contains (byte[] chunkID)
 		{
 			return items.Contains (chunkID) ? 1 : 0;
@@ -138,8 +139,11 @@ namespace BD2.Chunk.Daemon
 				return last;
 			}
 		}
+
 		#endregion
+
 		#region IComparable implementation
+
 		int IComparable.CompareTo (object obj)
 		{
 			if (obj == null)
@@ -147,6 +151,7 @@ namespace BD2.Chunk.Daemon
 			IRangedFilter IRF = (IRangedFilter)obj;
 			return first.CompareTo (IRF.FirstChunk);
 		}
+
 		#endregion
 	}
 }

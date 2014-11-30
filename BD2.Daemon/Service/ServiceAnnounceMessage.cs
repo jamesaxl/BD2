@@ -25,11 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using System;
+using BD2.Daemon.Buses;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("51aecfc5-8e82-4ca8-af1d-c5c556d23a55")]
-	[ObjectBusMessageDeserializerAttribute(typeof(ServiceAnnounceMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("51aecfc5-8e82-4ca8-af1d-c5c556d23a55")]
+	[ObjectBusMessageDeserializerAttribute (typeof(ServiceAnnounceMessage), "Deserialize")]
 	public sealed class ServiceAnnounceMessage : ObjectBusMessage, IComparable
 	{
 		Guid id;
@@ -56,24 +57,34 @@ namespace BD2.Daemon
 			}
 		}
 
-		public ServiceAnnounceMessage (Guid id, Guid type, string name)
+		byte[] meta;
+
+		public ServiceAnnounceMessage (Guid id, Guid type, string name, byte[] meta)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");
 			this.id = id;
 			this.type = type;
 			this.name = name;
+			this.meta = meta;
 		}
 
 		public static ObjectBusMessage Deserialize (byte[] bytes)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new ServiceAnnounceMessage (new Guid (BR.ReadBytes (16)), new Guid (BR.ReadBytes (16)), BR.ReadString ());
+					Guid id = new Guid (BR.ReadBytes (16));
+					Guid typeID = new Guid (BR.ReadBytes (16));
+					string name = BR.ReadString ();
+					byte[] meta = BR.ReadBytes (BR.ReadInt32 ());
+
+					return new ServiceAnnounceMessage (id, typeID, name, meta);
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -81,6 +92,8 @@ namespace BD2.Daemon
 					BW.Write (id.ToByteArray ());
 					BW.Write (type.ToByteArray ());
 					BW.Write (name);
+					BW.Write (meta.Length);
+					BW.Write (meta);
 					return MS.ToArray ();
 				}
 			}
@@ -91,14 +104,18 @@ namespace BD2.Daemon
 				return Guid.Parse ("51aecfc5-8e82-4ca8-af1d-c5c556d23a55");
 			}
 		}
+
 		#endregion
+
 		#region IComparable implementation
+
 		int IComparable.CompareTo (object obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException ("obj");
 			return id.CompareTo ((obj as ServiceAnnounceMessage).id);
 		}
+
 		#endregion
 	}
 }

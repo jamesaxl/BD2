@@ -32,8 +32,8 @@ namespace BD2.Test.Daemon.Chat
 	public class ChatAgent:ServiceAgent
 	{
 
-		ChatAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, bool run)
-			: base(serviceAgentMode, objectBusSession, flush, run)
+		ChatAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush)
+			: base (serviceAgentMode, objectBusSession, flush, false)
 		{
 			objectBusSession.RegisterType (typeof(ChatMessage), ChatMessageReceived);
 		}
@@ -53,23 +53,11 @@ namespace BD2.Test.Daemon.Chat
 		{
 			ObjectBusSession.SendMessage (new ChatMessage (text));
 		}
+
 		#region implemented abstract members of ServiceAgent
+
 		protected override void Run ()
 		{
-			try {
-				int i = 0;
-				string nextMessage = "This is a test message.";
-				DateTime t1 = DateTime.UtcNow;
-				while (i < 10) {
-					i++;
-					SendMessage (nextMessage);
-					nextMessage = "This is test message number " + i.ToString ();
-				}
-				Flush ();
-				Console.WriteLine ("Done in {0}", (DateTime.UtcNow - t1).TotalMilliseconds);
-				Destroy ();
-			} catch (System.Threading.ThreadAbortException) {
-			}
 		}
 
 		protected override void DestroyRequestReceived ()
@@ -81,6 +69,7 @@ namespace BD2.Test.Daemon.Chat
 		{
 			DestroyRequestReceived ();
 		}
+
 		#endregion
 	}
 }

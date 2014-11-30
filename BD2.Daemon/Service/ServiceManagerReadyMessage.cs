@@ -25,11 +25,12 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using BD2.Daemon.Buses;
 
 namespace BD2.Daemon
 {
-	[ObjectBusMessageTypeIDAttribute("5cf3cbfe-32bb-4d03-85d0-237118fb6786")]
-	[ObjectBusMessageDeserializerAttribute(typeof(ServiceManagerReadyMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("5cf3cbfe-32bb-4d03-85d0-237118fb6786")]
+	[ObjectBusMessageDeserializerAttribute (typeof(ServiceManagerReadyMessage), "Deserialize")]
 	public class ServiceManagerReadyMessage : ObjectBusMessage
 	{
 		public static ObjectBusMessage Deserialize (byte[] buffer)
@@ -38,7 +39,9 @@ namespace BD2.Daemon
 				throw new ArgumentException ("buffer must be empty");
 			return new ServiceManagerReadyMessage ();
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			return new byte[0];
@@ -49,6 +52,7 @@ namespace BD2.Daemon
 				return Guid.Parse ("5cf3cbfe-32bb-4d03-85d0-237118fb6786");
 			}
 		}
+
 		#endregion
 	}
 }

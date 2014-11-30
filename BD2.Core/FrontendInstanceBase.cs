@@ -32,13 +32,7 @@ namespace BD2.Core
 	public abstract class FrontendInstanceBase
 	{
 
-		Snapshot snapshot;
-
-		public Snapshot Snapshot {
-			get {
-				return snapshot;
-			}
-		}
+		public abstract BaseDataObjectManager CreateObjectManager ();
 
 		Frontend frontend;
 
@@ -48,15 +42,13 @@ namespace BD2.Core
 			}
 		}
 
-		protected FrontendInstanceBase (Snapshot snapshot, Frontend frontend)
+		protected FrontendInstanceBase (Frontend frontend)
 		{
 			if (frontend == null)
 				throw new ArgumentNullException ("frontend");
-			this.snapshot = snapshot;
 			this.frontend = frontend;
 		}
 
-		public string Name { get { return snapshot.Name; } }
 
 		internal void CreateObjects (byte[] chunkID, byte[] bytes)
 		{
@@ -67,13 +59,7 @@ namespace BD2.Core
 
 		protected abstract void OnCreateObjects (byte[] chunkID, byte[] bytes);
 
-	
-
 		protected abstract BaseDataObject GetObjectWithID (byte[] objectID);
 
-		public virtual byte[] GetObjectSegment (BaseDataObject baseDataObject)
-		{
-			return new byte[]{ };
-		}
 	}
 }

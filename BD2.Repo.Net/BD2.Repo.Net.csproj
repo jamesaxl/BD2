@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{EB2ADDC8-0A70-47DD-881F-B836FD48DE5D}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -41,10 +41,6 @@
     <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
       <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
       <Name>BD2.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
-      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
-      <Name>BD2.Chunk</Name>
     </ProjectReference>
     <ProjectReference Include="..\BD2.Daemon\BD2.Daemon.csproj">
       <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>

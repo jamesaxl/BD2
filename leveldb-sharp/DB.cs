@@ -33,6 +33,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 namespace LevelDB
 {
@@ -104,7 +105,7 @@ namespace LevelDB
 		}
 
 		public DB (Options options, string path)
-            : this(options, path, System.Text.Encoding.Default)
+			: this (options, path, System.Text.Encoding.Default)
 		{
 		}
 
@@ -314,6 +315,48 @@ namespace LevelDB
 		public byte[] GetRaw (string key)
 		{
 			return GetRaw (null, key);
+		}
+
+		public IEnumerator<byte[]> EnumerateRawKeys ()
+		{
+			Iterator iter = new Iterator (this, null);
+			while (iter.MoveNext ())
+				yield return iter.RawKey;
+		}
+
+		public IEnumerator<string> EnumerateKeys ()
+		{
+			Iterator iter = new Iterator (this, null);
+			while (iter.MoveNext ())
+				yield return iter.Key;
+		}
+
+		public IEnumerator<string> EnumerateKeys (System.Text.Encoding encoding)
+		{
+			Iterator iter = new Iterator (this, null);
+			while (iter.MoveNext ())
+				yield return encoding.GetString (iter.RawKey);
+		}
+
+		public IEnumerator<byte[]> EnumerateRawValues ()
+		{
+			Iterator iter = new Iterator (this, null);
+			while (iter.MoveNext ())
+				yield return iter.RawValue;
+		}
+
+		public IEnumerator<string> EnumerateValues ()
+		{
+			Iterator iter = new Iterator (this, null);
+			while (iter.MoveNext ())
+				yield return iter.Value;
+		}
+
+		public IEnumerator<string> EnumerateValues (System.Text.Encoding encoding)
+		{
+			Iterator iter = new Iterator (this, null);
+			while (iter.MoveNext ())
+				yield return encoding.GetString (iter.RawValue);
 		}
 
 		IEnumerator IEnumerable.GetEnumerator ()

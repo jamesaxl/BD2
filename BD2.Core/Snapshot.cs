@@ -26,7 +26,6 @@
  * */
 using System;
 using System.Collections.Generic;
-using BD2.Chunk;
 using BD2.Common;
 
 namespace BD2.Core
@@ -76,7 +75,7 @@ namespace BD2.Core
 			}
 		}
 
-		public override void Serialize (System.IO.Stream stream)
+		public override void Serialize (System.IO.Stream stream, EncryptedStreamManager encryptedStreamManager)
 		{
 			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
 				BW.Write (name);
@@ -90,8 +89,8 @@ namespace BD2.Core
 		{
 			string name;
 			SortedSet<byte[]> objects = new SortedSet<byte[]> ();
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer,false)) {
-				using (System.IO.BinaryReader BR =  new System.IO.BinaryReader (MS)) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer, false)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					name = BR.ReadString ();
 					int objectCount = BR.ReadInt32 ();
 					for (int n = 0; n != objectCount; n++) {
@@ -136,7 +135,9 @@ namespace BD2.Core
 			this.name = name;
 			this.objects = new SortedSet<byte[]> (objects, BD2.Common.ByteSequenceComparer.Shared);
 		}
+
 		#region IComparable implementation
+
 		public int CompareTo (object obj)
 		{
 			if (obj == null)
@@ -152,6 +153,7 @@ namespace BD2.Core
 				throw new ArgumentNullException ("other");
 			return other.name.CompareTo (name);
 		}
+
 		#endregion
 	}
 }

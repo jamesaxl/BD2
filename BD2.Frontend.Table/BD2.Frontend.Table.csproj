@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{285B9E10-0FC7-4D60-9D1D-5068E8963988}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -45,6 +45,7 @@
     <Compile Include="TransactionSource.cs" />
     <Compile Include="Index.cs" />
     <Compile Include="IndexColumn.cs" />
+    <Compile Include="DataContext.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

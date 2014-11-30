@@ -28,15 +28,18 @@ using System;
 
 namespace BD2.RawProxy.compress
 {
-	[RawProxyAttribute(typeof(compressv1), "873a0bc6-8631-43cd-8763-764810156050", "Deserialize")]
+	[RawProxyAttribute (typeof(compressv1), "873a0bc6-8631-43cd-8763-764810156050", "Deserialize")]
 	public class compressv1 : RawProxyv1
 	{
 		static readonly Guid TypeGuid = new Guid ("873a0bc6-8631-43cd-8763-764810156050");
 
-		public compressv1 ()
+		public compressv1 (object configuration)
+			: base (configuration)
 		{
 		}
+
 		#region implemented abstract members of BD2.RawProxy.RawProxyv1
+
 		public override string Name {
 			get {
 				return "Compress";
@@ -61,7 +64,9 @@ namespace BD2.RawProxy.compress
 				throw new NotSupportedException ("Invalid/Unsupported compression algorithm.");
 			}
 		}
+
 		#region implemented abstract members of RawProxyv1
+
 		protected override byte[] DoSerialize ()
 		{
 			return new byte[1] { 1 };
@@ -70,11 +75,13 @@ namespace BD2.RawProxy.compress
 		public static RawProxyv1 Deserialize (byte[] buffer)
 		{
 			if ((buffer.Length == 1) && buffer [0] == 1) {
-				return new compressv1 ();
+				return new compressv1 (null);
 			}
-			throw new NotSupportedException ("The version of compression proxy requested is not available.");
+			throw new NotSupportedException ("Requested version/configuration of compression proxy is not available.");
 		}
+
 		#endregion
+
 		public override byte[] Encode (byte[] Input)
 		{
 			System.IO.Compression.GZipStream gzs = new System.IO.Compression.GZipStream (new System.IO.MemoryStream (Input), System.IO.Compression.CompressionMode.Compress);
@@ -101,6 +108,7 @@ namespace BD2.RawProxy.compress
 				throw new Exception ("Unknown algorithm requested.");
 			}
 		}
+
 		#endregion
 	}
 }

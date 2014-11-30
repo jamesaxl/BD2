@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1F62C8FD-73FA-4EA8-BBB7-0106EF6E292D}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -39,14 +39,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Repo.LevelDB\BD2.Repo.Leveldb.csproj">
-      <Project>{AD303744-084C-4FC6-84C9-46F6179C670C}</Project>
-      <Name>BD2.Repo.Leveldb</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
-      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
-      <Name>BD2.Chunk</Name>
-    </ProjectReference>
     <ProjectReference Include="..\leveldb-sharp\leveldb-sharp.csproj">
       <Project>{8DD96596-38AC-46DD-80C1-75D9EBE585EA}</Project>
       <Name>leveldb-sharp</Name>

@@ -29,12 +29,13 @@ using BD2.Daemon;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using BD2.Chunk.Daemon.Common;
+using BD2.Core;
 
 namespace BD2.Chunk.Daemon
 {
 	public class ChunkAgent : ServiceAgent
 	{
-		ConcurrentQueue<TopLevelChunksRequestMessage> pendingRemoteRequests = new ConcurrentQueue<TopLevelChunksRequestMessage> ();
+		readonly ConcurrentQueue<TopLevelChunksRequestMessage> pendingRemoteRequests = new ConcurrentQueue<TopLevelChunksRequestMessage> ();
 		//ConcurrentQueue<TopLevelChunksRequestMessage> pendingLocalRequests = new ConcurrentQueue<TopLevelChunksRequestMessage> ();
 		//int requestQueueLengthThresholdMin = 64;
 		//int requestQueueLengthThresholdMax = 512;
@@ -43,7 +44,7 @@ namespace BD2.Chunk.Daemon
 		ChunkRepository repository;
 
 		public ChunkAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, ChunkRepository repository)
-			:base(serviceAgentMode, objectBusSession, flush, false)
+			: base (serviceAgentMode, objectBusSession, flush, false)
 		{
 			if (repository == null)
 				throw new ArgumentNullException ("repository");

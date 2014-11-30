@@ -24,19 +24,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
-using System;
-using System.Collections.Generic;
-using System.IO;
 using BD2.Core;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class Table : BaseDataObject
+	public abstract class Table : BaseDataObjectVersion
 	{
 		public abstract string Name { get; }
 
-		protected Table (FrontendInstanceBase frontendInstanceBase, byte[] chunkID)
-			: base (frontendInstanceBase, chunkID)
+		protected Table (byte[] chunkID,
+		                 BaseDataObject baseDataObject,
+		                 byte[][] previousVersionChunkIDs,
+		                 BaseDataObjectVersion[] previousVersions)
+			: base (chunkID,
+			        baseDataObject,
+			        previousVersionChunkIDs,
+			        previousVersions)
 		{
 
 		}

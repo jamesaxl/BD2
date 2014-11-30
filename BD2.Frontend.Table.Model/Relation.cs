@@ -27,11 +27,10 @@
 using System;
 using System.Collections.Generic;
 using BD2.Core;
-using BD2.Common;
 
 namespace BD2.Frontend.Table.Model
 {
-	public abstract class Relation : BaseDataObject
+	public abstract class Relation : BaseDataObjectVersion
 	{
 		public override IEnumerable<BaseDataObject> GetDependenies ()
 		{
@@ -49,7 +48,7 @@ namespace BD2.Frontend.Table.Model
 		Column[] childColumns;
 		ColumnSet childColumnSet;
 		Table childTable;
-		//it's purpose is to allow for relations to cross ColumnSets without one relation being processed twice 
+		//it's purpose is to allow for relations to cross ColumnSets without one relation being processed twice
 		string name;
 
 		public string Name {
@@ -59,7 +58,7 @@ namespace BD2.Frontend.Table.Model
 		}
 
 		protected Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, IndexBase parentColumns, Table childTable, ColumnSet childColumnSet, Column[] childColumns)
-		: base (frontendInstanceBase, chunkID)
+			: base (frontendInstanceBase, chunkID)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");
@@ -89,7 +88,9 @@ namespace BD2.Frontend.Table.Model
 				return childColumnSet;
 			}
 		}
+
 		#region implemented abstract members of Serializable
+
 		public override void Serialize (System.IO.Stream stream)
 		{
 			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
@@ -101,7 +102,9 @@ namespace BD2.Frontend.Table.Model
 				}
 			}
 		}
+
 		#endregion
+
 		public abstract IEnumerable<Row> GetChildRows (Row parent);
 
 		public abstract Row GetParentRow (Row child);

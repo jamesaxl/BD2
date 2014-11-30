@@ -26,6 +26,8 @@
  * */
 using System;
 using System.Collections.Concurrent;
+using BD2.Daemon.Streams;
+using BD2.Daemon.Buses;
 
 namespace BD2.Daemon
 {

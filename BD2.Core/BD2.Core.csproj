@@ -40,29 +40,94 @@
     <Compile Include="Frontend.cs" />
     <Compile Include="BaseDataObjectDescriptor.cs" />
     <Compile Include="Database.cs" />
-    <Compile Include="Snapshot.cs" />
-    <Compile Include="Transaction.cs" />
     <Compile Include="FrontendInstanceBase.cs" />
     <Compile Include="BaseDataObjectTypeIdAttribute.cs" />
-    <Compile Include="ITransactionSource.cs" />
+    <Compile Include="ArrayManipulation.cs" />
+    <Compile Include="ByteSequenceComparer.cs" />
+    <Compile Include="ChunkData.cs" />
+    <Compile Include="ChunkHeader.cs" />
+    <Compile Include="ChunkPushedEventArgs.cs" />
+    <Compile Include="ChunkRepository.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="DatabasePath.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="GenericUserRepositoryCollection.cs" />
+    <Compile Include="KeyValueStorage.cs" />
+    <Compile Include="LevelDBKeyValueStorage.cs" />
+    <Compile Include="OffsetedArray.cs" />
+    <Compile Include="Serializable.cs" />
+    <Compile Include="TamperSafeByteArray.cs" />
+    <Compile Include="UserRepository.cs" />
+    <Compile Include="UserRepositoryConfiguration.cs" />
+    <Compile Include="WeakChunkReference.cs" />
+    <Compile Include="WeakReference.cs" />
+    <Compile Include="Network\BD2ServiceAgent.cs" />
+    <Compile Include="NetworkKeyValueStorage\BD2ServiceAgent.cs" />
+    <Compile Include="NetworkKeyValueStorage\GetValuesRequestMessage.cs" />
+    <Compile Include="NetworkKeyValueStorage\GetAllRequestMessage.cs" />
+    <Compile Include="NetworkKeyValueStorage\GetValuesResponseMessage.cs" />
+    <Compile Include="NetworkKeyValueStorage\PutValueRequestMessage.cs" />
+    <Compile Include="NetworkKeyValueStorage\PutValueResponseMessage.cs" />
+    <Compile Include="NetworkKeyValueStorage\GetRepositoriesRequestMessage.cs" />
+    <Compile Include="NetworkKeyValueStorage\GetRepositoriesResponseMessage.cs" />
+    <Compile Include="NetworkKeyValueStorage\GetIsReadonlyRequestMessage.cs" />
+    <Compile Include="NetworkKeyValueStorage\GetIsReadonlyResponseMessage.cs" />
+    <Compile Include="Network\GetLoggedInUsersResponseMessage.cs" />
+    <Compile Include="Network\GetRepositoriesRequestMessage.cs" />
+    <Compile Include="Network\GetRepositoriesResponseMessage.cs" />
+    <Compile Include="Network\GetPublicKeyRequestMessage.cs" />
+    <Compile Include="Network\GetPublicKeyResonseMessage.cs" />
+    <Compile Include="Network\InternSymmetricKeyRequestMessage.cs" />
+    <Compile Include="Network\InternSymmetricKeyResponseMessage.cs" />
+    <Compile Include="Network\GetSymmetricKeyRequestMessage.cs" />
+    <Compile Include="Network\GetSymmetricKeyResponseMessage.cs" />
+    <Compile Include="RSAEncryptingKeyValueStorage.cs" />
+    <Compile Include="AESEncryptingKeyValueStorage.cs" />
+    <Compile Include="NetworkKeyValueStorage\Shell.cs" />
+    <Compile Include="Network\Shell.cs" />
+    <Compile Include="Network\GetTopLevelsRequestMessage.cs" />
+    <Compile Include="Network\GetTopLevelsResponseMessage.cs" />
+    <Compile Include="Network\GetChunksRequestMessage.cs" />
+    <Compile Include="Network\GetChunksResponseMessage.cs" />
+    <Compile Include="Network\InsertChunkRequestMessage.cs" />
+    <Compile Include="Network\InsertChunkResponseMessage.cs" />
+    <Compile Include="KEx\GetPublicKeyRequestMessage.cs" />
+    <Compile Include="KEx\GetPublicKeyResponseMessage.cs" />
+    <Compile Include="KEx\CreateChannelRequestMessage.cs" />
+    <Compile Include="KEx\CreateChannelResponseMessage.cs" />
+    <Compile Include="KEx\ChannelControl.cs" />
+    <Compile Include="KEx\Agent.cs" />
+    <Compile Include="KEx\Stream.cs" />
+    <Compile Include="EncryptedStorageManager.cs" />
+    <Compile Include="ChunkRepositoryInfo.cs" />
+    <Compile Include="BaseDataObjectVersion.cs" />
+    <Compile Include="IDataSource.cs" />
+    <Compile Include="BaseDataObjectManager.cs" />
+    <Compile Include="DataContext.cs" />
+    <Compile Include="Network\GetLoggedInUsersRequestMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
-      <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
-      <Name>BD2.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.LockManager\BD2.LockManager.csproj">
       <Project>{6938747E-45CF-4653-99C8-5D40E436E244}</Project>
       <Name>BD2.LockManager</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk\BD2.Chunk.csproj">
-      <Project>{DF473A42-B4ED-4A7C-9CC5-D6AB74B8A8C1}</Project>
-      <Name>BD2.Chunk</Name>
+    <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
+      <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
+      <Name>BD2.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.RawProxy\BD2.RawProxy.csproj">
-      <Project>{C73FD016-664C-4888-86AA-1293FFC3E264}</Project>
-      <Name>BD2.RawProxy</Name>
+    <ProjectReference Include="..\BD2.Daemon\BD2.Daemon.csproj">
+      <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>
+      <Name>BD2.Daemon</Name>
     </ProjectReference>
+    <ProjectReference Include="..\leveldb-sharp\leveldb-sharp.csproj">
+      <Project>{8DD96596-38AC-46DD-80C1-75D9EBE585EA}</Project>
+      <Name>leveldb-sharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Network\" />
+    <Folder Include="NetworkKeyValueStorage\" />
+    <Folder Include="KEx\" />
   </ItemGroup>
 </Project>

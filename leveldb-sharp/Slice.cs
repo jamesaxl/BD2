@@ -34,65 +34,81 @@ using System;
 
 namespace LevelDB
 {
-	public class Slice : IDisposable
+	public sealed class Slice : IDisposable
 	{
-        public IntPtr Handle { get; private set; }
+
+		public bool OwnsHandle { get; private set; }
+
+		public IntPtr Handle { get; private set; }
+
 		public int Length { get; private set; }
+
 		public bool Disposed { get; private set; }
-		public Slice (IntPtr handle, int length)
+
+		public Slice (IntPtr handle, int length, bool ownsHandle)
 		{
 			Handle = handle;
+			Length = length;
+			OwnsHandle = ownsHandle;
 		}
-		public void Read (byte[] Buffer, int Offset, int Length, int SliceOffset)
+
+		public void Read (byte[] buffer, int offset, int length, int sliceOffset)
 		{
-			if (SliceOffset < 0)
-				throw new ArgumentOutOfRangeException ("SliceOffset", "SliceOffset < 0");
-			if (Offset < 0)
-				throw new ArgumentOutOfRangeException ("Offset", "Offset < 0");
-			if ((Offset + Length > Buffer.Length) || 
-				(SliceOffset + Length > this.Length))
-				throw new ArgumentOutOfRangeException ("Length", "Length out of range of Slice/Buffer");
-			System.Runtime.InteropServices.Marshal.Copy (Handle + SliceOffset, Buffer, Offset, Length);
+			if (sliceOffset < 0)
+				throw new ArgumentOutOfRangeException ("sliceOffset", "SliceOffset cannot be negative.");
+			if (offset < 0)
+				throw new ArgumentOutOfRangeException ("offset", "Offset < 0");
+			if ((offset + length > buffer.Length) ||
+			    (sliceOffset + length > this.Length))
+				throw new ArgumentOutOfRangeException ("length", "Length out of range of Slice/Buffer");
+			System.Runtime.InteropServices.Marshal.Copy (Handle + sliceOffset, buffer, offset, length);
 		}
-		public void Read (byte[] Buffer, int Offset, int Length)
+
+		public void Read (byte[] buffer, int offset, int length)
 		{
-			Read(Buffer, Offset, Length, 0);
+			Read (buffer, offset, length, 0);
 		}
-		~Slice()
+
+		~Slice ()
 		{
-			Dispose();
+			Dispose ();
 		}
+
 		#region IDisposable implementation
-        ~Slice()
-        {
-            Dispose(false);
-        }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            var disposed = Disposed;
-            if (disposed) {
-                return;
-            }
-            Disposed = true;
+		~Slice ()
+		{
+			Dispose (false);
+		}
 
-            if (disposing) {
-                // free managed
+		void Dispose (bool disposing)
+		{
+			var disposed = Disposed;
+			if (disposed) {
+				return;
+			}
+			Disposed = true;
 
-            }
-            // free unmanaged
-            var handle = Handle;
-            if (handle != IntPtr.Zero) {
-                Handle = IntPtr.Zero;
-                Native.leveldb_free(handle);
-            }
-        }
+			if (disposing) {
+				// free managed
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+			}
+			// free unmanaged
+			if (OwnsHandle) {
+				var handle = Handle;
+				if (handle != IntPtr.Zero) {
+					Handle = IntPtr.Zero;
+					Native.leveldb_free (handle);
+				}
+			}
+		}
+
+		public void Dispose ()
+		{
+			Dispose (true);
+			GC.SuppressFinalize (this);
+		}
+
 		#endregion
 	}
 }

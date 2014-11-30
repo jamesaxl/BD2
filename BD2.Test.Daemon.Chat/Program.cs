@@ -36,7 +36,7 @@ namespace BD2.Test.Daemon.Chat
 		public static string ConsoleReadLine ()
 		{
 			#if TRACE
-			Console.WriteLine (new System.Diagnostics.StackTrace ().ToString ());
+			Console.WriteLine (new System.Diagnostics.StackTrace ());
 			#endif
 			lock (ConsoleLock)
 				return Console.ReadLine ();

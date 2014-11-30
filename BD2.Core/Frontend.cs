@@ -61,6 +61,6 @@ namespace BD2.Core
 
 		public abstract string Name { get; }
 
-		public abstract FrontendInstanceBase GetInstanse (Snapshot snapshot);
+		public abstract FrontendInstanceBase GetInstanse ();
 	}
 }

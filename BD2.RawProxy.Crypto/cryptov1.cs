@@ -31,12 +31,14 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace BD2.RawProxy.crypto
 {
-	[RawProxyAttribute(typeof(cryptov1), "1c36f5fc-e0f0-4836-8723-c4d2371c2018", "Deserialize")]
+	[RawProxyAttribute (typeof(cryptov1), "1c36f5fc-e0f0-4836-8723-c4d2371c2018", "Deserialize")]
 	public class cryptov1 : RawProxyv1
 	{
 
 		//todo:add procedure for retrieving the proxies
+
 		#region implemented abstract members of RawProxyv1
+
 		public override string Name {
 			get {
 				return "Crypto";
@@ -48,15 +50,17 @@ namespace BD2.RawProxy.crypto
 				return Guid.Parse ("0d1b1c2d-8eff-4167-99e5-3feccf7585e0");
 			}
 		}
+
 		#endregion
+
 		static DB storage;
 
 		static cryptov1 ()
 		{
-			string StoragePath = BD2.Common.Configuration.GetConfig (null, "RawProxy.Crypto", "StorageConfiguration", new System.Type[0] { }, (A,C) => "Change this path.");
+			string StoragePath = BD2.Common.Configuration.GetConfig (null, "RawProxy.Crypto", "StorageConfiguration", new System.Type[0] { }, (A, C) => "Change this path.");
 			storage = new DB (new Options () { Compression = CompressionType.SnappyCompression }, StoragePath, System.Text.Encoding.Unicode);
 		}
-		#region implemented abstract members of BD2.RawProxy.RawProxyv1
+
 		public override byte[] Decode (byte[] Input)
 		{
 			if (Input == null)
@@ -68,7 +72,7 @@ namespace BD2.RawProxy.crypto
 		{
 			return Encode (Input, DefaultEncoder);
 		}
-		 
+
 		#region implemented abstract members of RawProxyv1
 
 		protected override byte[] DoSerialize ()

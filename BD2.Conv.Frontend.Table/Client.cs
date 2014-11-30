@@ -26,6 +26,7 @@
   * */
 using System;
 using System.Collections.Generic;
+using System.Runtime.Remoting;
 
 namespace BD2.Conv.Frontend.Table
 {
@@ -156,7 +157,6 @@ namespace BD2.Conv.Frontend.Table
 				tableDataRequests.Add (reqID, table);
 			}
 			BD2.Conv.Frontend.Table.Row.AddColumnSet (new BD2.Conv.Frontend.Table.ColumnSet (tableColumns [table].ToArray ()));
-
 			agent.SendMessage (new GetRowsRequestMessage (reqID, table.ID));
 			AREGetRows.WaitOne ();
 			AREGetColumns.Set ();

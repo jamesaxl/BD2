@@ -31,7 +31,7 @@ using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	[BaseDataObjectTypeIdAttribute("10ec2d31-3291-43ae-96fe-da8537b22af6", typeof(Row), "Deserialize")]
+	[BaseDataObjectTypeIdAttribute ("10ec2d31-3291-43ae-96fe-da8537b22af6", typeof(Row), "Deserialize")]
 	public sealed class Row : Model.Row
 	{
 		byte[][] previousVersionsID;
@@ -42,7 +42,7 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		SortedDictionary<byte[], Row> previousVersions = new SortedDictionary<byte[], Row> ();
+		readonly SortedDictionary<byte[], Row> previousVersions = new SortedDictionary<byte[], Row> ();
 
 		public void SetPreviousVersion (Row pr)
 		{
@@ -72,7 +72,7 @@ namespace BD2.Frontend.Table
 		}
 
 		internal Row (FrontendInstanceBase  frontendInstanceBase, byte[] chunkID, Model.Table table, ColumnSet columnSet, byte[][] previousVersionsID, object[] data)
-			: base(frontendInstanceBase, chunkID, table, columnSet)
+			: base (frontendInstanceBase, chunkID, table, columnSet)
 		{
 			if (table == null)
 				throw new ArgumentNullException ("table");
@@ -85,7 +85,9 @@ namespace BD2.Frontend.Table
 			this.previousVersionsID = previousVersionsID;
 			this.data = data;
 		}
+
 		#region implemented abstract members of Serializable
+
 		public static Row Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
@@ -94,15 +96,15 @@ namespace BD2.Frontend.Table
 					ColumnSet columnSet = ((BD2.Frontend.Table.FrontendInstance)fib).GetColumnSetByID (BR.ReadBytes (32));
 					int previousVersionCount = BR.ReadInt32 ();
 					byte[][] previousVersions = new byte[previousVersionCount][];
-					for (int n  = 0; n != previousVersionCount; n++) {
+					for (int n = 0; n != previousVersionCount; n++) {
 						previousVersions [n] = BR.ReadBytes (32);
 					}
 					Row R = new Row (fib, 
-					                 chunkID,
-					                 table,
-					                 columnSet,
-					                 previousVersions,
-					                 columnSet.DeserializeObjects (BR.ReadBytes (BR.ReadInt32 ())));
+						        chunkID,
+						        table,
+						        columnSet,
+						        previousVersions,
+						        columnSet.DeserializeObjects (BR.ReadBytes (BR.ReadInt32 ())));
 					return R;
 				}
 			}
@@ -121,8 +123,11 @@ namespace BD2.Frontend.Table
 				BW.Write (buf);
 			}
 		}
+
 		#endregion
+
 		#region implemented abstract members of Row
+
 		public override object[] GetValues ()
 		{
 			return data;
@@ -146,8 +151,11 @@ namespace BD2.Frontend.Table
 				n++;
 			}
 		}
+
 		#endregion
+
 		#region implemented abstract members of BaseDataObject
+
 		public override Guid ObjectType {
 			get {
 				return Guid.Parse ("10ec2d31-3291-43ae-96fe-da8537b22af6");
@@ -162,6 +170,7 @@ namespace BD2.Frontend.Table
 			foreach (Row r in previousVersions.Values)
 				yield return r;
 		}
+
 		#endregion
 	}
 }
