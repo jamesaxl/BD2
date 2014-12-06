@@ -33,6 +33,7 @@ namespace BD2.Frontend.Table
 	public class Frontend : BD2.Frontend.Table.Model.Frontend
 	{
 		#region implemented abstract members of BD2.Core.Frontend
+
 		public override string Name {
 			get {
 				return "BD2.Frontend.Table";
@@ -40,13 +41,13 @@ namespace BD2.Frontend.Table
 		}
 
 		public Frontend (ValueSerializerBase valueDeserializer)
-			: base(valueDeserializer)
+			: base (valueDeserializer)
 		{
 		}
 
-		SortedDictionary<BD2.Core.Snapshot, BD2.Frontend.Table.FrontendInstance> instances = new SortedDictionary<BD2.Core.Snapshot, FrontendInstance> ();
+		SortedDictionary<BD2.Core.DataContext, BD2.Frontend.Table.FrontendInstance> instances = new SortedDictionary<BD2.Core.DataContext, FrontendInstance> ();
 
-		public override BD2.Core.FrontendInstanceBase GetInstanse (BD2.Core.Snapshot snapshot)
+		public override BD2.Core.FrontendInstanceBase GetInstanse (BD2.Core.DataContext snapshot)
 		{
 			if (instances.ContainsKey (snapshot))
 				return instances [snapshot];
@@ -54,6 +55,7 @@ namespace BD2.Frontend.Table
 			instances.Add (snapshot, fi);
 			return fi;
 		}
+
 		#endregion
 	}
 }

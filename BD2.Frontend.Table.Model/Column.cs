@@ -48,11 +48,13 @@ namespace BD2.Frontend.Table.Model
 
 		public bool AllowNull { get { return allowNull; } }
 
-		protected Column (byte[] chunkID,
+		protected Column (Guid id,
+		                  byte[] chunkID,
 		                  BaseDataObject baseDataObject,
 		                  byte[][] previousVersionChunkIDs,
 		                  BaseDataObjectVersion[] previousVersions, string name, Type type, bool allowNull, long length)
-			: base (chunkID,
+			: base (id,
+			        chunkID,
 			        baseDataObject,
 			        previousVersionChunkIDs,
 			        previousVersions)
@@ -69,7 +71,7 @@ namespace BD2.Frontend.Table.Model
 		{
 			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
 				BW.Write (name);
-				BW.Write (((Frontend)FrontendInstanceBase.Frontend).ValueDeserializer.TypeToID (type));
+				BW.Write (((Frontend)BaseDataObject.FrontendInstanceBase.Frontend).ValueDeserializer.TypeToID (type));
 				BW.Write (allowNull);
 				BW.Write (length);
 			}

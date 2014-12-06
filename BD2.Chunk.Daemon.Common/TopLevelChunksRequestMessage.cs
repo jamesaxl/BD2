@@ -27,11 +27,12 @@
 using System;
 using BD2.Daemon;
 using System.Collections.Generic;
+using BD2.Daemon.Buses;
 
 namespace BD2.Chunk.Daemon.Common
 {
-	[ObjectBusMessageTypeIDAttribute("eacfc35a-cc3d-4d2c-a27f-669dd41894ee")]
-	[ObjectBusMessageDeserializerAttribute(typeof(TopLevelChunksRequestMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("eacfc35a-cc3d-4d2c-a27f-669dd41894ee")]
+	[ObjectBusMessageDeserializerAttribute (typeof(TopLevelChunksRequestMessage), "Deserialize")]
 	public class TopLevelChunksRequestMessage : ObjectBusMessage
 	{
 
@@ -78,7 +79,9 @@ namespace BD2.Chunk.Daemon.Common
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -101,6 +104,7 @@ namespace BD2.Chunk.Daemon.Common
 				return Guid.Parse ("eacfc35a-cc3d-4d2c-a27f-669dd41894ee");
 			}
 		}
+
 		#endregion
 	}
 }

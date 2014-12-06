@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using BD2.Chunk.Daemon.Common;
 using BD2.Core;
+using BD2.Daemon.Buses;
 
 namespace BD2.Chunk.Daemon
 {
@@ -53,7 +54,7 @@ namespace BD2.Chunk.Daemon
 //			objectBusSession.RegisterType (typeof(BD2.Chunk.Daemon.Common.PollChunksRequestMessage), );
 //			objectBusSession.RegisterType (typeof(BD2.Chunk.Daemon.Common.PollNewChunksRequestMessage), );
 //			objectBusSession.RegisterType (typeof(BD2.Chunk.Daemon.Common.PushChunksRequestMessage), );
-			this.repository.Enumerate ();
+			//this.repository.Enumerate ();
 		}
 
 		public static ServiceAgent CreateAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, ChunkRepository repository)

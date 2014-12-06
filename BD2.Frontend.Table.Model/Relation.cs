@@ -27,29 +27,31 @@
 using System;
 using System.Collections.Generic;
 using BD2.Core;
+using System.Security;
 
 namespace BD2.Frontend.Table.Model
 {
 	public abstract class Relation : BaseDataObjectVersion
 	{
-		public override IEnumerable<BaseDataObject> GetDependenies ()
+		public override IEnumerable<BaseDataObjectVersion> GetDependenies ()
 		{
 			yield return parentColumns;
 			yield return childTable;
 			foreach (Column c in childColumns) {
 				yield return c;
 			}
-			foreach (BaseDataObject bdo in  base.GetDependenies ()) {
+			foreach (BaseDataObjectVersion bdo in  base.GetDependenies ()) {
 				yield return bdo;
 			}
 		}
 
-		IndexBase parentColumns;
-		Column[] childColumns;
-		ColumnSet childColumnSet;
-		Table childTable;
+		readonly IndexBase parentColumns;
+		readonly Column[] childColumns;
+		readonly ColumnSet childColumnSet;
+		readonly Table childTable;
 		//it's purpose is to allow for relations to cross ColumnSets without one relation being processed twice
-		string name;
+		//EDIT: wtf did i mean by this back then? it miust have meant something
+		readonly string name;
 
 		public string Name {
 			get {
@@ -57,8 +59,17 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		protected Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, IndexBase parentColumns, Table childTable, ColumnSet childColumnSet, Column[] childColumns)
-			: base (frontendInstanceBase, chunkID)
+		protected Relation (Guid id,
+		                    byte[] chunkID,
+		                    BaseDataObject baseDataObject,
+		                    byte[][] previousVersionChunkIDs,
+		                    BaseDataObjectVersion[] previousVersions,
+		                    string name,
+		                    IndexBase parentColumns,
+		                    Table childTable,
+		                    ColumnSet childColumnSet,
+		                    Column[] childColumns)
+			: base (id, chunkID, baseDataObject, previousVersionChunkIDs, previousVersions)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");
@@ -91,14 +102,14 @@ namespace BD2.Frontend.Table.Model
 
 		#region implemented abstract members of Serializable
 
-		public override void Serialize (System.IO.Stream stream)
+		public override void Serialize (System.IO.Stream stream, EncryptedStorageManager encryptedStorageManager)
 		{
 			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
-				BW.Write (parentColumns.ObjectID);
-				BW.Write (childTable.ObjectID);
+				BW.Write (parentColumns.BaseDataObject.ObjectID);
+				BW.Write (childTable.BaseDataObject.ObjectID);
 				BW.Write (childColumns.Length);
 				for (int n = 0; n != childColumns.Length; n++) {
-					BW.Write (childColumns [n].ObjectID);
+					BW.Write (childColumns [n].BaseDataObject.ObjectID);
 				}
 			}
 		}

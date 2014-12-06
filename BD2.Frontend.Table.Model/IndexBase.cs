@@ -36,8 +36,16 @@ namespace BD2.Frontend.Table.Model
 		ColumnSet columnSet;
 		bool unique;
 
-		protected IndexBase (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet, bool unique)
-			: base (frontendInstanceBase, chunkID)
+		protected IndexBase (Guid id,
+		                     byte[] chunkID,
+		                     BaseDataObject baseDataObject,
+		                     byte[][] previousVersionChunkIDs,
+		                     BaseDataObjectVersion[] previousVersions, Table table, ColumnSet columnSet, bool unique)
+			: base (id,
+			        chunkID,
+			        baseDataObject,
+			        previousVersionChunkIDs,
+			        previousVersions)
 		{
 			if (table == null)
 				throw new ArgumentNullException ("table");
@@ -83,23 +91,23 @@ namespace BD2.Frontend.Table.Model
 			return rv;
 		}
 
-		public static void Deserialize (FrontendInstance frontendInstance, System.IO.Stream stream, out Table table, out ColumnSet columnSet, out bool unique)
+		public static void Deserialize (DataContext dataContext, System.IO.Stream stream, out Table table, out ColumnSet columnSet, out bool unique)
 		{
 			byte[] tableID = new byte[32]; 
 			stream.Read (tableID, 0, 32);
-			table = frontendInstance.GetTableByID (tableID);
+			table = dataContext.GetTableByID (tableID);
 
 			byte[] columnSetID = new byte[32]; 
 			stream.Read (columnSetID, 0, 32);
-			columnSet = frontendInstance.GetColumnSetByID (columnSetID);
+			columnSet = dataContext.GetColumnSetByID (columnSetID);
 
 			unique = stream.ReadByte () != 0;
 		}
 
-		public override void Serialize (System.IO.Stream stream)
+		public override void Serialize (System.IO.Stream stream, EncryptedStorageManager encryptedStorageManager)
 		{
-			stream.Write (table.ObjectID, 0, 32);
-			stream.Write (columnSet.ObjectID, 0, 32);
+			stream.Write (table.BaseDataObject.ObjectID, 0, 32);
+			stream.Write (columnSet.BaseDataObject.ObjectID, 0, 32);
 			stream.WriteByte ((byte)(unique ? 1 : 0));
 		}
 	}

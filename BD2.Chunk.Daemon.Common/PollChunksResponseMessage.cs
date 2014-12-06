@@ -26,11 +26,12 @@
   * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Chunk.Daemon.Common
 {
-	[ObjectBusMessageDeserializer(typeof(PollChunksResponseMessage), "Deserialize")]
-	[ObjectBusMessageTypeID("6ea5b723-0a56-45e6-b57e-c938d1b6e84f")]
+	[ObjectBusMessageDeserializer (typeof(PollChunksResponseMessage), "Deserialize")]
+	[ObjectBusMessageTypeID ("6ea5b723-0a56-45e6-b57e-c938d1b6e84f")]
 	public class PollChunksResponseMessage : ObjectBusMessage
 	{
 		Guid requestID;
@@ -54,7 +55,9 @@ namespace BD2.Chunk.Daemon.Common
 			}
 			return new PushChunksRequestMessage (requestID, chunks);
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -71,6 +74,7 @@ namespace BD2.Chunk.Daemon.Common
 				return Guid.Parse ("6ea5b723-0a56-45e6-b57e-c938d1b6e84f");
 			}
 		}
+
 		#endregion
 	}
 }

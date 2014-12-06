@@ -25,29 +25,16 @@
 //  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  * */
 using System;
-using BD2.Core;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Core
 {
-	public abstract class TransactionBase : IDataSource
+	[Serializable]
+	public sealed class GenericUserRepositoryConfiguration
 	{
-		protected TransactionBase (IDataSource dataSource)
-		{
-		}
-
-		#region IDataSource implementation
-
-		public  System.Collections.Generic.IEnumerable<BaseDataObjectVersion> GetObjects ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public void CommitTransaction (System.Collections.Generic.IEnumerable<BaseDataObjectVersion> objects)
-		{
-			throw new NotImplementedException ();
-		}
-
-		#endregion
+		public byte[] ID;
+		public EncryptionMethod EncryptionMehtod;
+		public byte[] AESKeyID;
+		public byte[] DES3KeyID;
 	}
 }
 

@@ -32,9 +32,9 @@ namespace BD2.Frontend.Table.Model
 {
 	public abstract class Row : BaseDataObjectVersion
 	{
-		readonly ColumnSet columnSet;
+		readonly IDictionary<int, ColumnSet> columnSet;
 
-		public ColumnSet ColumnSet {
+		public IDictionary<int, ColumnSet> ColumnSet {
 			get {
 				return columnSet;
 			}
@@ -48,8 +48,18 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		protected Row (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Table table, ColumnSet columnSet, int valueSets)
-			: base (frontendInstanceBase, chunkID)
+		protected Row (Guid id,
+		               byte[] chunkID,
+		               BaseDataObject baseDataObject,
+		               byte[][] previousVersionChunkIDs,
+		               BaseDataObjectVersion[] previousVersions,
+		               Table table,
+		               IDictionary<int, ColumnSet> columnSets)
+			: base (id,
+			        chunkID,
+			        baseDataObject,
+			        previousVersionChunkIDs,
+			        previousVersions)
 		{
 			if (table == null)
 				throw new ArgumentNullException ("table");
@@ -61,9 +71,9 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract object[] GetValues ();
 
-		public object[] GetValues (ColumnSet outputColumnSet)
+		public object[] GetValues (int columnSetID, ColumnSet outputColumnSet)
 		{
-			return ((BD2.Frontend.Table.Model.FrontendInstance)FrontendInstanceBase).GetColumnSetConverter (columnSet, outputColumnSet).Convert (GetValues (), columnSet, outputColumnSet);
+			return ((FrontendInstance)BaseDataObject.FrontendInstanceBase).GetColumnSetConverter (columnSet [columnSetID], outputColumnSet).Convert (GetValues (), columnSet [columnSetID], outputColumnSet);
 		}
 
 		public abstract object GetValue (string fieldName);
@@ -72,11 +82,11 @@ namespace BD2.Frontend.Table.Model
 
 		public abstract IEnumerable<KeyValuePair<BD2.Frontend.Table.Model.Column, object>> GetValuesWithColumns ();
 
-		public override IEnumerable<BaseDataObject> GetDependenies ()
+		public override IEnumerable<BaseDataObjectVersion> GetDependenies ()
 		{
 			yield return table;
 			yield return columnSet;
-			BD2.Frontend.Table.Model.FrontendInstance fi = ((BD2.Frontend.Table.Model.FrontendInstance)FrontendInstanceBase);
+			BD2.Frontend.Table.Model.FrontendInstance fi = ((BD2.Frontend.Table.Model.FrontendInstance)BaseDataObject.FrontendInstanceBase);
 			foreach (Relation rel in fi.GetParentRelations (table)) {
 				foreach (Row row in fi.GetRows(rel.ChildTable, rel.ChildColumnSet, rel.ChildColumns, rel.ParentColumns.GetValues(GetValues ()))) {
 					yield return row;

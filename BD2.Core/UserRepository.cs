@@ -184,9 +184,10 @@ namespace BD2.Core
 				throw new ArgumentNullException ("pepper");
 			string passpepper = password + pepper;
 			Rijndael Rij = Rijndael.Create ();
-			Rij.Padding = System.Security.Cryptography.PaddingMode.ISO10126;
+			Rij.KeySize = 256;
+			Rij.Padding = PaddingMode.ISO10126;
 			Rij.Mode = CipherMode.CBC;
-			Rfc2898DeriveBytes aesKey = new Rfc2898DeriveBytes (passpepper, userID);
+			Rfc2898DeriveBytes aesKey = new Rfc2898DeriveBytes (passpepper, userID, 1 << 24);//16 Mibi, I don't care for cpus, EVER
 			Rij.Key = aesKey.GetBytes (Rij.KeySize / 8);
 			Rij.IV = aesKey.GetBytes (Rij.BlockSize / 8);
 			return Rij;
@@ -204,7 +205,7 @@ namespace BD2.Core
 				throw new ArgumentNullException ("pepper");
 			var Rij = CreateRijndael (userID, password, pepper);
 			ICryptoTransform RijTrans = Rij.CreateDecryptor ();
-			System.Security.Cryptography.CryptoStream cstream = new CryptoStream (stream, RijTrans, cryptoStreamMode);
+			CryptoStream cstream = new CryptoStream (stream, RijTrans, cryptoStreamMode);
 			return cstream;
 		}
 
@@ -222,7 +223,7 @@ namespace BD2.Core
 			if (userID == null)
 				throw new ArgumentNullException ("userID");
 			byte[] pubKeyRaw = usercerts.Get (userID);
-			System.IO.MemoryStream memoryStream = new System.IO.MemoryStream (pubKeyRaw);
+			MemoryStream memoryStream = new MemoryStream (pubKeyRaw);
 			var pubKey = DeserializeKey (memoryStream);
 			return pubKey;
 		}
@@ -236,7 +237,7 @@ namespace BD2.Core
 			if (pepper == null)
 				throw new ArgumentNullException ("pepper");
 			byte[] privateKeyRaw = userkeys.Get (userID);
-			System.IO.MemoryStream memoryStream = new System.IO.MemoryStream (privateKeyRaw);
+			MemoryStream memoryStream = new MemoryStream (privateKeyRaw);
 			Stream cryptoStream = CreateCryptoStream (memoryStream, userID, password, pepper, CryptoStreamMode.Read);
 			RSAParameters privateKey = DeserializeKey (cryptoStream);
 			return privateKey;

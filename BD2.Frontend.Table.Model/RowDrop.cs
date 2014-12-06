@@ -26,12 +26,13 @@
   * */
 using System;
 using BD2.Core;
+using System.IO;
 
 namespace BD2.Frontend.Table.Model
 {
 	public sealed class RowDrop : BaseDataObjectVersion
 	{
-		Row row;
+		readonly Row row;
 
 		public Row Row {
 			get {
@@ -39,12 +40,13 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		public RowDrop (byte[] chunkID,
+		public RowDrop (Guid id,
+		                byte[] chunkID,
 		                BaseDataObject baseDataObject,
 		                byte[][] previousVersionChunkIDs,
 		                BaseDataObjectVersion[] previousVersions,
 		                Row  row)
-			: base (chunkID, baseDataObject, previousVersionChunkIDs, previousVersions)
+			: base (id, chunkID, baseDataObject, previousVersionChunkIDs, previousVersions)
 		{
 			if (row == null)
 				throw new ArgumentNullException ("row");
@@ -53,19 +55,25 @@ namespace BD2.Frontend.Table.Model
 
 		#region implemented abstract members of Serializable
 
-		public static RowDrop Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+		public static RowDrop Deserialize (Guid id,
+		                                   byte[] chunkID,
+		                                   BaseDataObject baseDataObject,
+		                                   byte[][] previousVersionChunkIDs,
+		                                   BaseDataObjectVersion[] previousVersions,
+		                                   byte[] buffer)
 		{
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
-				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new RowDrop (fib, chunkID, ((BD2.Frontend.Table.Model.FrontendInstance)fib).GetRowByID (BR.ReadBytes (32)));
+			using (MemoryStream MS = new MemoryStream (buffer)) {
+				using (BinaryReader BR = new BinaryReader (MS)) {
+					return new RowDrop (id, chunkID, baseDataObject, previousVersionChunkIDs, previousVersions,
+						((FrontendInstance)baseDataObject.FrontendInstanceBase).GetRowByID (BR.ReadBytes (32)));
 				}
 			}
 		}
 
-		public override void Serialize (System.IO.Stream stream)
+		public override void Serialize (Stream stream, EncryptedStorageManager encryptedStorageManager)
 		{
-			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
-				BW.Write (row.ObjectID);
+			using (BinaryWriter BW = new BinaryWriter (stream)) {
+				BW.Write (row.BaseDataObject.ObjectID);
 			}
 		}
 
@@ -83,7 +91,7 @@ namespace BD2.Frontend.Table.Model
 
 		#region implemented abstract members of BaseDataObject
 
-		public override System.Collections.Generic.IEnumerable<BaseDataObject> GetDependenies ()
+		public override System.Collections.Generic.IEnumerable<BaseDataObjectVersion> GetDependenies ()
 		{
 			yield return row;
 		}

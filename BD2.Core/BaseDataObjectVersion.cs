@@ -39,6 +39,14 @@ namespace BD2.Core
 			}
 		}
 
+		//Guid id;
+
+		//		public Guid ID {
+		//			get {
+		//				return id;
+		//			}
+		//
+
 		byte[] chunkID;
 		byte[][] previousVersionChunkIDs;
 		BaseDataObject baseDataObject;
@@ -72,13 +80,15 @@ namespace BD2.Core
 			yield break;
 		}
 
-		protected BaseDataObjectVersion (byte[] chunkID,
+		protected BaseDataObjectVersion (Guid id,
+		                                 byte[] chunkID,
 		                                 BaseDataObject baseDataObject,
 		                                 byte[][] previousVersionChunkIDs,
 		                                 BaseDataObjectVersion[] previousVersions)
 		{
 			if (baseDataObject == null)
 				throw new ArgumentNullException ("baseDataObject");
+			//this.id = id;
 			this.chunkID = chunkID;
 			this.baseDataObject = baseDataObject;
 			this.previousVersionChunkIDs = previousVersionChunkIDs;

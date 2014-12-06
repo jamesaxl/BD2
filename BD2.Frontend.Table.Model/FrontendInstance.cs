@@ -36,17 +36,6 @@ namespace BD2.Frontend.Table.Model
 		{
 		}
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
-
-		public abstract Column GetColumn (string name, Type type, bool allowNull, long length);
-
-		public abstract Table GetTable (string name);
-
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table, ColumnSet columnSet, Column[] columns, object[] match);
-
-		public abstract System.Collections.Generic.IEnumerable<Row> GetRows (Table table);
-
-		public abstract ValueSerializerBase ValueSerializer { get; }
 		//TODO: Implement a real SPF algorithm
 		System.Collections.Generic.SortedDictionary<ColumnSet, System.Collections.Generic.SortedDictionary<ColumnSet, ColumnSetConverter>> cscs = new System.Collections.Generic.SortedDictionary<ColumnSet, System.Collections.Generic.SortedDictionary<ColumnSet, ColumnSetConverter>> ();
 
@@ -82,25 +71,6 @@ namespace BD2.Frontend.Table.Model
 			return GetColumnSetConverter (inputColumnSet, outputColumnSet).Convert (input, inputColumnSet, outputColumnSet);
 		}
 
-		public abstract Column GetColumnByID (byte[] id);
-
-		public abstract Table GetTableByID (byte[] id);
-
-		public abstract Row GetRowByID (byte[] id);
-
-		public abstract ColumnSet GetColumnSetByID (byte[] id);
-
-		public abstract Relation GetRelationByID (byte[] id);
-
-		public abstract IndexBase GetIndexByID (byte[] id);
-
-		public abstract IEnumerable<Table> GetTables ();
-
-		public abstract IEnumerable<ColumnSet> GetColumnSets ();
-
-		public abstract IEnumerable<Row> GetRows ();
-
-		public abstract IEnumerable<Relation> GetParentRelations (Table table);
 
 	}
 }

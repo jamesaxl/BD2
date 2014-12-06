@@ -27,11 +27,12 @@
 using System;
 using System.Collections.Generic;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Chunk.Daemon.Common
 {
-	[ObjectBusMessageTypeIDAttribute("e71158b7-ee11-44a4-aac9-8f180871554c")]
-	[ObjectBusMessageDeserializerAttribute(typeof(PushChunksRequestMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("e71158b7-ee11-44a4-aac9-8f180871554c")]
+	[ObjectBusMessageDeserializerAttribute (typeof(PushChunksRequestMessage), "Deserialize")]
 	public class PushChunksRequestMessage : ObjectBusMessage
 	{
 		Guid id;
@@ -68,7 +69,9 @@ namespace BD2.Chunk.Daemon.Common
 			}
 			return new PushChunksRequestMessage (id, chunks);
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -85,6 +88,7 @@ namespace BD2.Chunk.Daemon.Common
 				return Guid.Parse ("e71158b7-ee11-44a4-aac9-8f180871554c");
 			}
 		}
+
 		#endregion
 	}
 }

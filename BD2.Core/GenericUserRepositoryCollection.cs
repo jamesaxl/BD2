@@ -33,10 +33,17 @@ namespace BD2.Core
 {
 	public sealed class GenericUserRepositoryCollection
 	{
+		readonly DatabasePath path;
+		readonly SortedDictionary<string, KeyValueStorage<byte[]>> stores;
+		RSAParameters? rsa;
+
 		KeyValueStorage<byte[]> eSymmetricKeys;
 		KeyValueStorage<byte[]> eMeta;
+		KeyValueStorage<byte[]> eRepositoryConfigurations;
+
 		RSAEncryptingKeyValueStorage symmetricKeys;
 		RSAEncryptingKeyValueStorage meta;
+		AESEncryptingKeyValueStorage repositoryConfigurations;
 
 		public KeyValueStorage<byte[]> ESymmetricKeys {
 			get {
@@ -47,6 +54,12 @@ namespace BD2.Core
 		public KeyValueStorage<byte[]> EMeta {
 			get {
 				return eMeta;
+			}
+		}
+
+		public KeyValueStorage<byte[]> ERepositoryConfigurations {
+			get {
+				return eRepositoryConfigurations;
 			}
 		}
 
@@ -62,6 +75,12 @@ namespace BD2.Core
 			}
 		}
 
+		public AESEncryptingKeyValueStorage RepositoryConfigurations {
+			get {
+				return repositoryConfigurations;
+			}
+		}
+
 		public byte[] DefaultRepository{ get { return meta.Get (System.Text.Encoding.Unicode.GetBytes ("Default Repository")); } }
 
 		public KeyValueStorage<byte[]> GetSymmetricKeysRawData ()
@@ -70,9 +89,6 @@ namespace BD2.Core
 		}
 
 
-		readonly DatabasePath path;
-		readonly SortedDictionary<string, KeyValueStorage<byte[]>> stores;
-		RSAParameters? rsa;
 
 		public void SetRSAParameters (RSAParameters rsa)
 		{
@@ -80,6 +96,8 @@ namespace BD2.Core
 			this.rsa = rsa;
 			symmetricKeys = new RSAEncryptingKeyValueStorage (eSymmetricKeys, rsa);
 			meta = new RSAEncryptingKeyValueStorage (eMeta, rsa);
+			repositoryConfigurations = new AESEncryptingKeyValueStorage (eRepositoryConfigurations, 
+				symmetricKeys.Get (meta.Get (System.Text.Encoding.Unicode.GetBytes ("RepositoryConfigurationsKeyID"))));
 			//} else
 			//	throw new InvalidOperationException ();
 		}
@@ -92,8 +110,18 @@ namespace BD2.Core
 			stores = new SortedDictionary<string, KeyValueStorage<byte[]>> ();
 			eSymmetricKeys = new LevelDBKeyValueStorage<byte[]> (path.CreatePath ("Symmetric Keys"));
 			eMeta = new LevelDBKeyValueStorage<byte[]> (path.CreatePath ("Meta"));
+			eRepositoryConfigurations = new LevelDBKeyValueStorage<byte[]> (path.CreatePath ("Repository Configurations"));
 			if (rsa.HasValue)
 				SetRSAParameters (rsa.Value);
+		}
+
+		public void CreateRepository (string name, GenericUserRepositoryConfiguration configuration)
+		{
+			byte[] configName = System.Text.Encoding.Unicode.GetBytes (name);
+			System.IO.MemoryStream ms = new System.IO.MemoryStream ();
+			System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer (typeof(GenericUserRepositoryConfiguration));
+			xmls.Serialize (ms, configuration);
+			repositoryConfigurations.Put (configName, ms.ToArray ());
 		}
 
 		public KeyValueStorage<byte[]> GetStore (string name)
@@ -101,11 +129,25 @@ namespace BD2.Core
 			if (stores.ContainsKey (name))
 				return stores [name];
 			KeyValueStorage<byte[]> store = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (name));
-			byte[] state = meta.Get (System.Text.Encoding.Unicode.GetBytes (string.Format ("Encrypted:{0}", name)));
-			if (state [0] != 0)
+			System.IO.MemoryStream ms = new System.IO.MemoryStream (repositoryConfigurations.Get 
+				(System.Text.Encoding.Unicode.GetBytes (name)));
+			System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer (typeof(GenericUserRepositoryConfiguration));
+			GenericUserRepositoryConfiguration gurc = (GenericUserRepositoryConfiguration)xmls.Deserialize (ms);
+			switch (gurc.EncryptionMehtod) {
+			case  EncryptionMethod.AES:
+				store = new AESEncryptingKeyValueStorage (store, symmetricKeys.Get (gurc.AESKeyID));
+				stores.Add (name, store);
+				return store;
+			case EncryptionMethod.RSA:
 				store = new RSAEncryptingKeyValueStorage (store, rsa.Value);
-			stores.Add (name, store);
-			return store;
+				stores.Add (name, store);
+				return store;
+			case EncryptionMethod.None:
+				stores.Add (name, store);
+				return store;
+			default:
+				throw new NotSupportedException ("Specified encryption method is not supported.");
+			}
 		}
 
 	}

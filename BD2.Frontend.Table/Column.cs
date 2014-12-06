@@ -30,14 +30,16 @@ using BD2.Daemon;
 
 namespace BD2.Frontend.Table
 {
-	[BaseDataObjectTypeIdAttribute("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60", typeof(Column), "Deserialize")]
+	[BaseDataObjectTypeIdAttribute ("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60", typeof(Column), "Deserialize")]
 	public class Column : Model.Column
 	{
 		internal Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, Type type, bool allowNull, long length)
-			:base(frontendInstanceBase, chunkID, name, type, allowNull, length)
+			: base (frontendInstanceBase, chunkID, name, type, allowNull, length)
 		{
 		}
+
 		#region implemented abstract members of Serializable
+
 		public static Column Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
@@ -48,17 +50,21 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		public override void Serialize (System.IO.Stream stream)
+		public override void Serialize (System.IO.Stream stream, EncryptedStorageManager encryptedStorageManager)
 		{
 			base.Serialize (stream);
 		}
+
 		#endregion
+
 		#region implemented abstract members of BaseDataObject
+
 		public override Guid ObjectType {
 			get {
 				return Guid.Parse ("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60");
 			}
 		}
+
 		#endregion
 	}
 }

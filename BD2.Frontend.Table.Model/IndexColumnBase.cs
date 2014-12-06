@@ -55,18 +55,19 @@ namespace BD2.Frontend.Table.Model
 			this.sortAscending = sortAscending;
 		}
 
-		public static void Deserialize (FrontendInstance frontendInstanceBase, System.IO.Stream stream, out Column column, out bool sortAscending)
+		public static void Deserialize (DataContext dataContext, System.IO.Stream stream, out Column column, out bool sortAscending)
 		{
+
 			byte[] columnID = new byte[32];
 			stream.Read (columnID, 0, 32);
-			column = frontendInstanceBase.GetColumnByID (columnID);
+			column = dataContext.GetColumnByID (columnID);
 			sortAscending = stream.ReadByte () != 0;
 		}
 
 		public virtual byte[] Serialize ()
 		{
 			using (System.IO.MemoryStream stream = new System.IO.MemoryStream ()) {
-				stream.Write (column.ObjectID, 0, 32);
+				stream.Write (column.BaseDataObject.ObjectID, 0, 32);
 				stream.WriteByte ((byte)(sortAscending ? 1 : 0));
 				return stream.ToArray ();
 			}

@@ -174,7 +174,7 @@ namespace BD2.Core
 				if (!permanentStorage.ContainsKey (sk.Key))
 					//#warning SO WRONG
 					foreach (var cr in crs) {//this is sooooooooooo wrong because ih creates unnecessary KVSs in unrelated DBs
-						permanentStorage.Add (sk.Key, new AESEncryptingKeyValueStorage (cr.LencryptedData [sk.Key], sk.Value, sk.Key));
+						permanentStorage.Add (sk.Key, new AESEncryptingKeyValueStorage (cr.LencryptedData [sk.Key], sk.Value));
 					}
 			}
 		}
@@ -191,7 +191,7 @@ namespace BD2.Core
 				RSAEncryptingKeyValueStorage symmetricKeys = userreps.SymmetricKeys;
 				foreach (var sk in symmetricKeys) {
 					if (!permanentStorage.ContainsKey (sk.Key))
-						permanentStorage.Add (sk.Key, new AESEncryptingKeyValueStorage (chunkRepository.LencryptedData [sk.Key], sk.Value, sk.Key));
+						permanentStorage.Add (sk.Key, new AESEncryptingKeyValueStorage (chunkRepository.LencryptedData [sk.Key], sk.Value));
 				}
 			}
 		}

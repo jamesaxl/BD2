@@ -42,23 +42,19 @@ namespace BD2.Core
 		}
 
 		byte[] key;
-		byte[] iv;
 		Aes aes;
 		
 		ICryptoTransform decryptor;
 		ICryptoTransform encryptor;
 
-		public AESEncryptingKeyValueStorage (KeyValueStorage<byte[]> baseStorage, byte[] key, byte[] iv)
+		public AESEncryptingKeyValueStorage (KeyValueStorage<byte[]> baseStorage, byte[] key)
 		{
 			if (baseStorage == null)
 				throw new ArgumentNullException ("baseStorage");
 			if (key == null)
 				throw new ArgumentNullException ("key");
-			if (iv == null)
-				throw new ArgumentNullException ("iv");
 			this.baseStorage = baseStorage;
 			this.key = key;
-			this.iv = iv;
 		}
 
 		#region implemented abstract members of KeyValueStorage
@@ -72,7 +68,6 @@ namespace BD2.Core
 		{
 			aes = Aes.Create ();
 			aes.Key = key;
-			aes.IV = iv;
 			decryptor = aes.CreateDecryptor ();
 			encryptor = aes.CreateEncryptor ();
 		}
@@ -132,8 +127,6 @@ namespace BD2.Core
 		{
 			baseStorage.Delete (key);
 		}
-
-
 
 		public override IAsyncResult BeginPut (byte[] key, byte[] value)
 		{

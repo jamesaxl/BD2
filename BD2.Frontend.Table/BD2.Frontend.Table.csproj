@@ -41,11 +41,10 @@
     <Compile Include="Frontend.cs" />
     <Compile Include="FrontendInstance.cs" />
     <Compile Include="GenericValueDeserializer.cs" />
-    <Compile Include="Transaction.cs" />
-    <Compile Include="TransactionSource.cs" />
     <Compile Include="Index.cs" />
     <Compile Include="IndexColumn.cs" />
     <Compile Include="DataContext.cs" />
+    <Compile Include="LayeredDictionary.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

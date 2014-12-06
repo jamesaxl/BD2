@@ -34,35 +34,7 @@ namespace BD2.Frontend.Table
 	[BaseDataObjectTypeIdAttribute ("10ec2d31-3291-43ae-96fe-da8537b22af6", typeof(Row), "Deserialize")]
 	public sealed class Row : Model.Row
 	{
-		byte[][] previousVersionsID;
-
-		public byte[][] PreviousVersionID {
-			get {
-				return (byte[][])previousVersionsID.Clone ();
-			}
-		}
-
-		readonly SortedDictionary<byte[], Row> previousVersions = new SortedDictionary<byte[], Row> ();
-
-		public void SetPreviousVersion (Row pr)
-		{
-			previousVersions.Add (pr.ObjectID, pr);
-		}
-
-		SortedSet<Row> currentVersion;
-
-		public SortedSet<Row> CurrentVersion {
-			get {
-				return new SortedSet<Row> (currentVersion);
-			}
-		}
-
-		public void SetCurrentVersion (Row row)
-		{
-			if (currentVersion == null)
-				currentVersion = new SortedSet<Row> ();
-			currentVersion.Add (row);
-		}
+	
 
 		object[] data;
 
@@ -80,9 +52,6 @@ namespace BD2.Frontend.Table
 				throw new ArgumentNullException ("columnSet");
 			if (data == null)
 				throw new ArgumentNullException ("data");
-			if (previousVersionsID == null)
-				throw new ArgumentNullException ("previousVersionsID");
-			this.previousVersionsID = previousVersionsID;
 			this.data = data;
 		}
 
@@ -115,9 +84,6 @@ namespace BD2.Frontend.Table
 			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
 				BW.Write (Table.ObjectID, 0, 32);
 				BW.Write (ColumnSet.ObjectID, 0, 32);
-				BW.Write (previousVersionsID.Length);
-				for (int n = 0; n != previousVersionsID.Length; n++)
-					BW.Write (previousVersionsID [n]);
 				byte[] buf = ColumnSet.SerializeObjects (data);
 				BW.Write (buf.Length);
 				BW.Write (buf);
@@ -167,8 +133,6 @@ namespace BD2.Frontend.Table
 			foreach (BaseDataObject bdo in  base.GetDependenies ()) {
 				yield return bdo;
 			}
-			foreach (Row r in previousVersions.Values)
-				yield return r;
 		}
 
 		#endregion

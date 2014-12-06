@@ -105,6 +105,8 @@
     <Compile Include="BaseDataObjectManager.cs" />
     <Compile Include="DataContext.cs" />
     <Compile Include="Network\GetLoggedInUsersRequestMessage.cs" />
+    <Compile Include="GenericUserRepositoryConfiguration.cs" />
+    <Compile Include="EncryptionMethod.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

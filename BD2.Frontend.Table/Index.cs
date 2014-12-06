@@ -31,15 +31,18 @@ using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	[BaseDataObjectTypeIdAttribute("aa8d2cde-5ab2-4656-b172-510d64f831ab", typeof(Index), "Deserialize")]
+	[BaseDataObjectTypeIdAttribute ("aa8d2cde-5ab2-4656-b172-510d64f831ab", typeof(Index), "Deserialize")]
 	public sealed class Index : IndexBase
 	{
 		#region implemented abstract members of IndexBase
+
 		public override int GetColumnCount ()
 		{
 			return indexColumns.Length;
 		}
+
 		#endregion
+
 		IndexColumnBase[] indexColumns;
 
 		public override IEnumerable<IndexColumnBase> GetIndexColumns ()
@@ -49,7 +52,7 @@ namespace BD2.Frontend.Table
 		}
 
 		public Index (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Model.Table table, Model.ColumnSet columnSet, bool unique, IndexColumnBase[] indexColumns)
-		:base(frontendInstanceBase, chunkID, table, columnSet, unique)
+			: base (frontendInstanceBase, chunkID, table, columnSet, unique)
 		{
 			if (indexColumns == null)
 				throw new ArgumentNullException ("indexColumn");
@@ -59,7 +62,9 @@ namespace BD2.Frontend.Table
 			}
 			this.indexColumns = ((IndexColumnBase[])indexColumns.Clone ());
 		}
+
 		#region implemented abstract members of Serializable
+
 		public static Index Deserialize (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, byte[] buffer)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
@@ -89,9 +94,12 @@ namespace BD2.Frontend.Table
 				}
 			}
 		}
+
 		#endregion
+
 		#region implemented abstract members of BaseDataObject
-		public override IEnumerable<BaseDataObject> GetDependenies ()
+
+		public override IEnumerable<BaseDataObjectVersion> GetDependenies ()
 		{
 			foreach (BaseDataObject bdo in base.GetDependenies ()) {
 				yield return bdo;
@@ -103,6 +111,7 @@ namespace BD2.Frontend.Table
 				return Guid.Parse ("aa8d2cde-5ab2-4656-b172-510d64f831ab");
 			}
 		}
+
 		#endregion
 	}
 }

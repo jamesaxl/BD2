@@ -28,20 +28,21 @@ using System;
 using System.Collections.Generic;
 using BD2.Frontend.Table.Model;
 using BD2.Core;
-using BD2.Common;
 
 namespace BD2.Frontend.Table
 {
-	[BaseDataObjectTypeIdAttribute("bb346656-4812-4fb5-8dd0-abb75f9bab80", typeof(Relation), "Deserialize")]
+	[BaseDataObjectTypeIdAttribute ("bb346656-4812-4fb5-8dd0-abb75f9bab80", typeof(Relation), "Deserialize")]
 	public sealed class Relation : Model.Relation
 	{
 
 		public Relation (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, IndexBase parentColumns, Model.Table childTable, ColumnSet childColumnSet, Model.Column[] childColumns)
-			:base (frontendInstanceBase, chunkID, name, parentColumns, childTable, childColumnSet, childColumns)
+			: base (frontendInstanceBase, chunkID, name, parentColumns, childTable, childColumnSet, childColumns)
 		{
 		
 		}
+
 		#region implemented abstract members of Serializable
+
 		public static Relation Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
 		{
 			BD2.Frontend.Table.FrontendInstance fi = (BD2.Frontend.Table.FrontendInstance)fib;
@@ -60,7 +61,7 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		public override void Serialize (System.IO.Stream stream)
+		public override void Serialize (System.IO.Stream stream, EncryptedStorageManager encryptedStorageManager)
 		{
 			base.Serialize (stream);
 		}
@@ -71,14 +72,17 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		public override IEnumerable<BaseDataObject> GetDependenies ()
+		public override IEnumerable<BaseDataObjectVersion> GetDependenies ()
 		{
 			foreach (BaseDataObject bdo in base.GetDependenies ()) {
 				yield return bdo;
 			}
 		}
+
 		#endregion
+
 		#region implemented abstract members of Relation
+
 		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetChildRows (BD2.Frontend.Table.Model.Row parent)
 		{
 			int count = ChildColumns.Length;
@@ -88,7 +92,7 @@ namespace BD2.Frontend.Table
 				//HACK: There should be a way with siginficantly less overhead when we have the column reference itself.
 				values [n++] = parent.GetValue (ic.Column.Name);
 			}
-			return ((BD2.Frontend.Table.FrontendInstance)this.FrontendInstanceBase).GetRows (ChildTable, ChildColumnSet, ChildColumns, values);
+			return ((BD2.Frontend.Table.FrontendInstance)BaseDataObject.FrontendInstanceBase).GetRows (ChildTable, ChildColumnSet, ChildColumns, values);
 		}
 
 		public override BD2.Frontend.Table.Model.Row GetParentRow (BD2.Frontend.Table.Model.Row child)
@@ -100,8 +104,9 @@ namespace BD2.Frontend.Table
 				//HACK: There should be a way with siginficantly less overhead when we have the column reference itself.
 				values [n++] = child.GetValue (ic.Column.Name);
 			}
-			return ((BD2.Frontend.Table.FrontendInstance)this.FrontendInstanceBase).GetRows (ParentColumns.Table, ParentColumns.ColumnSet, ChildColumns, values).GetEnumerator ().First ();
+			return ((BD2.Frontend.Table.FrontendInstance)BaseDataObject.FrontendInstanceBase).GetRows (ParentColumns.Table, ParentColumns.ColumnSet, ChildColumns, values).GetEnumerator ().First ();
 		}
+
 		#endregion
 	}
 }

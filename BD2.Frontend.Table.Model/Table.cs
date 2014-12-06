@@ -25,6 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 using BD2.Core;
+using System;
 
 namespace BD2.Frontend.Table.Model
 {
@@ -32,11 +33,13 @@ namespace BD2.Frontend.Table.Model
 	{
 		public abstract string Name { get; }
 
-		protected Table (byte[] chunkID,
+		protected Table (Guid id,
+		                 byte[] chunkID,
 		                 BaseDataObject baseDataObject,
 		                 byte[][] previousVersionChunkIDs,
 		                 BaseDataObjectVersion[] previousVersions)
-			: base (chunkID,
+			: base (id,
+			        chunkID,
 			        baseDataObject,
 			        previousVersionChunkIDs,
 			        previousVersions)

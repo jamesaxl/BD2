@@ -42,36 +42,52 @@ namespace BD2.Frontend.Table.Model
 			}
 		}
 
-		public ColumnSet (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, Column[] columns)
-			: base (frontendInstanceBase, chunkID)
+		public ColumnSet (Guid id,
+		                  byte[] chunkID,
+		                  BaseDataObject baseDataObject,
+		                  byte[][] previousVersionChunkIDs,
+		                  BaseDataObjectVersion[] previousVersions, Column[] columns)
+			: base (id,
+			        chunkID,
+			        baseDataObject,
+			        previousVersionChunkIDs,
+			        previousVersions)
 		{
 			if (columns == null)
 				throw new ArgumentNullException ("columns");
+			foreach (var c in columns)
+				if (c == null)
+					throw new ArgumentException ("null reference in array", "columns");
 			this.columns = columns;
 		}
 
 		#region implemented abstract members of Serializable
 
-		public static BaseDataObject Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+		public static BaseDataObjectVersion Deserialize (byte[] chunkID,
+		                                                 BaseDataObject baseDataObject,
+		                                                 byte[][] previousVersionChunkIDs,
+		                                                 BaseDataObjectVersion[] previousVersions, byte[] buffer)
 		{
 			using (System.IO.MemoryStream MS = new MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new BinaryReader (MS)) {
+					Guid id = new Guid (BR.ReadBytes (16));
 					int columnCount = BR.ReadInt32 ();
 					Column[] columns = new Column[columnCount];
 					for (int n = 0; n != columnCount; n++) {
-						columns [n] = ((FrontendInstance)fib).GetColumnByID (BR.ReadBytes (32));
+						columns [n] = ((FrontendInstance)baseDataObject.FrontendInstanceBase).GetColumnByID (BR.ReadBytes (32));
 					}
-					return new ColumnSet (fib, chunkID, columns);
+					return new ColumnSet (id, chunkID, baseDataObject, previousVersionChunkIDs, previousVersions, columns);
 				}
 			}
 		}
 
-		public override void Serialize (Stream stream)
+		public override void Serialize (Stream stream, EncryptedStorageManager encryptedStorageManager)
 		{
 			using (BinaryWriter BW = new BinaryWriter (stream)) {
 				BW.Write (columns.Length);
 				for (int n = 0; n != columns.Length; n++) {
-					BW.Write (columns [n].ObjectID);
+					BW.Write (columns [n].BaseDataObject.ObjectID);
+
 				}
 			}
 		}
@@ -80,7 +96,7 @@ namespace BD2.Frontend.Table.Model
 
 		#region implemented abstract members of BaseDataObject
 
-		public override IEnumerable<BaseDataObject> GetDependenies ()
+		public override IEnumerable<BaseDataObjectVersion> GetDependenies ()
 		{
 			foreach (Column column in columns)
 				yield return column;
@@ -100,12 +116,12 @@ namespace BD2.Frontend.Table.Model
 
 		public byte[] SerializeObjects (object[] data)
 		{
-			return ((FrontendInstance)FrontendInstanceBase).ValueSerializer.SerializeArray (data);
+			return ((FrontendInstance)BaseDataObject.FrontendInstanceBase).ValueSerializer.SerializeArray (data);
 		}
 
 		public object[] DeserializeObjects (byte[] data)
 		{
-			return ((FrontendInstance)FrontendInstanceBase).ValueSerializer.DeserializeArray (data);
+			return ((FrontendInstance)BaseDataObject.FrontendInstanceBase).ValueSerializer.DeserializeArray (data);
 		}
 
 		public int IndexOf (string fieldName, StringComparison comparisonType)

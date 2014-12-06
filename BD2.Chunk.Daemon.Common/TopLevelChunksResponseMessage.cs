@@ -26,11 +26,12 @@
   * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Chunk.Daemon.Common
 {
-	[ObjectBusMessageTypeID("fee3227b-92b1-42e3-8f7b-a544e8e81d50")]
-	[ObjectBusMessageDeserializer(typeof(TopLevelChunksRequestMessage), "Deserialize")]
+	[ObjectBusMessageTypeID ("fee3227b-92b1-42e3-8f7b-a544e8e81d50")]
+	[ObjectBusMessageDeserializer (typeof(TopLevelChunksRequestMessage), "Deserialize")]
 	public class TopLevelChunksResponseMessage : ObjectBusMessage
 	{
 		Guid requestID;
@@ -63,10 +64,12 @@ namespace BD2.Chunk.Daemon.Common
 			this.chunks = chunks;
 			this.exception = exception;
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
-			using (System.IO.MemoryStream MS  = new System.IO.MemoryStream ()) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (requestID.ToByteArray ());
 					BW.Write (chunks.ToByteArray ());
@@ -88,7 +91,7 @@ namespace BD2.Chunk.Daemon.Common
 			Guid chunks;
 			Exception exception;
 
-			using (System.IO.MemoryStream MS  = new System.IO.MemoryStream (buffer,false)) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					requestID = new Guid (BR.ReadBytes (16));
 					chunks = new Guid (BR.ReadBytes (16));
@@ -112,6 +115,7 @@ namespace BD2.Chunk.Daemon.Common
 				return Guid.Parse ("fee3227b-92b1-42e3-8f7b-a544e8e81d50");
 			}
 		}
+
 		#endregion
 	}
 }

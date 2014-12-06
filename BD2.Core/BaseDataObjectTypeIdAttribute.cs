@@ -32,7 +32,7 @@ namespace BD2
 {
 	public sealed class BaseDataObjectTypeIdAttribute : Attribute
 	{
-		static System.Collections.Generic.SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> attribs = new SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> ();
+		static readonly System.Collections.Generic.SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> attribs = new SortedDictionary<Guid, BaseDataObjectTypeIdAttribute> ();
 
 		public static BaseDataObjectTypeIdAttribute GetAttribFor (Guid id)
 		{
@@ -54,7 +54,7 @@ namespace BD2
 
 		System.Reflection.MethodInfo deserialize;
 
-		public BaseDataObject Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+		public BaseDataObjectVersion Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
 		{
 			if (fib == null)
 				throw new ArgumentNullException ("fib");
@@ -65,10 +65,10 @@ namespace BD2
 			if (deserialize == null) {
 				ResolveMethod ();
 			}
-			return (BaseDataObject)deserialize.Invoke (null, new object[] { fib, chunkID, buffer });
+			return (BaseDataObjectVersion)deserialize.Invoke (null, new object[] { fib, chunkID, buffer });
 		}
 
-		Type deserializerType;
+		readonly Type deserializerType;
 
 		public Type DeserializerType {
 			get {
@@ -76,7 +76,7 @@ namespace BD2
 			}
 		}
 
-		string deserializerProcedureName;
+		readonly string deserializerProcedureName;
 
 		public string DeserializerProcedureName {
 			get {

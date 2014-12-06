@@ -84,7 +84,7 @@ namespace BD2.Core
 					foreach (var sk in userStorage.GetUserRepository (ur).SymmetricKeys) {
 						EncryptedData.Add (sk.Key, new AESEncryptingKeyValueStorage (
 							new LevelDBKeyValueStorage<byte[]> (dbp.CreatePath ("Encrypted").CreatePath (sk.Key.ToHexadecimal ()))
-								, sk.Value, sk.Key));
+								, sk.Value));
 					}
 					ChunkRepository cr = new ChunkRepository (
 						                     cri.GetStorage<byte[][]> (dbp, "Dependencies"),

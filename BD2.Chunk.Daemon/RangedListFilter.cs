@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using BD2.Chunk.Daemon.Common;
+using BD2.Core;
 
 namespace BD2.Chunk.Daemon
 {
