@@ -25,13 +25,14 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using BD2.Frontend.Table.Model;
+using BD2.Frontend.Table;
 
 namespace BD2.Frontend.Table
 {
-	public class GenericValueDeserializer : BD2.Frontend.Table.Model.ValueSerializerBase
+	public class GenericValueDeserializer : BD2.Frontend.Table.ValueSerializerBase
 	{
 		#region implemented abstract members of ValueSerializerBase
+
 		public override byte TypeToID (Type type)
 		{
 			string TFQN = type.FullName;
@@ -108,7 +109,9 @@ namespace BD2.Frontend.Table
 				throw new Exception (string.Format ("Serialization for type <{0}> is not supported", id));
 			}
 		}
+
 		#endregion
+
 		public override object Deserialize (System.IO.BinaryReader binaryReader)
 		{
 			bool hasValue = binaryReader.ReadBoolean ();

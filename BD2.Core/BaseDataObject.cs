@@ -6,18 +6,8 @@ namespace BD2.Core
 {
 	public sealed class BaseDataObject : IComparable<BaseDataObject>
 	{
-		bool fullyLoaded;
 		readonly FrontendInstanceBase frontendInstanceBase;
 		readonly SortedDictionary<byte[], BaseDataObjectVersion> versions = new SortedDictionary<byte[], BaseDataObjectVersion> ();
-
-		public bool FullyLoaded {
-			get {
-				return fullyLoaded;
-			}
-			internal set {
-				fullyLoaded = value; 
-			}
-		}
 
 		public SortedDictionary<byte[], BaseDataObjectVersion> Versions {
 			get {
@@ -46,7 +36,7 @@ namespace BD2.Core
 			}
 		}
 
-		public Frontend Frontend {
+		public FrontendBase Frontend {
 			get {
 				return frontendInstanceBase.Frontend;
 			}

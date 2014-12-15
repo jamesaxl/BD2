@@ -64,6 +64,7 @@ namespace BD2.Core
 			if (typeof(T) != typeof(byte[]) && typeof(T) != typeof(byte[][]) && typeof(T) != typeof(string))
 				throw new NotImplementedException ();
 			this.path = path;
+			db = OpenLevelDB (path);
 		}
 
 		#region implemented abstract members of KeyValueStorage

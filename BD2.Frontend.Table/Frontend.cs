@@ -26,12 +26,19 @@
  * */
 using System;
 using System.Collections.Generic;
-using BD2.Frontend.Table.Model;
 
 namespace BD2.Frontend.Table
 {
-	public class Frontend : BD2.Frontend.Table.Model.Frontend
+	public class Frontend : BD2.Core.FrontendBase
 	{
+		ValueSerializerBase valueDeserializer;
+
+		public ValueSerializerBase ValueDeserializer {
+			get {
+				return valueDeserializer;
+			}
+		}
+
 		#region implemented abstract members of BD2.Core.Frontend
 
 		public override string Name {
@@ -41,18 +48,20 @@ namespace BD2.Frontend.Table
 		}
 
 		public Frontend (ValueSerializerBase valueDeserializer)
-			: base (valueDeserializer)
 		{
+			if (valueDeserializer == null)
+				throw new ArgumentNullException ("valueDeserializer");
+			this.valueDeserializer = valueDeserializer;
 		}
 
-		SortedDictionary<BD2.Core.DataContext, BD2.Frontend.Table.FrontendInstance> instances = new SortedDictionary<BD2.Core.DataContext, FrontendInstance> ();
+		readonly SortedDictionary<BD2.Core.DataContext, FrontendInstance> instances = new SortedDictionary<BD2.Core.DataContext, FrontendInstance> ();
 
-		public override BD2.Core.FrontendInstanceBase GetInstanse (BD2.Core.DataContext snapshot)
+		public override BD2.Core.FrontendInstanceBase GetInstanse (BD2.Core.DataContext dataContext)
 		{
-			if (instances.ContainsKey (snapshot))
-				return instances [snapshot];
-			BD2.Frontend.Table.FrontendInstance fi = new BD2.Frontend.Table.FrontendInstance (snapshot, this, ValueDeserializer);
-			instances.Add (snapshot, fi);
+			if (instances.ContainsKey (dataContext))
+				return instances [dataContext];
+			FrontendInstance fi = new FrontendInstance (this, ValueDeserializer);
+			instances.Add (dataContext, fi);
 			return fi;
 		}
 

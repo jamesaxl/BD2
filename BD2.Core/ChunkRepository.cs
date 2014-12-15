@@ -33,23 +33,27 @@ namespace BD2.Core
 	public sealed class ChunkRepository
 	{
 		public ChunkRepository (
-			KeyValueStorage<byte[][]> dependencies,
 			KeyValueStorage<byte[]> data,
+			KeyValueStorage<byte[][]> dataDependencies,
+			KeyValueStorage<byte[][]> dataTopLevels,
+			KeyValueStorage<byte[]> meta,
+			KeyValueStorage<byte[][]> metaDependencies,
+			KeyValueStorage<byte[][]> metaTopLevels,
 			KeyValueStorage<byte[][]> signatures,
 			KeyValueStorage<byte[][]> chunkSymmetricKeys,
-			KeyValueStorage<byte[][]> topLevels,
-			KeyValueStorage<byte[]> meta,
 			KeyValueStorage<byte[]> index,
 			IDictionary<byte[], KeyValueStorage<byte[]>> encryptedData
 		)
 		{
 			this.lindex = index;
 			this.ldata = data;
-			this.ldependencies = dependencies;
-			this.ltopLevels = topLevels;
+			this.ldataDependencies = dataDependencies;
+			this.ldataTopLevels = dataTopLevels;
+			this.lmeta = meta;
+			this.lmetaDependencies = metaDependencies;
+			this.lmetaTopLevels = metaTopLevels;
 			this.lsignatures = signatures;
 			this.lchunkSymmetricKeys = chunkSymmetricKeys;
-			this.lmeta = meta;
 			this.lencryptedData = new SortedDictionary<byte[], KeyValueStorage<byte[]>> (encryptedData);
 		}
 
@@ -69,11 +73,11 @@ namespace BD2.Core
 			}
 		}
 
-		KeyValueStorage<byte[][]> ltopLevels;
+		KeyValueStorage<byte[][]> ldataTopLevels;
 
-		public KeyValueStorage<byte[][]> LtopLevels {
+		public KeyValueStorage<byte[][]> LdataTopLevels {
 			get {
-				return ltopLevels;
+				return ldataTopLevels;
 			}
 		}
 
@@ -85,6 +89,23 @@ namespace BD2.Core
 			}
 		}
 
+		KeyValueStorage<byte[][]> lmetaDependencies;
+
+		public KeyValueStorage<byte[][]> LmetaDepnedencies {
+			get {
+				return lmetaDependencies;
+			}
+		}
+
+		KeyValueStorage<byte[][]> lmetaTopLevels;
+
+		public KeyValueStorage<byte[][]> LmetaTopLevels {
+			get {
+				return lmetaTopLevels;
+			}
+		}
+
+
 		KeyValueStorage<byte[]> lindex;
 
 		public KeyValueStorage<byte[]> Lindex {
@@ -93,11 +114,11 @@ namespace BD2.Core
 			}
 		}
 
-		KeyValueStorage<byte[][]> ldependencies;
+		KeyValueStorage<byte[][]> ldataDependencies;
 
-		public KeyValueStorage<byte[][]> Ldependencies {
+		public KeyValueStorage<byte[][]> LdataDependencies {
 			get {
-				return ldependencies;
+				return ldataDependencies;
 			}
 		}
 
@@ -134,7 +155,7 @@ namespace BD2.Core
 				byte[][] dependencies;
 				byte[][] signatures;
 				data = ldata.Get (chunkID);
-				dependencies = ldependencies.Get (chunkID);
+				dependencies = ldataDependencies.Get (chunkID);
 				signatures = lsignatures.Get (chunkID);
 				yield return new ChunkData (chunkID, data, dependencies, signatures, this); 
 			}
@@ -148,9 +169,9 @@ namespace BD2.Core
 				throw new ArgumentNullException ("data");
 			if (dependencies == null)
 				throw new ArgumentNullException ("dependencies");
-			ldependencies.Put (chunkID, dependencies);
+			ldataDependencies.Put (chunkID, dependencies);
 			ldata.Put (chunkID, data);
-			ltopLevels.Put (chunkID, dependencies);
+			ldataTopLevels.Put (chunkID, dependencies);
 			lsignatures.Put (chunkID, signatures);
 			for (int n = 0; n != signatures.Length; n++) {
 				if (signatures [n] == null)
@@ -160,7 +181,7 @@ namespace BD2.Core
 				byte[] dependency = dependencies [n];
 				if (dependency == null)
 					throw new ArgumentNullException (string.Format ("dependencies[{0}]", n), "dependency cannot be null");
-				ltopLevels.Delete (dependency);
+				ldataTopLevels.Delete (dependency);
 			}
 		}
 
@@ -171,12 +192,12 @@ namespace BD2.Core
 			SortedSet<byte[]> resolved = new SortedSet<byte[]> (chunks, ByteSequenceComparer.Shared);
 			SortedSet<byte[]> results = new SortedSet<byte[]> (chunks, ByteSequenceComparer.Shared);
 			foreach (byte[] chunk in chunks) {
-				removables.UnionWith (repo.ldependencies.Get (chunk));
+				removables.UnionWith (repo.ldataDependencies.Get (chunk));
 			}
 			for (int n = 0; n != extraPasses; n++) {
 				foreach (byte[] chunk in removables) {
 					if (!resolved.Contains (chunk)) {
-						removables.UnionWith (repo.ldependencies.Get (chunk));
+						removables.UnionWith (repo.ldataDependencies.Get (chunk));
 						resolved.Add (chunk);
 					}
 				}

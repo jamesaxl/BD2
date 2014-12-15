@@ -27,41 +27,48 @@
 using System;
 using System.Collections.Generic;
 using BD2.Core;
-using BD2.Frontend.Table.Model;
+using BD2.Frontend.Table;
 
 namespace BD2.Frontend.Table
 {
-	[BaseDataObjectTypeIdAttribute("3be06a16-6727-4639-b702-060b522af660", typeof(Table), "Deserialize")]
-	public class Table : Model.Table
+	[BaseDataObjectTypeIdAttribute ("3be06a16-6727-4639-b702-060b522af660", typeof(Table), "Deserialize")]
+	public class Table : BaseMetaObject
 	{
 		string name;
 
-		public override string Name { get { return name; } }
+		public string Name { get { return name; } }
 
-		public Table (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name)
-			:base(frontendInstanceBase, chunkID)
+		public Table (FrontendInstanceBase frontendInstanceBase, byte[] objectID, byte[] chunkID, string name)
+			: base (frontendInstanceBase, objectID, chunkID)
 		{
+			if (name == null)
+				throw new ArgumentNullException ("name");
 			this.name = name;
 		}
+
 		#region implemented abstract members of Serializable
-		public static BaseDataObject Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
+
+		public static BaseMetaObject Deserialize (FrontendInstanceBase fib, byte[] chunkID, byte[] buffer)
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					return new BD2.Frontend.Table.Table (fib, chunkID, BR.ReadString ());
+					return new Table (fib, BR.ReadBytes (32), chunkID, BR.ReadString ());
 				}
 			}
 		}
 
-		public override void Serialize (System.IO.Stream stream)
+		public override void Serialize (System.IO.Stream stream, EncryptedStorageManager encryptedStorageManager)
 		{
-			using (System.IO.BinaryWriter BW  = new System.IO.BinaryWriter (stream)) {
+			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
 				BW.Write (name);
 			}
 		}
+
 		#endregion
+
 		#region implemented abstract members of BaseDataObject
-		public override IEnumerable<BaseDataObject> GetDependenies ()
+
+		public override IEnumerable<BaseMetaObject> GetDependenies ()
 		{
 			yield break;
 		}
@@ -71,6 +78,7 @@ namespace BD2.Frontend.Table
 				return Guid.Parse ("3be06a16-6727-4639-b702-060b522af660");
 			}
 		}
+
 		#endregion
 	}
 }

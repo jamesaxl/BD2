@@ -85,10 +85,6 @@
       <Project>{285B9E10-0FC7-4D60-9D1D-5068E8963988}</Project>
       <Name>BD2.Frontend.Table</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj">
-      <Project>{A4059B19-5E63-468E-9AE0-6D55AFD9775E}</Project>
-      <Name>BD2.Frontend.Table.Model</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Core\BD2.Core.csproj">
       <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
       <Name>BD2.Core</Name>

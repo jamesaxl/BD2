@@ -30,8 +30,15 @@ namespace BD2.Core
 {
 	public abstract class DataContext
 	{
+		readonly FrontendInstanceBase frontendInstanceBase;
 		readonly DataContext baseContext;
 		readonly DataContext[] include;
+
+		public FrontendInstanceBase FrontendInstanceBase {
+			get {
+				return frontendInstanceBase;
+			}
+		}
 
 		public DataContext BaseContext {
 			get {
@@ -46,19 +53,25 @@ namespace BD2.Core
 		}
 
 	
-		protected DataContext (DataContext baseContext)
+		protected DataContext (FrontendInstanceBase frontendInstanceBase, DataContext baseContext)
 		{
+			if (frontendInstanceBase == null)
+				throw new ArgumentNullException ("frontendInstanceBase");
 			if (baseContext == null)
 				throw new ArgumentNullException ("baseContext");
+			this.frontendInstanceBase = frontendInstanceBase;
 			this.baseContext = baseContext;
 		}
 
-		protected DataContext (DataContext baseContext, DataContext[] include)
+		protected DataContext (FrontendInstanceBase frontendInstanceBase, DataContext baseContext, DataContext[] include)
 		{
+			if (frontendInstanceBase == null)
+				throw new ArgumentNullException ("frontendInstanceBase");
 			if (baseContext == null)
 				throw new ArgumentNullException ("baseContext");
 			if (include == null)
 				throw new ArgumentNullException ("include");
+			this.frontendInstanceBase = frontendInstanceBase;
 			this.baseContext = baseContext;
 			this.include = include;
 

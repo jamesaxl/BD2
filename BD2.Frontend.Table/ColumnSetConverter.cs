@@ -26,23 +26,37 @@
   * */
 using System;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Frontend.Table
 {
-	public sealed class GenericColumnSetConverter : ColumnSetConverter
+	public abstract	class ColumnSetConverter
 	{
-		Func<object[], ColumnSet, ColumnSet, object[]> convertFunc;
+		public abstract object[] Convert (object[] data, ColumnSet inColumnSet, ColumnSet outColumnSet);
 
-		public override object[] Convert (object[] data, ColumnSet inColumnSet, ColumnSet outColumnSet)
-		{
-			return convertFunc (data, inColumnSet, outColumnSet);
+		readonly System.Collections.Generic.IEnumerable<ColumnSet> inColumnSets;
+
+		public System.Collections.Generic.IEnumerable<ColumnSet> InColumnSets {
+			get {
+				return inColumnSets;
+			}
 		}
 
-		public GenericColumnSetConverter (System.Collections.Generic.IEnumerable<ColumnSet> inColumnSets, System.Collections.Generic.IEnumerable<ColumnSet> outColumnSets, Func<object[], ColumnSet, ColumnSet, object[]> convertFunc)
-			:base(inColumnSets, outColumnSets)
+		readonly System.Collections.Generic.IEnumerable<ColumnSet> outColumnSets;
+
+		public System.Collections.Generic.IEnumerable<ColumnSet> OutColumnSets {
+			get {
+				return outColumnSets;
+			}
+		}
+
+		protected ColumnSetConverter (System.Collections.Generic.IEnumerable<ColumnSet> inColumnSets, System.Collections.Generic.IEnumerable<ColumnSet> outColumnSets)
 		{
-			if (convertFunc == null)
-				throw new ArgumentNullException ("convertFunc");
-			this.convertFunc = convertFunc;
+			if (inColumnSets == null)
+				throw new ArgumentNullException ("inColumnSets");
+			if (outColumnSets == null)
+				throw new ArgumentNullException ("outColumnSets");
+			this.inColumnSets = inColumnSets;
+			this.outColumnSets = outColumnSets;
+
 		}
 	}
 }

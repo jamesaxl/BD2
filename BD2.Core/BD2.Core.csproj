@@ -37,7 +37,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BaseDataObject.cs" />
-    <Compile Include="Frontend.cs" />
     <Compile Include="BaseDataObjectDescriptor.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="FrontendInstanceBase.cs" />
@@ -102,11 +101,12 @@
     <Compile Include="ChunkRepositoryInfo.cs" />
     <Compile Include="BaseDataObjectVersion.cs" />
     <Compile Include="IDataSource.cs" />
-    <Compile Include="BaseDataObjectManager.cs" />
     <Compile Include="DataContext.cs" />
     <Compile Include="Network\GetLoggedInUsersRequestMessage.cs" />
     <Compile Include="GenericUserRepositoryConfiguration.cs" />
     <Compile Include="EncryptionMethod.cs" />
+    <Compile Include="FrontendBase.cs" />
+    <Compile Include="BaseMetaObject.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

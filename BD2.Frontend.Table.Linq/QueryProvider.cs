@@ -20,14 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.Linq;
+
 namespace BD2.Frontend.Table.Linq
 {
 	public class QueryProvider : System.Linq.IQueryProvider
 	{
-		public QueryProvider ()
-		{
-		}
 		#region IQueryProvider implementation
+
 		IQueryable IQueryProvider.CreateQuery (System.Linq.Expressions.Expression expression)
 		{
 			throw new System.NotImplementedException ();
@@ -47,6 +46,7 @@ namespace BD2.Frontend.Table.Linq
 		{
 			throw new System.NotImplementedException ();
 		}
+
 		#endregion
 
 	}

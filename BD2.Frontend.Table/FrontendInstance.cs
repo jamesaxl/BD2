@@ -27,22 +27,71 @@
 using System;
 using System.Collections.Generic;
 using BD2.Core;
-using BD2.Frontend.Table.Model;
+using BD2.Frontend.Table;
 
 namespace BD2.Frontend.Table
 {
-	public class FrontendInstance : BD2.Frontend.Table.Model.FrontendInstance
+	public class FrontendInstance : FrontendInstanceBase
 	{
+		SortedDictionary<byte[], Table> tables = new SortedDictionary<byte[], Table> (ByteSequenceComparer.Shared);
+		SortedDictionary<byte[], Column> columns = new SortedDictionary<byte[], Column> (ByteSequenceComparer.Shared);
+		SortedDictionary<byte[], ColumnSet> columnSets = new SortedDictionary<byte[], ColumnSet> (ByteSequenceComparer.Shared);
+		SortedDictionary<ColumnSet, SortedDictionary<ColumnSet, ColumnSetConverter>> cscs = new SortedDictionary<ColumnSet, SortedDictionary<ColumnSet, ColumnSetConverter>> ();
+
+		protected override BaseMetaObject GetObjectWithID (byte[] objectID)
+		{
+			//todo:use TryGetValue
+			if (columns.ContainsKey (objectID))
+				return columns [objectID];
+			if (columnSets.ContainsKey (objectID))
+				return columnSets [objectID];
+			if (tables.ContainsKey (objectID))
+				return tables [objectID];
+			return null;
+		}
+
+		public void AddColumnSetConverter (ColumnSetConverter csc)
+		{
+			foreach (ColumnSet ocs in csc.OutColumnSets) {
+				if (!cscs.ContainsKey (ocs)) {
+					cscs.Add (ocs, new SortedDictionary<ColumnSet, ColumnSetConverter> ());
+				}
+				SortedDictionary<ColumnSet, ColumnSetConverter> sources = cscs [ocs];
+				foreach (ColumnSet ics in csc.InColumnSets) {
+					sources.Add (ics, csc);
+				}
+			}
+		}
+
+		public ColumnSetConverter GetColumnSetConverter (ColumnSet columnSet, ColumnSet outputColumnSet)
+		{
+			if (cscs.ContainsKey (outputColumnSet)) {
+				SortedDictionary<ColumnSet, ColumnSetConverter> sources = cscs [outputColumnSet];
+				if (sources.ContainsKey (columnSet)) {
+					return sources [columnSet];
+				} else
+					throw new NotSupportedException ("Conversion from source ColumnSet is not supported.");			
+			} else
+				throw new NotSupportedException ("Conversion to destination ColumnSet is not supported.");
+		}
+
+		public object[] ConvertColumnSet (object[] input, ColumnSet inputColumnSet, ColumnSet outputColumnSet)
+		{
+			if (inputColumnSet == outputColumnSet)
+				return input;
+			return GetColumnSetConverter (inputColumnSet, outputColumnSet).Convert (input, inputColumnSet, outputColumnSet);
+		}
+
 		ValueSerializerBase valueSerializer;
 		//SortedDictionary<byte[], BaseDataObject> volatileData = new SortedDictionary<byte[], BaseDataObject> (BD2.Common.ByteSequenceComparer.Shared);
-		public override ValueSerializerBase ValueSerializer {
+		public ValueSerializerBase ValueSerializer {
 			get {
 				return valueSerializer;
 			}
 		}
 
-		public FrontendInstance (Snapshot snapshot, Frontend frontend, ValueSerializerBase valueSerializer) :
-			base (snapshot, frontend)
+		public FrontendInstance (Frontend frontend, ValueSerializerBase valueSerializer) :
+			base (frontend)
 		{
 			if (valueSerializer == null)
 				throw new ArgumentNullException ("valueSerializer");
@@ -50,6 +99,11 @@ namespace BD2.Frontend.Table
 		}
 
 		#region implemented abstract members of FrontendInstance
+
+		void InsertObject (BaseDataObjectVersion baseDataObjectVersion)
+		{
+			throw new NotImplementedException ();
+		}
 
 		protected override void OnCreateObjects (byte[] chunkID, byte[] bytes)
 		{
@@ -68,81 +122,74 @@ namespace BD2.Frontend.Table
 			}
 		}
 
-		void InsertObject (BaseDataObject bdo)
-		{
-			if (bdo is Table) {
-				tables.Add (bdo.ObjectID, (Table)bdo);
-				perTableRows.Add ((Table)bdo, new SortedDictionary<byte[], Row> (BD2.Common.ByteSequenceComparer.Shared));
-			} else if (bdo is Column) {
-				columns.Add (bdo.ObjectID, (Column)bdo);
-			} else if (bdo is ColumnSet) {
-				columnSets.Add (bdo.ObjectID, (ColumnSet)bdo);
-			} else if (bdo is Row) {
-				rows.Add (bdo.ObjectID, (Row)bdo);
-				RemovePreviousVersions ((Row)bdo);
-			}
-		}
-
-		 
-		public override void Purge (BaseDataObject bdo)
-		{
-			//TODO:make sure we remove all the related objects first, like the rows in a columnset or table
-			if (!bdo.IsVolatile)
-				throw new Exception ("BD2 does not and never will support purging non-volatile data.");
-			if (bdo is Table) {
-				tables.Remove (bdo.ObjectID);
-			} else if (bdo is Column) {
-				columns.Remove (bdo.ObjectID);
-			} else if (bdo is ColumnSet) {
-				columnSets.Remove (bdo.ObjectID);
-			} else if (bdo is Row) {
-				rows.Remove (bdo.ObjectID);
-				FallbackToPreviousVersions ((Row)bdo);
-			} else if (bdo is RowDrop) {
-				Row R = (Row)((RowDrop)bdo).Row;
-				rows.Add (R.ObjectID, R);
-			}
-
-		}
-
-
-		public override BD2.Core.Transaction CreateTransaction ()
-		{
-			return new Transaction (this);
-		}
-
-
-		public override IEnumerable<BD2.Frontend.Table.Model.Row> GetRows (BD2.Frontend.Table.Model.Table table,
-		                                                                   BD2.Frontend.Table.Model.ColumnSet columnSet,
-		                                                                   BD2.Frontend.Table.Model.Column[] columns, object[] match)
-		{
-			int[] columnIndices = new int[columns.Length];
-			for (int n = 0; n != columns.Length; n++) {
-				columnIndices [n] = columnSet.IndexOf (columns [n]);
-			}
-			foreach (BD2.Frontend.Table.Model.Row r in GetRows (table)) {
-				object[] fields = r.GetValues (columnSet);
-				bool isMatch = true;
-				for (int n = 0; n != columns.Length; n++) {
-					if (fields [columnIndices [n]] != match [n]) {
-						isMatch = false;
-						continue;
-					}
-				}
-				if (isMatch)
-					yield return r;
-			}
-		}
-
-		public override IEnumerable<BD2.Frontend.Table.Model.Relation> GetParentRelations (BD2.Frontend.Table.Model.Table table)
-		{
-			foreach (var rel in relations) {
-				if (rel.Value.ChildTable == table)
-					yield return rel.Value;
-			}
-		}
-
 
 		#endregion
+
+		public  ColumnSet GetColumnSetByID (byte[] id)
+		{
+			if (!columnSets.ContainsKey (id))
+				System.Diagnostics.Debugger.Break ();
+			return columnSets [id];
+		}
+
+		public  Table GetTableByID (byte[] id)
+		{
+			if (!tables.ContainsKey (id))
+				System.Diagnostics.Debugger.Break ();
+			return tables [id];
+		}
+
+		public  Column GetColumnByID (byte[] id)
+		{
+			if (!columns.ContainsKey (id))
+				System.Diagnostics.Debugger.Break ();
+			return columns [id];
+		}
+
+		public IEnumerable<Table> GetTables ()
+		{
+			return new SortedSet<Table> (tables.Values);
+		}
+
+		//to avoid duplicates
+		public Column GetColumn (string name, Type type, bool allowNull, long length)
+		{
+			Column nc = new Column (this, null, null, name, type, allowNull, length);
+			byte[] hash = nc.ObjectID;
+			if (columns.ContainsKey (hash))
+				return columns [hash];
+			columns.Add (hash, nc);
+			return nc;
+		}
+
+		public ColumnSet GetColumnSet (Column[] columns)
+		{
+			if (columns == null)
+				throw new ArgumentNullException ("columns");
+			ColumnSet cs = new ColumnSet (this, null, null, columns);
+			byte[] hash = cs.ObjectID;
+			if (columnSets.ContainsKey (hash)) {
+				return columnSets [hash];
+			}
+			columnSets.Add (hash, cs);
+			return cs;
+		}
+
+		public Table GetTable (string name)
+		{
+			Table temp = new Table (this, null, null, name);
+			if (tables.ContainsKey (temp.ObjectID)) {
+				return tables [temp.ObjectID];
+			}
+			tables.Add (temp.ObjectID, temp);
+			//perTableRows.Add (temp, new SortedDictionary<byte[], Row> (ByteSequenceComparer.Shared));
+			return temp;
+		}
+
+
+		public IEnumerable<ColumnSet> GetColumnSets ()
+		{
+			return new SortedSet<ColumnSet> (columnSets.Values);
+		}
 	}
 }

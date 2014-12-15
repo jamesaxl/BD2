@@ -49,4 +49,10 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <ProjectReference Include="..\BD2.Core\BD2.Core.csproj">
+      <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
+      <Name>BD2.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

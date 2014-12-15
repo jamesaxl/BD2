@@ -31,12 +31,49 @@ using BD2.Daemon;
 namespace BD2.Frontend.Table
 {
 	[BaseDataObjectTypeIdAttribute ("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60", typeof(Column), "Deserialize")]
-	public class Column : Model.Column
+	public class Column : BaseMetaObject
 	{
-		internal Column (FrontendInstanceBase frontendInstanceBase, byte[] chunkID, string name, Type type, bool allowNull, long length)
-			: base (frontendInstanceBase, chunkID, name, type, allowNull, length)
+		readonly string name;
+
+		public string Name { get { return name; } }
+
+		readonly Type type;
+
+		public Type Type { get { return type; } }
+
+		readonly long length;
+
+		public long Length { get { return length; } }
+
+		readonly bool allowNull;
+
+		public bool AllowNull { get { return allowNull; } }
+
+		public Column (FrontendInstanceBase frontendInstanceBase,
+		               byte[] id,
+		               byte[] chunkID,
+		               string name, Type type, bool allowNull, long length)
+			: base (frontendInstanceBase, id, chunkID)
 		{
+			if (name == null)
+				throw new ArgumentNullException ("name");
+			this.name = name;
+			this.type = type;
+			this.allowNull = allowNull;
+			this.length = length;
 		}
+
+		public override void Serialize (System.IO.Stream stream, EncryptedStorageManager encryptedStorageManager)
+		{
+			using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (stream)) {
+				BW.Write (ObjectID);
+				BW.Write (name);
+				BW.Write (((Frontend)FrontendInstanceBase.Frontend).ValueDeserializer.TypeToID (type));
+				BW.Write (allowNull);
+				BW.Write (length);
+			}
+		}
+
 
 		#region implemented abstract members of Serializable
 
@@ -44,25 +81,26 @@ namespace BD2.Frontend.Table
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
-					//todo: have the base class to deserialize it's own data
-					return new Column (fib, chunkID, BR.ReadString (), ((Frontend)fib.Frontend).ValueDeserializer.IDToType (BR.ReadByte ()), BR.ReadBoolean (), BR.ReadInt64 ());
+					return new Column (fib, BR.ReadBytes (32), chunkID, BR.ReadString (), ((Frontend)fib.Frontend).ValueDeserializer.IDToType (BR.ReadByte ()), BR.ReadBoolean (), BR.ReadInt64 ());
 				}
 			}
 		}
 
-		public override void Serialize (System.IO.Stream stream, EncryptedStorageManager encryptedStorageManager)
-		{
-			base.Serialize (stream);
-		}
-
 		#endregion
 
-		#region implemented abstract members of BaseDataObject
+		#region implemented abstract members of BaseMetaObject
 
 		public override Guid ObjectType {
 			get {
 				return Guid.Parse ("85997e6a-60d3-4dfb-ae49-6bd7a0de4b60");
 			}
+		}
+
+
+
+		public override System.Collections.Generic.IEnumerable<BaseMetaObject> GetDependenies ()
+		{
+			yield break;
 		}
 
 		#endregion

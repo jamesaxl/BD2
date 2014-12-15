@@ -5,10 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{472E06FA-66CA-4C61-90E7-14F8B7095F67}</ProjectGuid>
+    <ProjectGuid>{791FFF64-1602-4D31-BCF5-FD8E3CBE5216}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>BD2.Test.Frontend.Table</RootNamespace>
-    <AssemblyName>BD2.Test.Frontend.Table</AssemblyName>
+    <RootNamespace>BD2.UserManagement.CLI</RootNamespace>
+    <AssemblyName>BD2.UserManagement.CLI</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -39,10 +40,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Frontend.Table\BD2.Frontend.Table.csproj">
-      <Project>{285B9E10-0FC7-4D60-9D1D-5068E8963988}</Project>
-      <Name>BD2.Frontend.Table</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Core\BD2.Core.csproj">
       <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
       <Name>BD2.Core</Name>

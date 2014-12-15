@@ -27,190 +27,81 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using BD2.Chunk;
+using BD2.Core;
 
 namespace BD2.Repo.Net
 {
-	public class Repository : ChunkRepository
+	public class KeyValueStorage<T> : BD2.Core.KeyValueStorage<T>
 	{
-		Stream peer;
+		#region implemented abstract members of KeyValueStorage
 
-		public Repository (Stream peer)
-		{
-			this.peer = peer;
-		}
-
-		static byte[] DependenciesToArray (byte[][] dependencies)
-		{
-			if (dependencies == null)
-				return null;
-			int lenOfDependencies = 0;
-			for (int n = 0; n != dependencies.Length; n++) {
-				lenOfDependencies += dependencies [n].Length + sizeof(int);
-			}
-			byte[] metadata = new byte[sizeof(int) + lenOfDependencies];
-			MemoryStream metastream = new MemoryStream (metadata, true);
-			BinaryWriter metawriter = new BinaryWriter (metastream);
-			metawriter.Write (dependencies.Length);
-			for (int n = 0; n != dependencies.Length; n++) {
-				metawriter.Write (dependencies [n].Length);
-				metawriter.Write (dependencies [n]);
-			}
-			return metadata;
-		}
-
-		static byte[][] ArrayToDependencies (byte[] array)
-		{
-			if (array == null)
-				return null;
-			MemoryStream metastream = new MemoryStream (array);
-			BinaryReader metareader = new BinaryReader (metastream);
-			int countOfDependencies = metareader.ReadInt32 ();
-			byte[][] dependencies = new byte[countOfDependencies][];
-			for (int n = 0; n != countOfDependencies; n++) {
-				dependencies [n] = metareader.ReadBytes (metareader.ReadInt32 ());
-			}
-			return dependencies;
-		}
-
-		#region implemented abstract members of ChunkRepository
-
-		public override SortedDictionary<byte[], string> GetUsers ()
+		public override void Initialize ()
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override void AddUser (byte[] id, string name)
+		public override void Dispose ()
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override void PushIndex (byte[] index, byte[] value)
+		public override IEnumerator<KeyValuePair<byte[], T>> GetEnumerator ()
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override void PushSegment (byte[] chunkID, byte[] value)
+		public override IEnumerator<byte[]> EnumerateKeys ()
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override void PushKey (byte[] keyID, byte[] value)
+		public override IAsyncResult BeginPut (byte[] key, T value)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override void PushSignatures (byte[] chunkID, SortedDictionary<byte[], byte[]> sigList)
+		public override IAsyncResult BeginGet (byte[] key)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override byte[] PullIndex (byte[] index)
+		public override IAsyncResult BeginDelete (byte[] key)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override void PushRawProxyData (byte[] index, byte[] value)
+		public override void Put (byte[] key, T value)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override byte[] PullRawProxyData (byte[] index)
+		public override T Get (byte[] key)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override void Push (byte[] chunkID, byte[] data, byte[] segment, byte[][] dependencies)
+		public override void Delete (byte[] key)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override byte[] PullData (byte[] chunkID)
+		public override void EndPut (IAsyncResult asyncResult)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override byte[] PullSegment (byte[] chunkID)
+		public override T EndGet (IAsyncResult asyncResult)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override byte[] PullKey (byte[] keyID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override SortedDictionary<byte[], byte[]> PullSignatures (byte[] chunkID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override byte[][] PullDependencies (byte[] chunkID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override void Pull (byte[] chunkID, out byte[] data, out byte[] segment, out byte[][] dependencies)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<byte[]> Enumerate ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateData ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateRawProxyData ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<byte[]> EnumerateTopLevels ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateDependencies ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateTopLevelDependencies ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override int GetLeastCost (int currentMinimum, byte[] chunkID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override int GetMaxCostForAny ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override Guid ID {
-			get {
-				throw new NotImplementedException ();
-			}
-		}
-
-		public override void PushPrivateKey (byte[] keyID, byte[] value)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override byte[] PullPrivateKey (byte[] keyID)
+		public override void EndDelete (IAsyncResult asyncResult)
 		{
 			throw new NotImplementedException ();
 		}
 
 		#endregion
+
+
 	}
 }

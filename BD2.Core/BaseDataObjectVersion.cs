@@ -31,6 +31,11 @@ namespace BD2.Core
 {
 	public abstract class BaseDataObjectVersion : Serializable, IComparable<BaseDataObjectVersion>
 	{
+		byte[] id;
+		byte[] chunkID;
+		BaseDataObject baseDataObject;
+		IDictionary<byte[], BaseDataObjectVersion> previousVersions;
+
 		public byte[] ChunkID {
 			get {
 				if (chunkID == null)
@@ -39,24 +44,9 @@ namespace BD2.Core
 			}
 		}
 
-		//Guid id;
-
-		//		public Guid ID {
-		//			get {
-		//				return id;
-		//			}
-		//
-
-		byte[] chunkID;
-		byte[][] previousVersionChunkIDs;
-		BaseDataObject baseDataObject;
-		BaseDataObjectVersion[] previousVersions;
-
-
-
-		public byte[][] PreviousVersionChunkIDs {
+		public byte[] ID {
 			get {
-				return previousVersionChunkIDs;
+				return id;
 			}
 		}
 
@@ -66,12 +56,11 @@ namespace BD2.Core
 			}
 		}
 
-		public BaseDataObjectVersion[] PreviousVersions {
+		public IDictionary<byte[], BaseDataObjectVersion> PreviousVersions {
 			get {
 				return previousVersions;
 			}
 		}
-
 
 		public abstract Guid ObjectType { get; }
 
@@ -80,19 +69,16 @@ namespace BD2.Core
 			yield break;
 		}
 
-		protected BaseDataObjectVersion (Guid id,
+		protected BaseDataObjectVersion (byte[] id,
 		                                 byte[] chunkID,
-		                                 BaseDataObject baseDataObject,
-		                                 byte[][] previousVersionChunkIDs,
-		                                 BaseDataObjectVersion[] previousVersions)
+		                                 BaseDataObject baseDataObject)
 		{
 			if (baseDataObject == null)
 				throw new ArgumentNullException ("baseDataObject");
-			//this.id = id;
+			this.id = id;
 			this.chunkID = chunkID;
 			this.baseDataObject = baseDataObject;
-			this.previousVersionChunkIDs = previousVersionChunkIDs;
-			this.previousVersions = previousVersions;
+			this.previousVersions = new Dictionary<byte[], BaseDataObjectVersion> (baseDataObject.Versions);
 		}
 
 		#region IComparable implementation

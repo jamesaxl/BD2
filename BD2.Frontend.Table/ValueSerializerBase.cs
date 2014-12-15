@@ -25,25 +25,44 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using BD2.Core;
+using System.Collections.Generic;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Frontend.Table
 {
-	public abstract class Frontend : BD2.Core.Frontend
+	public abstract class ValueSerializerBase
 	{
-		ValueSerializerBase valueDeserializer;
+		public abstract byte TypeToID (Type type);
 
-		public ValueSerializerBase ValueDeserializer {
-			get {
-				return valueDeserializer;
+		public abstract Type IDToType (byte id);
+
+		public abstract object Deserialize (System.IO.BinaryReader binaryReader);
+
+		public object[] DeserializeArray (byte[] buffer)
+		{
+			System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer);
+			System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
+			object[] objects = new object[BR.ReadInt32 ()]; 
+			int n = 0;
+			while (MS.Position < MS.Length) {
+				objects [n] = Deserialize (BR);
+				n++;
 			}
+			return objects;
 		}
 
-		protected Frontend (ValueSerializerBase valueDeserializer)
+		public abstract void Serialize (object obj, System.IO.BinaryWriter binaryWriter);
+
+		public byte[] SerializeArray (object[] objects)
 		{
-			if (valueDeserializer == null)
-				throw new ArgumentNullException ("valueDeserializer");
-			this.valueDeserializer = valueDeserializer;
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
+					BW.Write (objects.Length);
+					foreach (object obj in objects) {
+						Serialize (obj, BW);
+					}
+					return MS.ToArray ();
+				}
+			}
 		}
 	}
 }

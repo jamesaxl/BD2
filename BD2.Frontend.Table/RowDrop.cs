@@ -25,39 +25,75 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
+using BD2.Core;
+using System.IO;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Frontend.Table
 {
-	public abstract	class ColumnSetConverter
+	public sealed class RowDrop : BaseDataObjectVersion
 	{
-		public abstract object[] Convert (object[] data, ColumnSet inColumnSet, ColumnSet outColumnSet);
+		readonly Row row;
 
-		System.Collections.Generic.IEnumerable<ColumnSet> inColumnSets;
-
-		public System.Collections.Generic.IEnumerable<ColumnSet> InColumnSets {
+		public Row Row {
 			get {
-				return inColumnSets;
+				return row;
 			}
 		}
 
-		System.Collections.Generic.IEnumerable<ColumnSet> outColumnSets;
-
-		public System.Collections.Generic.IEnumerable<ColumnSet> OutColumnSets {
-			get {
-				return outColumnSets;
-			}
-		}
-
-		protected ColumnSetConverter (System.Collections.Generic.IEnumerable<ColumnSet> inColumnSets, System.Collections.Generic.IEnumerable<ColumnSet> outColumnSets)
+		public RowDrop (byte[] id,
+		                byte[] chunkID,
+		                BaseDataObject baseDataObject,
+		                
+		                Row  row)
+			: base (id, chunkID, baseDataObject)
 		{
-			if (inColumnSets == null)
-				throw new ArgumentNullException ("inColumnSets");
-			if (outColumnSets == null)
-				throw new ArgumentNullException ("outColumnSets");
-			this.inColumnSets = inColumnSets;
-			this.outColumnSets = outColumnSets;
-
+			if (row == null)
+				throw new ArgumentNullException ("row");
+			this.row = row;
 		}
+
+		#region implemented abstract members of Serializable
+
+		public static RowDrop Deserialize (DataContext dataContext,
+		                                   byte[] id,
+		                                   byte[] chunkID,
+		                                   BaseDataObject baseDataObject,
+		                                   byte[] buffer)
+		{
+			using (MemoryStream MS = new MemoryStream (buffer)) {
+				using (BinaryReader BR = new BinaryReader (MS)) {
+					return new RowDrop (id, chunkID, baseDataObject, dataContext.GetRowByID (BR.ReadBytes (32)));
+				}
+			}
+		}
+
+		public override void Serialize (Stream stream, EncryptedStorageManager encryptedStorageManager)
+		{
+			using (BinaryWriter BW = new BinaryWriter (stream)) {
+				BW.Write (row.BaseDataObject.ObjectID);
+			}
+		}
+
+		#endregion
+
+		#region implemented abstract members of BaseDataObject
+
+		public override Guid ObjectType {
+			get {
+				return Guid.Parse ("1ede8774-cdd5-4d88-bce2-daa9af54aa51");
+			}
+		}
+
+		#endregion
+
+		#region implemented abstract members of BaseDataObject
+
+		public override System.Collections.Generic.IEnumerable<BaseDataObjectVersion> GetDependenies ()
+		{
+			yield return row;
+		}
+
+		#endregion
 	}
 }
 

@@ -33,8 +33,8 @@ namespace BD2.Conv.Frontend.Table
 	public class Client
 	{
 		SortedDictionary<Guid, Table> tableDataRequests;
-		BD2.Core.Frontend frontend;
-		BD2.Core.Frontend[] frontends;
+		BD2.Core.FrontendBase frontend;
+		BD2.Core.FrontendBase[] frontends;
 		BD2.Core.Database db;
 		BD2.Core.Snapshot ss;
 		BD2.Frontend.Table.FrontendInstance frontendInstance;
@@ -86,7 +86,7 @@ namespace BD2.Conv.Frontend.Table
 			typeIDs.Add (typeof(DateTime), 12);
 			tableDataRequests = new SortedDictionary<Guid, Table> ();
 			frontend = new BD2.Frontend.Table.Frontend (new BD2.Frontend.Table.GenericValueDeserializer ());
-			frontends = new BD2.Core.Frontend[] { frontend };
+			frontends = new BD2.Core.FrontendBase[] { frontend };
 			db = new BD2.Core.Database (new BD2.Chunk.ChunkRepository[] { repo }, frontends, new byte[]{ }, databaseName);
 			ss = db.GetSnapshot ("Primary");
 			frontendInstance = (BD2.Frontend.Table.FrontendInstance)frontend.GetInstanse (ss);

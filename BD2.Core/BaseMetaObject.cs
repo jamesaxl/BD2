@@ -1,4 +1,4 @@
-// /*
+﻿// /*
 //  * Copyright (c) 2014 Behrooz Amoozad
 //  * All rights reserved.
 //  *
@@ -24,29 +24,51 @@
 //  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  * */
-
 using System;
-using System.Security.Cryptography;
 using System.Collections.Generic;
-using System.IO;
-using BD2.Core;
-using System.Net.Security;
 
 namespace BD2.Core
 {
-	[Serializable]
-	public sealed class UserRepositoryConfiguration
+	public abstract class BaseMetaObject : Serializable
 	{
-		public string UsersPath = "Users";
-		public string UserKeysPath = "UserKeys";
-		public string UserCertsPath = "UserCerts";
-		public string UserSigningKeysPath = "UserSigningKeys";
-		public string UserSigningCertsPath = "UserSigningCerts";
-		public string UserParentsPath = "UserParents";
-		public string UserRepositoresPath = "UserRepositories";
-		public string RepositoresPath = "Repositories";
-		public string MetaPath = "Meta";
-		public string PermissionsPath = "Permissions";
+		readonly FrontendInstanceBase frontendInstanceBase;
+		readonly byte[] objectID;
+		readonly byte[] chunkID;
+
+		public abstract Guid ObjectType { get; }
+
+		public abstract IEnumerable<BaseMetaObject> GetDependenies ();
+
+		public FrontendInstanceBase FrontendInstanceBase {
+			get {
+				return frontendInstanceBase;
+			}
+		}
+
+		public byte[] ObjectID {
+			get {
+				return objectID;
+			}
+		}
+
+		public byte[] ChunkID {
+			get {
+				return chunkID;
+			}
+		}
+
+		protected BaseMetaObject (FrontendInstanceBase frontendInstanceBase, byte[] objectID, byte[] chunkID)
+		{
+			if (frontendInstanceBase == null)
+				throw new ArgumentNullException ("frontendInstanceBase");
+			if (objectID == null)
+				throw new ArgumentNullException ("objectID");
+			if (chunkID == null)
+				throw new ArgumentNullException ("chunkID");
+			this.frontendInstanceBase = frontendInstanceBase;
+			this.objectID = objectID;
+			this.chunkID = chunkID;
+		}
 	}
-	
 }
+

@@ -46,7 +46,7 @@ namespace BD2.Core
 
 		readonly UserRepository userStorage;
 		readonly SortedDictionary<byte[], ChunkRepository> dataStorage = new SortedDictionary<byte[], ChunkRepository> ();
-		readonly SortedDictionary<string, Frontend> frontends = new SortedDictionary<string, Frontend> ();
+		readonly SortedDictionary<string, FrontendBase> frontends = new SortedDictionary<string, FrontendBase> ();
 		readonly SortedSet<FrontendInstanceBase> frontendInstances = new SortedSet<FrontendInstanceBase> ();
 		readonly EncryptedStorageManager encryptedStorageManager;
 
@@ -87,12 +87,14 @@ namespace BD2.Core
 								, sk.Value));
 					}
 					ChunkRepository cr = new ChunkRepository (
-						                     cri.GetStorage<byte[][]> (dbp, "Dependencies"),
 						                     cri.GetStorage<byte[]> (dbp, "Data"),
+						                     cri.GetStorage<byte[][]> (dbp, "TopLevels"),
+						                     cri.GetStorage<byte[][]> (dbp, "Dependencies"),
+						                     cri.GetStorage<byte[]> (dbp, "Meta"),
+						                     cri.GetStorage<byte[][]> (dbp, "MetaTopLevels"),
+						                     cri.GetStorage<byte[][]> (dbp, "MetaDependencies"),
 						                     cri.GetStorage<byte[][]> (dbp, "Signatures"),
 						                     cri.GetStorage<byte[][]> (dbp, "Chunk Symmetric Keys"),
-						                     cri.GetStorage<byte[][]> (dbp, "TopLevels"),
-						                     cri.GetStorage<byte[]> (dbp, "Meta"),
 						                     cri.GetStorage<byte[]> (dbp, "Index"),
 						                     EncryptedData);
 					dataStorage.Add (cr.ID, cr);
@@ -102,7 +104,7 @@ namespace BD2.Core
 			return v;
 		}
 
-		public Frontend GetFrontend (string frontendName)
+		public FrontendBase GetFrontend (string frontendName)
 		{
 			if (frontendName == null)
 				throw new ArgumentNullException ("frontendName");
@@ -110,14 +112,14 @@ namespace BD2.Core
 		}
 
 
-		public Database (UserRepository userStorage, IEnumerable<Frontend> frontends)
+		public Database (UserRepository userStorage, IEnumerable<FrontendBase> frontends)
 		{
 			if (userStorage == null)
 				throw new ArgumentNullException ("userStorage");
 			if (frontends == null)
 				throw new ArgumentNullException ("frontends");
 			this.userStorage = userStorage;
-			this.frontends = new SortedDictionary<string, Frontend> ();
+			this.frontends = new SortedDictionary<string, FrontendBase> ();
 			foreach (var f in frontends) {
 				if (f == null)
 					throw new ArgumentException ("Has at least one null item", "frontends");
@@ -164,7 +166,7 @@ namespace BD2.Core
 				foreach (var tup in new SortedDictionary<byte[], byte[]>(pendingData, BD2.Core.ByteSequenceComparer.Shared)) {
 					//Console.WriteLine ("Testing object");
 					byte[] nchunk = tup.Key;
-					byte[][] deps = cr.Ldependencies.Get (nchunk);
+					byte[][] deps = cr.LdataDependencies.Get (nchunk);
 					if (deps == null)
 						throw new InvalidDataException ();
 					Console.WriteLine ("dependency count = {0}", deps.Length);
@@ -311,9 +313,7 @@ namespace BD2.Core
 			Console.WriteLine ("Writing {0} bytes representing {1} objects to backend", MS.Length, n);
 			byte[] buf = MS.ToArray ();
 			byte[] chunkID = sha.ComputeHash (buf);
-			dataStorage [DefaultStorage].Ldata.Put (chunkID, buf);
-			dataStorage [DefaultStorage].Ldependencies.Put (chunkID, deps);
-			dataStorage [DefaultStorage].Lsignatures.Put (chunkID, userStorage.Sign (chunkID));
+			dataStorage [DefaultStorage].Push (chunkID, buf, deps, userStorage.Sign (chunkID));
 			foreach (var bdo in objects) {
 				bdo.SetChunkID (chunkID);
 			}

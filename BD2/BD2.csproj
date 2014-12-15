@@ -97,10 +97,6 @@
       <Project>{F1659C24-EB5A-4980-9891-6FCDE3FB496D}</Project>
       <Name>BD2.Frontend.Table.Linq</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj">
-      <Project>{A4059B19-5E63-468E-9AE0-6D55AFD9775E}</Project>
-      <Name>BD2.Frontend.Table.Model</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Frentend.TextStream\BD2.Frontend.TextStream.csproj">
       <Project>{19E7BB88-BD82-4428-B256-6B8A7C8682B3}</Project>
       <Name>BD2.Frontend.TextStream</Name>

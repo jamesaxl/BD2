@@ -24,266 +24,81 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
-using System;
-using System.IO;
-using System.Collections.Generic;
-using BD2.Chunk;
+using BD2.Core;
 
 namespace BD2.Repo.File
 {
-	public class Repository : ChunkRepository
+	public class KeyValueStorage<T> :  BD2.Core.KeyValueStorage<T>
 	{
-		#region implemented abstract members of ChunkRepository
+		#region implemented abstract members of KeyValueStorage
 
-		public override SortedDictionary<byte[], string> GetUsers ()
+		public override void Initialize ()
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override void AddUser (byte[] id, string name)
+		public override void Dispose ()
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override void PushIndex (byte[] index, byte[] value)
+		public override System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<byte[], T>> GetEnumerator ()
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override void PushSegment (byte[] chunkID, byte[] value)
+		public override System.Collections.Generic.IEnumerator<byte[]> EnumerateKeys ()
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override void PushKey (byte[] keyID, byte[] value)
+		public override System.IAsyncResult BeginPut (byte[] key, T value)
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override void PushPrivateKey (byte[] keyID, byte[] value)
+		public override System.IAsyncResult BeginGet (byte[] key)
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override void PushSignatures (byte[] chunkID, SortedDictionary<byte[], byte[]> sigList)
+		public override System.IAsyncResult BeginDelete (byte[] key)
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override byte[] PullIndex (byte[] index)
+		public override void Put (byte[] key, T value)
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override void PushRawProxyData (byte[] index, byte[] value)
+		public override T Get (byte[] key)
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override byte[] PullRawProxyData (byte[] index)
+		public override void Delete (byte[] key)
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override void Push (byte[] chunkID, byte[] data, byte[] segment, byte[][] dependencies)
+		public override void EndPut (System.IAsyncResult asyncResult)
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override byte[] PullData (byte[] chunkID)
+		public override T EndGet (System.IAsyncResult asyncResult)
 		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public override byte[] PullSegment (byte[] chunkID)
+		public override void EndDelete (System.IAsyncResult asyncResult)
 		{
-			throw new NotImplementedException ();
-		}
-
-		public override byte[] PullKey (byte[] keyID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override byte[] PullPrivateKey (byte[] keyID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override SortedDictionary<byte[], byte[]> PullSignatures (byte[] chunkID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override byte[][] PullDependencies (byte[] chunkID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override void Pull (byte[] chunkID, out byte[] data, out byte[] segment, out byte[][] dependencies)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateData ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateRawProxyData ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<byte[]> EnumerateTopLevels ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateDependencies ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override IEnumerable<Tuple<byte[], byte[][]>> EnumerateTopLevelDependencies ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override int GetLeastCost (int currentMinimum, byte[] chunkID)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override int GetMaxCostForAny ()
-		{
-			throw new NotImplementedException ();
+			throw new System.NotImplementedException ();
 		}
 
 		#endregion
 
-		SortedSet<byte[]> publicChunks;
-		Mono.Data.Sqlite.SqliteConnection Base;
-		string path;
-		string name;
 
-		public string Name {
-			get {
-				return name;
-			}
-		}
-
-		Guid id;
-
-		public Repository (IEnumerable<ChunkRepositoryCollection> Repos, string Path, string Name)
-			: base (Repos)
-		{
-			if (Name == null)
-				throw new ArgumentNullException ("Name");
-			if (Path == null)
-				throw new ArgumentNullException ("Path");
-			publicChunks = new SortedSet<byte[]> ();
-			path = Path;
-			name = Name;
-			string FPath = Path + System.IO.Path.DirectorySeparatorChar + Name;
-			bool Exists = System.IO.File.Exists (FPath);
-			if (!Exists)
-				System.IO.File.Create (FPath);
-			Base = new Mono.Data.Sqlite.SqliteConnection ("Data Source=" + FPath);
-			if (!Exists) {
-				try {
-					id = Guid.NewGuid ();
-					Base.Open ();
-					using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand (
-						                                              "CREATE TABLE CHUNKS(" +
-						                                              "ID BLOB(64) NOT NULL, " +
-						                                              "Path TEXT(400) NOT NULL)", Base))
-						Comm.ExecuteNonQuery ();
-					using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand (
-						                                              "CREATE TABLE ATTRIBUTES(" +
-						                                              "NAME TEXT(128) PRIMARY KEY NOT NULL, " +
-						                                              "VALUE BLOB(1024) NOT NULL)", Base))
-						Comm.ExecuteNonQuery ();
-					using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand (
-						                                              "INSERT INTO ATTRIBUTES(" +
-						                                              "NAME, " +
-						                                              "VALUE) VALUES('ID', @p0)", Base)) {
-						Comm.Parameters.AddWithValue ("p0", ID.ToByteArray ());
-						Comm.ExecuteNonQuery ();
-					}
-				} catch (Exception) {
-					if (Base != null) {
-						if (Base.State == System.Data.ConnectionState.Open) {
-							Base.Close ();
-						}
-						Base.Dispose ();
-					}
-					throw;
-				}
-			} else
-				Base.Open ();
-		}
-
-		~Repository ()
-		{
-			Base.Close ();
-			Base.Dispose ();
-		}
-
-		public  void Push (byte[] ChunkDescriptor, byte[] Data)
-		{
-			if (ChunkDescriptor == null)
-				throw new ArgumentNullException ("ChunkDescriptor");
-			//TODO:FIX
-			string NName = "TODO:FIX";//ChunkDescriptor.ToHexadecimal ();
-			string FPath = path + System.IO.Path.DirectorySeparatorChar + NName;
-			System.IO.File.WriteAllBytes (FPath, Data);
-			using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand ("INSERT INTO Files (ID, Name, Hash, Attributes) VALUES (@p0,@p1,@p2,@p3)", Base)) {
-				Comm.Parameters.AddWithValue ("p0", ChunkDescriptor);
-				Comm.Parameters.AddWithValue ("p1", NName);
-				Comm.Parameters.AddWithValue ("p2", null);
-				Comm.ExecuteNonQuery ();
-			}
-
-		}
-
-		public  byte[] Pull (byte[] ChunkDescriptor)
-		{
-			using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand ("SELECT PATH FROM CHUNKS WHERE ID = @p0", Base)) {
-				Comm.Parameters.AddWithValue ("p0", ChunkDescriptor);
-				Mono.Data.Sqlite.SqliteDataReader DR = Comm.ExecuteReader ();
-				string NName = "TODO:FIX";//ChunkDescriptor.ToHexadecimal ();
-				string FPath = path + System.IO.Path.DirectorySeparatorChar + NName;
-				if (DR.Read ()) {
-					return System.IO.File.ReadAllBytes (FPath);
-				}
-				return null;
-			}
-		}
-
-		public override IEnumerable<byte[]> Enumerate ()
-		{
-			if (publicChunks == null) {
-				populatePublicChunks ();
-			}
-			return publicChunks;
-		}
-
-		void populatePublicChunks ()
-		{
-
-			publicChunks = new SortedSet<byte[]> ();
-		}
-
-		public override Guid ID {
-			get {
-				if (id == Guid.Empty)
-					using (Mono.Data.Sqlite.SqliteCommand Comm = new Mono.Data.Sqlite.SqliteCommand ("SELECT VALUE FROM ATTRIBUTES WHERE NAME = 'ID'", Base)) {
-						id = new Guid ((byte[])Comm.ExecuteScalar ());
-					}
-				return id;
-			}
-		}
- 
 	}
 }

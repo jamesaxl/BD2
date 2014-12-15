@@ -26,11 +26,12 @@
  * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Test.Daemon.Chat
 {
-	[ObjectBusMessageTypeIDAttribute("b4f471fa-f56c-44b0-88b8-714a3ab3427b")]
-	[ObjectBusMessageDeserializerAttribute(typeof(ChatMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("b4f471fa-f56c-44b0-88b8-714a3ab3427b")]
+	[ObjectBusMessageDeserializerAttribute (typeof(ChatMessage), "Deserialize")]
 	public class ChatMessage : ObjectBusMessage
 	{
 
@@ -55,7 +56,9 @@ namespace BD2.Test.Daemon.Chat
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -71,6 +74,7 @@ namespace BD2.Test.Daemon.Chat
 				return Guid.Parse ("b4f471fa-f56c-44b0-88b8-714a3ab3427b");
 			}
 		}
+
 		#endregion
 	}
 }

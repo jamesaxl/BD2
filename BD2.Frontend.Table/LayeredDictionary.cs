@@ -72,7 +72,9 @@ namespace BD2.Frontend.Table
 						count--;
 					}
 				}
+				return true;
 			}
+			return false;
 		}
 
 		public bool TryGetValue (TKey key, out TValue value)
@@ -137,11 +139,13 @@ namespace BD2.Frontend.Table
 		{
 			if (overlay.Remove (item)) {
 				if (count != -1) {
-					if (baseDictionary.ContainsKey (item)) {
+					if (baseDictionary.Contains (item)) {
 						count--;
 					}
 				}
+				return true;
 			}
+			return false;
 		}
 
 		public int Count {

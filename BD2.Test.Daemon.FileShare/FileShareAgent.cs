@@ -27,6 +27,7 @@
 using System;
 using BD2.Daemon;
 using System.IO;
+using BD2.Daemon.Buses;
 
 namespace BD2.Test.Daemon.FileShare
 {
@@ -36,7 +37,7 @@ namespace BD2.Test.Daemon.FileShare
 		System.Collections.Concurrent.ConcurrentQueue<FileShareMessage> files = new System.Collections.Concurrent.ConcurrentQueue<FileShareMessage> ();
 
 		FileShareAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, bool run)
-			:base(serviceAgentMode, objectBusSession, flush, run)
+			: base (serviceAgentMode, objectBusSession, flush, run)
 		{
 			objectBusSession.RegisterType (typeof(FileShareMessage), FileShareMessageReceived);
 		}
@@ -57,7 +58,9 @@ namespace BD2.Test.Daemon.FileShare
 		{
 			ObjectBusSession.SendMessage (new FileShareMessage (text, CreateStream (File.Open (text, FileMode.Open))));
 		}
+
 		#region implemented abstract members of ServiceAgent
+
 		protected override void Run ()
 		{
 			try {
@@ -96,6 +99,7 @@ namespace BD2.Test.Daemon.FileShare
 		{
 			Thread.Abort ();
 		}
+
 		#endregion
 	}
 }

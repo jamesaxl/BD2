@@ -25,44 +25,24 @@
   * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * */
 using System;
-using System.Collections.Generic;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Frontend.Table
 {
-	public abstract class ValueSerializerBase
+	public sealed class GenericColumnSetConverter : ColumnSetConverter
 	{
-		public abstract byte TypeToID (Type type);
+		Func<object[], ColumnSet, ColumnSet, object[]> convertFunc;
 
-		public abstract Type IDToType (byte id);
-
-		public abstract object Deserialize (System.IO.BinaryReader binaryReader);
-
-		public object[] DeserializeArray (byte[] buffer)
+		public override object[] Convert (object[] data, ColumnSet inColumnSet, ColumnSet outColumnSet)
 		{
-			System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer);
-			System.IO.BinaryReader BR = new System.IO.BinaryReader (MS);
-			object[] objects = new object[BR.ReadInt32 ()]; 
-			int n = 0;
-			while (MS.Position < MS.Length) {
-				objects [n] = Deserialize (BR);
-				n++;
-			}
-			return objects;
+			return convertFunc (data, inColumnSet, outColumnSet);
 		}
 
-		public abstract void Serialize (object obj, System.IO.BinaryWriter binaryWriter);
-
-		public byte[] SerializeArray (object[] objects)
+		public GenericColumnSetConverter (System.Collections.Generic.IEnumerable<ColumnSet> inColumnSets, System.Collections.Generic.IEnumerable<ColumnSet> outColumnSets, Func<object[], ColumnSet, ColumnSet, object[]> convertFunc)
+			: base (inColumnSets, outColumnSets)
 		{
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
-				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
-					BW.Write (objects.Length);
-					foreach (object obj in objects) {
-						Serialize (obj, BW);
-					}
-					return MS.ToArray ();
-				}
-			}
+			if (convertFunc == null)
+				throw new ArgumentNullException ("convertFunc");
+			this.convertFunc = convertFunc;
 		}
 	}
 }

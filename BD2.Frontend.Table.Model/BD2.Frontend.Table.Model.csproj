@@ -34,20 +34,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Column.cs" />
-    <Compile Include="ColumnSet.cs" />
-    <Compile Include="IndexBase.cs" />
-    <Compile Include="IndexColumnBase.cs" />
-    <Compile Include="Relation.cs" />
-    <Compile Include="Row.cs" />
-    <Compile Include="Table.cs" />
-    <Compile Include="RowDrop.cs" />
-    <Compile Include="Frontend.cs" />
-    <Compile Include="FrontendInstance.cs" />
-    <Compile Include="ColumnSetConverter.cs" />
-    <Compile Include="ValueSerializerBase.cs" />
-    <Compile Include="GenericColumnSetConverter.cs" />
-    <Compile Include="DataContext.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

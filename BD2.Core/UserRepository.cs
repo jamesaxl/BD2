@@ -31,15 +31,21 @@ using System.IO;
 using BD2.Core;
 using Mono.Security.Cryptography;
 using System.IO.MemoryMappedFiles;
+using System.Configuration;
+using System.Security.AccessControl;
+using System.CodeDom.Compiler;
 
 namespace BD2.Core
 {
 	public sealed class UserRepository
 	{
-		readonly KeyValueStorage<string> usernames;
-		readonly KeyValueStorage<byte[]> usercerts;
-		readonly KeyValueStorage<byte[]> userkeys;
-		readonly KeyValueStorage<byte[][]> userrepositories;
+		readonly KeyValueStorage<string> userNames;
+		readonly KeyValueStorage<byte[]> userParents;
+		readonly KeyValueStorage<byte[]> userCerts;
+		readonly KeyValueStorage<byte[]> userKeys;
+		readonly KeyValueStorage<byte[]> userSigningCerts;
+		readonly KeyValueStorage<byte[]> userSigningKeys;
+		readonly KeyValueStorage<byte[][]> userRepositories;
 		readonly KeyValueStorage<byte[]> repositories;
 		readonly KeyValueStorage<byte[]> meta;
 		//readonly KeyValueStorage<byte[]> permissions;
@@ -61,26 +67,32 @@ namespace BD2.Core
 
 		//readonly DatabasePath path;
 
-		public UserRepository (DatabasePath path, Stream configuration)
+		public UserRepository (DatabasePath path, UserRepositoryConfiguration config)
 		{
 			if (path == null)
 				throw new ArgumentNullException ("path");
-			//this.path = path;
-			System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer (typeof(UserRepositoryConfiguration));
-			UserRepositoryConfiguration config = (UserRepositoryConfiguration)xmls.Deserialize (configuration);
-			usernames = new LevelDBKeyValueStorage<string> (path.CreatePath (config.UsersPath));
-			usercerts = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserCertsPath));
-			userkeys = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserKeysPath));
-			userrepositories = new LevelDBKeyValueStorage<byte[][]> (path.CreatePath (config.UserRepositoresPath));
+			if (config == null)
+				throw new ArgumentNullException ("config");
+
+			Console.WriteLine ("*");
+			userNames = new LevelDBKeyValueStorage<string> (path.CreatePath (config.UsersPath));
+			userParents = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserParentsPath));
+			userCerts = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserCertsPath));
+			userKeys = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserKeysPath));
+			userSigningCerts = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserSigningCertsPath));
+			userSigningKeys = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserSigningKeysPath));
+			userRepositories = new LevelDBKeyValueStorage<byte[][]> (path.CreatePath (config.UserRepositoresPath));
 			repositories = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.RepositoresPath));
 			meta = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.MetaPath));
 			//permissions = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.PermissionsPath));
 			genericRepositories = new SortedDictionary<byte[], GenericUserRepositoryCollection> ();
 			loggedInUsers = new SortedDictionary<byte[], RSAParameters> ();
-			foreach (var user in usernames) {
+			Console.WriteLine ("*");
+			foreach (var user in userNames) {
+				Console.WriteLine ("*");
 				genericRepositories.Add (user.Key, 
 					new GenericUserRepositoryCollection (path.CreatePath (user.Key.ToHexadecimal ()),
-						DeserializeKey (new MemoryStream (usercerts.Get (user.Key), false))
+						DeserializeKey (new MemoryStream (userCerts.Get (user.Key), false))
 					)
 				);
 			}
@@ -88,7 +100,7 @@ namespace BD2.Core
 
 		public IEnumerable<KeyValuePair<byte[], string>> GetUsers ()
 		{
-			return usernames;
+			return userNames;
 		}
 
 		public bool Login (byte[] userID, string password, string pepper)
@@ -117,7 +129,7 @@ namespace BD2.Core
 		{
 			if (userID == null)
 				throw new ArgumentNullException ("userID");
-			return userrepositories.Get (userID);
+			return userRepositories.Get (userID);
 		}
 
 		public byte[] GetRawRepositoryInfo (byte[] repositoryID)
@@ -144,7 +156,7 @@ namespace BD2.Core
 				throw new ArgumentNullException ("newPassword");
 			if (pepper == null)
 				throw new ArgumentNullException ("pepper");
-			byte[] privateKeyRaw = userkeys.Get (userID);
+			byte[] privateKeyRaw = userKeys.Get (userID);
 
 			{//verify password
 				System.IO.MemoryStream memoryStream = new System.IO.MemoryStream (privateKeyRaw);
@@ -170,7 +182,7 @@ namespace BD2.Core
 			streamO.FlushFinalBlock ();
 
 			byte[] newKeyRaw = newKeyStream.ToArray ();
-			userkeys.Put (userID, newKeyRaw);
+			userKeys.Put (userID, newKeyRaw);
 			return true;
 		}
 
@@ -222,7 +234,7 @@ namespace BD2.Core
 		{
 			if (userID == null)
 				throw new ArgumentNullException ("userID");
-			byte[] pubKeyRaw = usercerts.Get (userID);
+			byte[] pubKeyRaw = userCerts.Get (userID);
 			MemoryStream memoryStream = new MemoryStream (pubKeyRaw);
 			var pubKey = DeserializeKey (memoryStream);
 			return pubKey;
@@ -236,12 +248,36 @@ namespace BD2.Core
 				throw new ArgumentNullException ("password");
 			if (pepper == null)
 				throw new ArgumentNullException ("pepper");
-			byte[] privateKeyRaw = userkeys.Get (userID);
+			byte[] privateKeyRaw = userKeys.Get (userID);
 			MemoryStream memoryStream = new MemoryStream (privateKeyRaw);
-			Stream cryptoStream = CreateCryptoStream (memoryStream, userID, password, pepper, CryptoStreamMode.Read);
-			RSAParameters privateKey = DeserializeKey (cryptoStream);
-			return privateKey;
+			//try deserializing without auth// means first login
+			try {
+				RSAParameters rsap = DeserializeKey (new MemoryStream (privateKeyRaw));
+				try {
+					MemoryStream newKeyStream = new MemoryStream ();
+					Rijndael newPassRij = CreateRijndael (userID, password, pepper);
+					MemoryStream streamI = new MemoryStream (privateKeyRaw);
+					CryptoStream streamO = new CryptoStream (newKeyStream, newPassRij.CreateEncryptor (), CryptoStreamMode.Write);
+					var buffer = new byte[1024];
+					var read = streamI.Read (buffer, 0, buffer.Length);
+					while (read > 0) {
+						streamO.Write (buffer, 0, read);
+						read = streamI.Read (buffer, 0, buffer.Length);
+					}
+					streamO.FlushFinalBlock ();
 
+					byte[] newKeyRaw = newKeyStream.ToArray ();
+					userKeys.Put (userID, newKeyRaw);
+				} catch (Exception ex) {
+					Console.Error.WriteLine ("Exception trying to set user password for first time.");
+					throw ex;
+				}
+				return rsap;
+			} catch {
+				Stream cryptoStream = CreateCryptoStream (memoryStream, userID, password, pepper, CryptoStreamMode.Read);
+				RSAParameters privateKey = DeserializeKey (cryptoStream);
+				return privateKey;
+			}
 		}
 
 		public byte[] Sign (byte[] data, byte[] userID)
@@ -269,7 +305,35 @@ namespace BD2.Core
 			}
 			return rv.ToArray ();
 		}
-	
+
+		public void CreateUser (string name, byte[] parentID)
+		{
+			byte[] userID = new byte[32];
+			RandomNumberGenerator.Create ().GetBytes (userID);
+			Console.Write ("User ID:");
+			foreach (byte b in userID)
+				Console.Write (" {0:X2}", b);
+			Console.WriteLine ();
+
+			using (var rsa = new RSACryptoServiceProvider (2048)) {
+				using (var rsaSign = new RSACryptoServiceProvider (2048)) {
+					try {
+						userNames.Put (userID, name);
+						if (parentID != null) {
+							userParents.Put (userID, parentID);
+						}
+						userKeys.Put (userID, System.Text.Encoding.Unicode.GetBytes (rsa.ToXmlString (true)));
+						userCerts.Put (userID, System.Text.Encoding.Unicode.GetBytes (rsa.ToXmlString (false)));
+						userSigningKeys.Put (userID, System.Text.Encoding.Unicode.GetBytes (rsaSign.ToXmlString (true)));
+						userSigningCerts.Put (userID, System.Text.Encoding.Unicode.GetBytes (rsaSign.ToXmlString (false)));
+
+					} finally {
+						rsa.PersistKeyInCsp = false;
+						rsaSign.PersistKeyInCsp = false;
+					}
+				}
+			}
+		}
 	}
 }
 

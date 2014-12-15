@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Behrooz Amoozad
+ * Copyright (c) 2014 Behrooz Amoozad
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,27 +24,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
-using BD2.Core;
 using System;
+using System.Collections.Generic;
+using BD2.LockManager;
 
-namespace BD2.Frontend.Table.Model
+namespace BD2.Core
 {
-	public abstract class Table : BaseDataObjectVersion
+	public abstract class FrontendBase : IComparable
 	{
+		Database database;
+
+		public Database Database {
+			get {
+				return database;
+			}
+			internal set {
+				database = value;
+			}
+		}
+
+		protected FrontendBase ()
+		{
+		}
+		//For comparison 'only' just to make things smoother in case of needing to sort or search or whatever somewhere.
+		Guid id = Guid.NewGuid ();
+
+		public int CompareTo (object obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException ("obj");
+			FrontendBase f = obj as FrontendBase;
+			if (obj == null)
+				throw new ArgumentException ("Argument obj must be of type Frontend.", "obj");
+			return f.id.CompareTo (id);
+		}
+
 		public abstract string Name { get; }
 
-		protected Table (Guid id,
-		                 byte[] chunkID,
-		                 BaseDataObject baseDataObject,
-		                 byte[][] previousVersionChunkIDs,
-		                 BaseDataObjectVersion[] previousVersions)
-			: base (id,
-			        chunkID,
-			        baseDataObject,
-			        previousVersionChunkIDs,
-			        previousVersions)
-		{
-
-		}
+		public abstract FrontendInstanceBase GetInstanse (DataContext dataContext);
 	}
 }

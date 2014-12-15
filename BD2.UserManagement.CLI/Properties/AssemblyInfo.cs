@@ -24,48 +24,30 @@
 //  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  * */
-using System;
-using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
-namespace BD2.Frontend.Table.Model
-{
-	public abstract class DataContext
-	{
-		public DataContext ()
-		{
-		}
+// Information about this assembly is defined by the following attributes.
+// Change them to the values specific to your project.
 
-		public abstract ColumnSet GetColumnSet (Column[] columns);
+[assembly: AssemblyTitle ("BD2.UserManagement.CLI")]
+[assembly: AssemblyDescription ("")]
+[assembly: AssemblyConfiguration ("")]
+[assembly: AssemblyCompany ("")]
+[assembly: AssemblyProduct ("")]
+[assembly: AssemblyCopyright ("Behrooz Amoozad")]
+[assembly: AssemblyTrademark ("")]
+[assembly: AssemblyCulture ("")]
 
-		public abstract Column GetColumn (string name, Type type, bool allowNull, long length);
+// The assembly version has the format "{Major}.{Minor}.{Build}.{Revision}".
+// The form "{Major}.{Minor}.*" will automatically update the build and revision,
+// and "{Major}.{Minor}.{Build}.*" will update just the revision.
 
-		public abstract Table GetTable (string name);
+[assembly: AssemblyVersion ("1.0.*")]
 
-		public abstract IEnumerable<Row> GetRows (Table table, ColumnSet columnSet, Column[] columns, object[] match);
+// The following attributes are used to specify the signing key for the assembly,
+// if desired. See the Mono documentation for more information about signing.
 
-		public abstract IEnumerable<Row> GetRows (Table table);
-
-		public abstract ValueSerializerBase ValueSerializer { get; }
-
-		public abstract Column GetColumnByID (byte[] id);
-
-		public abstract Table GetTableByID (byte[] id);
-
-		public abstract Row GetRowByID (byte[] id);
-
-		public abstract ColumnSet GetColumnSetByID (byte[] id);
-
-		public abstract Relation GetRelationByID (byte[] id);
-
-		public abstract IndexBase GetIndexByID (byte[] id);
-
-		public abstract IEnumerable<Table> GetTables ();
-
-		public abstract IEnumerable<ColumnSet> GetColumnSets ();
-
-		public abstract IEnumerable<Row> GetRows ();
-
-		public abstract IEnumerable<Relation> GetParentRelations (Table table);
-	}
-}
+//[assembly: AssemblyDelaySign(false)]
+//[assembly: AssemblyKeyFile("")]
 

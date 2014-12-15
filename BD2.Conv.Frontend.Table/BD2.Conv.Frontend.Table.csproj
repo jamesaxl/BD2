@@ -85,10 +85,6 @@
       <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
       <Name>BD2.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj">
-      <Project>{A4059B19-5E63-468E-9AE0-6D55AFD9775E}</Project>
-      <Name>BD2.Frontend.Table.Model</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Model\" />

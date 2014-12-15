@@ -32,17 +32,15 @@ namespace BD2.Core
 	public abstract class FrontendInstanceBase
 	{
 
-		public abstract BaseDataObjectManager CreateObjectManager ();
+		FrontendBase frontend;
 
-		Frontend frontend;
-
-		public Frontend Frontend {
+		public FrontendBase Frontend {
 			get {
 				return frontend;
 			}
 		}
 
-		protected FrontendInstanceBase (Frontend frontend)
+		protected FrontendInstanceBase (FrontendBase frontend)
 		{
 			if (frontend == null)
 				throw new ArgumentNullException ("frontend");
@@ -55,11 +53,11 @@ namespace BD2.Core
 			OnCreateObjects (chunkID, bytes);
 		}
 
-		public abstract void Purge (BaseDataObject bdo);
+		//public abstract void Purge (BaseDataObject bdo);
 
 		protected abstract void OnCreateObjects (byte[] chunkID, byte[] bytes);
 
-		protected abstract BaseDataObject GetObjectWithID (byte[] objectID);
+		protected abstract BaseMetaObject GetObjectWithID (byte[] objectID);
 
 	}
 }

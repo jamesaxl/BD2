@@ -78,11 +78,6 @@ namespace BD2.Core
 			return new string (Result);
 		}
 
-		public static void WriteVersion (this System.IO.BinaryWriter BinaryWriter, short Major, short Minor)
-		{
-			BinaryWriter.Write (Major);
-			BinaryWriter.Write (Minor);
-		}
 
 		public static void Write (this System.IO.BinaryWriter BinaryWriter, short[] Params)
 		{

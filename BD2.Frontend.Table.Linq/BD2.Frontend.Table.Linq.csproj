@@ -40,10 +40,4 @@
     <Compile Include="OrderedQueryable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <ProjectReference Include="..\BD2.Frontend.Table.Model\BD2.Frontend.Table.Model.csproj">
-      <Project>{A4059B19-5E63-468E-9AE0-6D55AFD9775E}</Project>
-      <Name>BD2.Frontend.Table.Model</Name>
-    </ProjectReference>
-  </ItemGroup>
 </Project>
