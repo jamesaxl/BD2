@@ -31,55 +31,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="CSharpTest.Net.Library">
+      <HintPath>..\CSDN\csharptest-net\src\bin\CSharpTest.Net.Library.dll</HintPath>
+    </Reference>
+    <Reference Include="CSharpTest.Net.BPlusTree">
+      <HintPath>..\CSDN\csharptest-net\src\bin\CSharpTest.Net.BPlusTree.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Chunk.Daemon\BD2.Chunk.Daemon.csproj">
-      <Project>{C60A5077-8EFF-4791-8AA2-89A2EBE58653}</Project>
-      <Name>BD2.Chunk.Daemon</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.CLI\BD2.CLI.csproj">
-      <Project>{1BDB2273-537B-48F7-9317-1A1B8C6F1C62}</Project>
-      <Name>BD2.CLI</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
       <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
       <Name>BD2.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv\BD2.Conv.csproj">
-      <Project>{CFC2FE19-A495-44D1-9B56-E0FB316A6414}</Project>
-      <Name>BD2.Conv</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Daemon.DB4O\BD2.Conv.Daemon.DB4O.csproj">
-      <Project>{5B861B2E-347C-4E75-AC23-C05326E330C6}</Project>
-      <Name>BD2.Conv.Daemon.DB4O</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Daemon.MSSQL\BD2.Conv.Daemon.MSSQL.csproj">
-      <Project>{84598FAA-8E5D-47A9-9463-AFB5A5FAD28F}</Project>
-      <Name>BD2.Conv.Daemon.MSSQL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Daemon.Sqlite\BD2.Conv.Daemon.Sqlite.csproj">
-      <Project>{436AE80B-3AE2-448F-B0A4-2676449B7AC8}</Project>
-      <Name>BD2.Conv.Daemon.Sqlite</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Frontend.Raw\BD2.Conv.Frontend.Raw.csproj">
-      <Project>{1A0AF799-B4B8-44F9-8439-C1A7A595D5DB}</Project>
-      <Name>BD2.Conv.Frontend.Raw</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Frontend.Table\BD2.Conv.Frontend.Table.csproj">
-      <Project>{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}</Project>
-      <Name>BD2.Conv.Frontend.Table</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Generic.DataTranslator\BD2.Conv.Generic.DataTranslator.csproj">
-      <Project>{0E351074-E71D-449C-990C-93D93953D949}</Project>
-      <Name>BD2.Conv.Generic.DataTranslator</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Generic.TableNameTranslator\BD2.Conv.Generic.TableNameTranslator.csproj">
-      <Project>{DD766E91-87CB-432F-A0E5-065C5D8ADE30}</Project>
-      <Name>BD2.Conv.Generic.TableNameTranslator</Name>
     </ProjectReference>
     <ProjectReference Include="..\BD2.Core\BD2.Core.csproj">
       <Project>{8D352784-ED9B-4C46-A5E9-B2E32481E25B}</Project>
@@ -105,10 +71,6 @@
       <Project>{6938747E-45CF-4653-99C8-5D40E436E244}</Project>
       <Name>BD2.LockManager</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Repo.File\BD2.Repo.File.csproj">
-      <Project>{7C75502F-DF43-42E9-95F4-F00B5D3774D3}</Project>
-      <Name>BD2.Repo.File</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Repo.Net\BD2.Repo.Net.csproj">
       <Project>{EB2ADDC8-0A70-47DD-881F-B836FD48DE5D}</Project>
       <Name>BD2.Repo.Net</Name>
@@ -116,10 +78,6 @@
     <ProjectReference Include="..\leveldb-sharp\leveldb-sharp.csproj">
       <Project>{8DD96596-38AC-46DD-80C1-75D9EBE585EA}</Project>
       <Name>leveldb-sharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk.Daemon.BloomFilter\BD2.Chunk.Daemon.BloomFilter.csproj">
-      <Project>{8167365B-7849-434A-A5EA-62BE332F523C}</Project>
-      <Name>BD2.Chunk.Daemon.BloomFilter</Name>
     </ProjectReference>
     <ProjectReference Include="..\BD2.Test.Conv.MSSQL\BD2.Test.Conv.MSSQL.csproj">
       <Project>{FB276F98-934B-4E9C-A1DC-7F9CCA8AACA0}</Project>
@@ -133,14 +91,6 @@
       <Project>{175B36CF-8C71-4620-83BA-BC94885599FD}</Project>
       <Name>BD2.Test.Daemon.StreamPair</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Test.Frontend.Table\BD2.Test.Frontend.Table.csproj">
-      <Project>{472E06FA-66CA-4C61-90E7-14F8B7095F67}</Project>
-      <Name>BD2.Test.Frontend.Table</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Test.Repo.LevelDB\BD2.Test.Repo.LevelDB.csproj">
-      <Project>{1F62C8FD-73FA-4EA8-BBB7-0106EF6E292D}</Project>
-      <Name>BD2.Test.Repo.LevelDB</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Squad\Squad.csproj">
       <Project>{8179BF44-79F2-4A33-AA38-0872CCCBB85E}</Project>
       <Name>Squad</Name>
@@ -148,6 +98,10 @@
     <ProjectReference Include="..\BD2.Test.Daemon.FileShare\BD2.Test.Daemon.FileShare.csproj">
       <Project>{7ACADD24-C836-4A18-ABBD-3597C0A3BC04}</Project>
       <Name>BD2.Test.Daemon.FileShare</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BD2.UserManagement.CLI\BD2.UserManagement.CLI.csproj">
+      <Project>{791FFF64-1602-4D31-BCF5-FD8E3CBE5216}</Project>
+      <Name>BD2.UserManagement.CLI</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

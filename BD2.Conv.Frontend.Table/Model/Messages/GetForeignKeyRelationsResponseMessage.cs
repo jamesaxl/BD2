@@ -26,10 +26,11 @@
  * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Conv.Frontend.Table
 {
-	public class GetForeignKeyRelationsResponseMessage : BD2.Daemon.ObjectBusMessage
+	public class GetForeignKeyRelationsResponseMessage : ObjectBusMessage
 	{
 		Guid requestID;
 
@@ -84,14 +85,16 @@ namespace BD2.Conv.Frontend.Table
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
 				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (requestID.ToByteArray ());
 					BW.Write (foreignKeyRelations.Length);
-					for (int n =0; n != foreignKeyRelations.Length; n++) {
+					for (int n = 0; n != foreignKeyRelations.Length; n++) {
 						byte[] bytes = foreignKeyRelations [n].Serialize ();
 						BW.Write (bytes.Length);
 						BW.Write (bytes);
@@ -113,6 +116,7 @@ namespace BD2.Conv.Frontend.Table
 				return Guid.Parse ("716b9fbf-fab5-4c0e-abae-307f9895c6cc");
 			}
 		}
+
 		#endregion
 	}
 }

@@ -26,6 +26,7 @@
  * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Test.Daemon.Chat
 {
@@ -53,7 +54,7 @@ namespace BD2.Test.Daemon.Chat
 			ObjectBus OB = new ObjectBus (SH);
 			ServiceManager SM = new ServiceManager (OB);
 			if (modeName == "Server") {
-				SM.AnnounceService (new ServiceAnnounceMessage (Guid.NewGuid (), chatServiceAnouncementType, "Chat"), ChatAgent.CreateAgent);
+				SM.AnnounceService (new ServiceAnnounceMessage (Guid.NewGuid (), chatServiceAnouncementType, "Chat", null), ChatAgent.CreateAgent);
 				SM.AnounceReady ();
 			}
 			if (modeName == "Client") {

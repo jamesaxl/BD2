@@ -29,14 +29,12 @@ using System.Collections.Generic;
 
 namespace BD2.Core
 {
-	public abstract class KeyValueStorage<T> : IDisposable, IEnumerable<KeyValuePair<byte[], T>> where T : class
+	public abstract class KeyValueStorage<T> : IDisposable, IEnumerable<KeyValuePair<byte[], T>>
 	{
 
-		public abstract void Initialize ();
 
 		protected KeyValueStorage ()
 		{
-
 		}
 
 		#region IDisposable implementation
@@ -49,10 +47,6 @@ namespace BD2.Core
 
 		public abstract IEnumerator<KeyValuePair<byte[], T>> GetEnumerator ();
 
-		#endregion
-
-		#region IEnumerable implementation
-
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
 		{
 			return GetEnumerator ();
@@ -60,13 +54,21 @@ namespace BD2.Core
 
 		#endregion
 
+		public abstract void Initialize ();
+
+		/// <summary>
+		/// Inclusivly enumerates from start key to the end of the collection
+		/// </summary>
+		public abstract IEnumerable<KeyValuePair<byte[], T>> EnumerateFrom (byte[] start);
+
+		/// <summary>
+		/// Inclusivly enumerates from start key to stop key
+		/// </summary>
+		public abstract IEnumerable<KeyValuePair<byte[], T>> EnumerateRange (byte[] start, byte[] end);
+
 		public abstract IEnumerator<byte[]> EnumerateKeys ();
 
-		public abstract IAsyncResult BeginPut (byte[] key, T value);
-
-		public abstract IAsyncResult BeginGet (byte[] key);
-
-		public abstract IAsyncResult BeginDelete (byte[] key);
+		public abstract int Count { get ; }
 
 		public abstract void Put (byte[] key, T value);
 
@@ -74,11 +76,6 @@ namespace BD2.Core
 
 		public abstract void Delete (byte[] key);
 
-		public abstract void EndPut (IAsyncResult asyncResult);
-
-		public abstract T EndGet (IAsyncResult asyncResult);
-
-		public abstract void EndDelete (IAsyncResult asyncResult);
 	}
 }
 

@@ -29,11 +29,10 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using BD2.Core;
-using System.Security.Policy;
 
 namespace BD2.Core
 {
-	public sealed class LevelDBKeyValueStorage<T> : KeyValueStorage<T> where T : class
+	public sealed class LevelDBKeyValueStorage : KeyValueStorage<byte[]>
 	{
 		string path;
 		LevelDB.DB db;
@@ -61,8 +60,6 @@ namespace BD2.Core
 
 		public LevelDBKeyValueStorage (string path)
 		{
-			if (typeof(T) != typeof(byte[]) && typeof(T) != typeof(byte[][]) && typeof(T) != typeof(string))
-				throw new NotImplementedException ();
 			this.path = path;
 			db = OpenLevelDB (path);
 		}
@@ -84,54 +81,27 @@ namespace BD2.Core
 			db.Dispose ();
 		}
 
-		public override IEnumerator<KeyValuePair<byte[], T>> GetEnumerator ()
+		public override IEnumerator<KeyValuePair<byte[], byte[]>> GetEnumerator ()
 		{
 			var en = db.GetRawEnumerator ();
-			if (typeof(T) == typeof(byte[])) {
-				while (en.MoveNext ())
-					yield return new KeyValuePair<byte[], T> (en.Current.Key, en.Current.Value as T);
-			}
-			if (typeof(T) == typeof(byte[][])) {
-				while (en.MoveNext ())
-					yield return new KeyValuePair<byte[], T> (en.Current.Key, en.Current.Value.Expand () as T);
-			}
-			if (typeof(T) == typeof(string)) {
-				while (en.MoveNext ())
-					yield return new KeyValuePair<byte[], T> (en.Current.Key, System.Text.Encoding.Unicode.GetString (en.Current.Value) as T);
-			}
+			while (en.MoveNext ())
+				yield return new KeyValuePair<byte[], byte[]> (en.Current.Key, en.Current.Value);
 		}
 
-		public override void Put (byte[] key, T value)
+		public override void Put (byte[] key, byte[] value)
 		{
 			if (key == null)
 				throw new ArgumentNullException ("key");
 			if (value == null)
 				throw new ArgumentNullException ("value");
-			if (typeof(T) == typeof(byte[])) {
-				db.Put (key, value as byte[]);
-			}
-			if (typeof(T) == typeof(byte[][])) {
-				db.Put (key, (value as byte[][]).Combine ());
-			}
-			if (typeof(T) == typeof(string)) {
-				db.Put (key, System.Text.Encoding.Unicode.GetBytes (value as string));
-			}
+			db.Put (key, value as byte[]);
 		}
 
-		public override T Get (byte[] key)
+		public override byte[] Get (byte[] key)
 		{
 			if (key == null)
 				throw new ArgumentNullException ("key");
-			if (typeof(T) == typeof(byte[])) {
-				return db.GetRaw (key) as T;
-			}
-			if (typeof(T) == typeof(byte[][])) {
-				return db.GetRaw (key).Expand () as T;
-			}
-			if (typeof(T) == typeof(string)) {
-				return System.Text.Encoding.Unicode.GetString (db.GetRaw (key)) as T;
-			}
-			throw new NotSupportedException ();//never thrown
+			return db.GetRaw (key);
 		}
 
 		public override void Delete (byte[] key)
@@ -145,34 +115,20 @@ namespace BD2.Core
 
 		#region implemented abstract members of KeyValueStorage
 
-		public override IAsyncResult BeginPut (byte[] key, T value)
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateFrom (byte[] start)
 		{
-			throw new NotImplementedException ();
+			throw new NotSupportedException ();
 		}
 
-		public override IAsyncResult BeginGet (byte[] key)
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateRange (byte[] start, byte[] end)
 		{
-			throw new NotImplementedException ();
+			throw new NotSupportedException ();
 		}
 
-		public override IAsyncResult BeginDelete (byte[] key)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override void EndPut (IAsyncResult asyncResult)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override T EndGet (IAsyncResult asyncResult)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override void EndDelete (IAsyncResult asyncResult)
-		{
-			throw new NotImplementedException ();
+		public override int Count {
+			get {
+				throw new NotSupportedException ();
+			}
 		}
 
 		#endregion

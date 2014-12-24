@@ -48,10 +48,6 @@
       <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>
       <Name>BD2.Daemon</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Frontend.Table\BD2.Conv.Frontend.Table.csproj">
-      <Project>{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}</Project>
-      <Name>BD2.Conv.Frontend.Table</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Conv\BD2.Conv.csproj">
       <Project>{CFC2FE19-A495-44D1-9B56-E0FB316A6414}</Project>
       <Name>BD2.Conv</Name>

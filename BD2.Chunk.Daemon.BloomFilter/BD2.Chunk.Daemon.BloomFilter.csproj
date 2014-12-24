@@ -43,10 +43,6 @@
       <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
       <Name>BD2.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk.Daemon\BD2.Chunk.Daemon.csproj">
-      <Project>{C60A5077-8EFF-4791-8AA2-89A2EBE58653}</Project>
-      <Name>BD2.Chunk.Daemon</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Chunk.Daemon.Common\BD2.Chunk.Daemon.Common.csproj">
       <Project>{7759DDFD-E328-4788-B67C-6967E65811B6}</Project>
       <Name>BD2.Chunk.Daemon.Common</Name>

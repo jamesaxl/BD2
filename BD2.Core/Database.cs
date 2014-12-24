@@ -32,6 +32,8 @@ using BD2.Core;
 using System.Diagnostics.SymbolStore;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
+using System.Reflection.Emit;
+using System.Globalization;
 
 namespace BD2.Core
 {
@@ -49,6 +51,12 @@ namespace BD2.Core
 		readonly SortedDictionary<string, FrontendBase> frontends = new SortedDictionary<string, FrontendBase> ();
 		readonly SortedSet<FrontendInstanceBase> frontendInstances = new SortedSet<FrontendInstanceBase> ();
 		readonly EncryptedStorageManager encryptedStorageManager;
+
+		public UserRepository UserStorage {
+			get {
+				return userStorage;
+			}
+		}
 
 		public SortedDictionary<byte[], ChunkRepository> DataStorage {
 			get {
@@ -69,6 +77,16 @@ namespace BD2.Core
 			return userStorage.GetUsers ();
 		}
 
+		public bool VerifyPassword (byte[] userID, string password, string pepper)
+		{
+			return userStorage.VerifyPassword (userID, password, pepper);
+		}
+
+		DatabasePath GetRepositoryPath (byte[] ID)
+		{
+			return new DatabasePath (ID.ToHexadecimal ());
+		}
+
 		public bool Login (byte[] userID, string password, string pepper)
 		{
 			if (userStorage.LoggedInUsers.Contains (userID))
@@ -77,27 +95,39 @@ namespace BD2.Core
 			if (v) {
 				foreach (var ur in userStorage.GetUserRepositories (userID)) {
 					byte[] repoInfo = userStorage.GetRawRepositoryInfo (ur);
-					System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer (typeof(ChunkRepositoryInfo));
-					ChunkRepositoryInfo cri = (ChunkRepositoryInfo)xmls.Deserialize (new System.IO.MemoryStream (repoInfo, false));
-					DatabasePath dbp = new DatabasePath (cri.BasePath);
-					SortedDictionary<byte[], KeyValueStorage<byte[]>> EncryptedData = new SortedDictionary<byte[], KeyValueStorage<byte[]>> ();
-					foreach (var sk in userStorage.GetUserRepository (ur).SymmetricKeys) {
-						EncryptedData.Add (sk.Key, new AESEncryptingKeyValueStorage (
-							new LevelDBKeyValueStorage<byte[]> (dbp.CreatePath ("Encrypted").CreatePath (sk.Key.ToHexadecimal ()))
+					System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer (typeof(ChunkRepositoryConfiguration));
+					ChunkRepositoryConfiguration cri = (ChunkRepositoryConfiguration)xmls.Deserialize (new MemoryStream (repoInfo, false));
+					DatabasePath dbp = GetRepositoryPath (cri.ID);
+					if (dataStorage.ContainsKey (ur)) {
+						foreach (var sk in userStorage.GetUserRepository (ur).SymmetricKeys) {
+							if (!dataStorage [ur].LencryptedData.ContainsKey (sk.Key)) {
+								dataStorage [ur].LencryptedData.Add (sk.Key, new AESEncryptingKeyValueStorage (
+									new LevelDBKeyValueStorage (dbp.CreatePath ("Encrypted").CreatePath (sk.Key.ToHexadecimal ()))
 								, sk.Value));
+							}
+						}
+					} else {
+						SortedDictionary<byte[], KeyValueStorage<byte[]>> EncryptedData = new SortedDictionary<byte[], KeyValueStorage<byte[]>> ();
+						foreach (var sk in userStorage.GetUserRepository (ur).SymmetricKeys) {
+							KeyValueStorageConfiguration ESC = new KeyValueStorageConfiguration ();
+							ESC.Type = cri.Data.Type;
+							ESC.Path = sk.Key.ToHexadecimal ();
+							EncryptedData.Add (sk.Key, new AESEncryptingKeyValueStorage (
+								ESC.OpenStorage<byte[]> (dbp.CreatePath ("Encrypted")), sk.Value));
+						}
+						ChunkRepository cr = new ChunkRepository (
+							                     cri.Data.OpenStorage<byte[]> (dbp),
+							                     cri.TopLevels.OpenStorage<byte[][]> (dbp),
+							                     cri.Dependencies.OpenStorage<byte[][]> (dbp),
+							                     cri.Meta.OpenStorage<byte[]> (dbp),
+							                     cri.MetaTopLevels.OpenStorage<byte[][]> (dbp),
+							                     cri.MetaDependencies.OpenStorage<byte[][]> (dbp),
+							                     cri.Signatures.OpenStorage<byte[][]> (dbp),
+							                     cri.ChunkSymmetricKeys.OpenStorage<byte[][]> (dbp),
+							                     cri.Index.OpenStorage<byte[]> (dbp),
+							                     EncryptedData);
+						dataStorage.Add (cr.ID, cr);
 					}
-					ChunkRepository cr = new ChunkRepository (
-						                     cri.GetStorage<byte[]> (dbp, "Data"),
-						                     cri.GetStorage<byte[][]> (dbp, "TopLevels"),
-						                     cri.GetStorage<byte[][]> (dbp, "Dependencies"),
-						                     cri.GetStorage<byte[]> (dbp, "Meta"),
-						                     cri.GetStorage<byte[][]> (dbp, "MetaTopLevels"),
-						                     cri.GetStorage<byte[][]> (dbp, "MetaDependencies"),
-						                     cri.GetStorage<byte[][]> (dbp, "Signatures"),
-						                     cri.GetStorage<byte[][]> (dbp, "Chunk Symmetric Keys"),
-						                     cri.GetStorage<byte[]> (dbp, "Index"),
-						                     EncryptedData);
-					dataStorage.Add (cr.ID, cr);
 					//encryptedStorageManager.Add (ur, new EncryptedStorageManager (cr, userStorage));
 				}
 			}
@@ -120,12 +150,15 @@ namespace BD2.Core
 				throw new ArgumentNullException ("frontends");
 			this.userStorage = userStorage;
 			this.frontends = new SortedDictionary<string, FrontendBase> ();
+			DataContext dc = new NullDataContext ();
 			foreach (var f in frontends) {
 				if (f == null)
 					throw new ArgumentException ("Has at least one null item", "frontends");
 				this.frontends.Add (f.Name, f);
+				frontendInstances.Add (f.GetInstanse (dc));
 			}
 			encryptedStorageManager = new EncryptedStorageManager (userStorage);
+
 		}
 
 	
@@ -152,6 +185,7 @@ namespace BD2.Core
 					LoadRepository (crt.Value);
 					repos.Add (crt.Key, crt.Value);
 				}
+
 		}
 
 		void LoadRepository (ChunkRepository cr)

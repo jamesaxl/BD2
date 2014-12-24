@@ -26,11 +26,12 @@
  * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Test.Daemon.StreamPair
 {
-	[ObjectBusMessageTypeIDAttribute("7e152319-ee6f-4094-a55b-7ab222825c28")]
-	[ObjectBusMessageDeserializerAttribute(typeof(StreamPairMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("7e152319-ee6f-4094-a55b-7ab222825c28")]
+	[ObjectBusMessageDeserializerAttribute (typeof(StreamPairMessage), "Deserialize")]
 	public class StreamPairMessage : ObjectBusMessage
 	{
 
@@ -55,7 +56,9 @@ namespace BD2.Test.Daemon.StreamPair
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -71,6 +74,7 @@ namespace BD2.Test.Daemon.StreamPair
 				return Guid.Parse ("7e152319-ee6f-4094-a55b-7ab222825c28");
 			}
 		}
+
 		#endregion
 	}
 }

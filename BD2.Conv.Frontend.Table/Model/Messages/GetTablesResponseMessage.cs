@@ -26,11 +26,12 @@
  * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Conv.Frontend.Table
 {
-	[ObjectBusMessageTypeIDAttribute("f8c300c2-6198-49a8-a8aa-0ab4125c419f")]
-	[ObjectBusMessageDeserializerAttribute(typeof(GetTablesResponseMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("f8c300c2-6198-49a8-a8aa-0ab4125c419f")]
+	[ObjectBusMessageDeserializerAttribute (typeof(GetTablesResponseMessage), "Deserialize")]
 	public class GetTablesResponseMessage : ObjectBusMessage
 	{
 		Guid requestID;
@@ -94,7 +95,9 @@ namespace BD2.Conv.Frontend.Table
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -130,6 +133,7 @@ namespace BD2.Conv.Frontend.Table
 				return Guid.Parse ("f8c300c2-6198-49a8-a8aa-0ab4125c419f");
 			}
 		}
+
 		#endregion
 	}
 }

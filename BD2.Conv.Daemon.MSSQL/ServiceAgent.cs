@@ -30,6 +30,7 @@ using BD2.Daemon;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using BD2.Daemon.Buses;
 
 namespace BD2.Conv.Daemon.MSSQL
 {
@@ -42,7 +43,7 @@ namespace BD2.Conv.Daemon.MSSQL
 		//SortedDictionary<Guid, Column> columns = new SortedDictionary<Guid, Column> ();
 		//SortedDictionary<int, SortedDictionary<string,Column>> tableColumns = new SortedDictionary<int, SortedDictionary<string, Column>> ();
 		ServiceAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, ServiceParameters parameters)
-			:base(serviceAgentMode, objectBusSession, flush, false)
+			: base (serviceAgentMode, objectBusSession, flush, false)
 		{
 			if (serviceAgentMode != ServiceAgentMode.Server)
 				throw new Exception ("This service agent can only be run in server mode.");
@@ -118,34 +119,34 @@ namespace BD2.Conv.Daemon.MSSQL
 			Console.WriteLine (table.Name);
 			try {
 
-			SqlConnection conn_Rows = new SqlConnection (connectionString);
-			try {
-				conn_Rows.Open ();
-			} catch {                    //retry once
-				conn_Rows.Open ();
-			}
+				SqlConnection conn_Rows = new SqlConnection (connectionString);
+				try {
+					conn_Rows.Open ();
+				} catch {                    //retry once
+					conn_Rows.Open ();
+				}
 
-			SqlCommand cmdSelect = new SqlCommand (string.Format ("Select * from [{0}]", table.Name), conn_Rows);
-			cmdSelect.CommandTimeout *= 30; 
-			response = new GetRowsResponseMessage (request.ID, readRowsData (conn_Rows, cmdSelect, cmdSelect.ExecuteReader (), table), null);
+				SqlCommand cmdSelect = new SqlCommand (string.Format ("Select * from [{0}]", table.Name), conn_Rows);
+				cmdSelect.CommandTimeout *= 30; 
+				response = new GetRowsResponseMessage (request.ID, readRowsData (conn_Rows, cmdSelect, cmdSelect.ExecuteReader (), table), null);
 			} catch (Exception ex) {
-				response = new GetRowsResponseMessage (request.ID, new List<BD2.Conv.Frontend.Table.Row>(), ex);
+				response = new GetRowsResponseMessage (request.ID, new List<BD2.Conv.Frontend.Table.Row> (), ex);
 			}
 			ObjectBusSession.SendMessage (response);
 			Console.WriteLine ("Sent GetRowsResponseMessage.");
 		}
 
-		List<BD2.Conv.Frontend.Table.Row> readRowsData(SqlConnection connection, SqlCommand command, SqlDataReader reader, Table table)
+		List<BD2.Conv.Frontend.Table.Row> readRowsData (SqlConnection connection, SqlCommand command, SqlDataReader reader, Table table)
 		{
 			Console.WriteLine ("readRowsData()");
 			List<BD2.Conv.Frontend.Table.Row> rows = new List<BD2.Conv.Frontend.Table.Row> ();
 			object[] values;
 			//SortedDictionary<string, Column> table = tableColumns [context.Table.SqlTableID];
 			string[] rowTFQNs = new string[reader.FieldCount];
-			BD2.Conv.Frontend.Table.Column[] cols =  new BD2.Conv.Frontend.Table.Column[reader.FieldCount];
+			BD2.Conv.Frontend.Table.Column[] cols = new BD2.Conv.Frontend.Table.Column[reader.FieldCount];
 			for (int n = 0; n != reader.FieldCount; n++) {
 				cols [n] = psc.GetColumnByName (table, reader.GetName (n));
-				rowTFQNs [n] = cols[n].TFQN;
+				rowTFQNs [n] = cols [n].TFQN;
 			}
 			int rc = 0;
 			ColumnSet columnSet = new ColumnSet (cols);
@@ -160,6 +161,7 @@ namespace BD2.Conv.Daemon.MSSQL
 			connection.Close ();
 			return rows;
 		}
+
 		void GetForeignKeyRelationsRequestMessageReceived (ObjectBusMessage obj)
 		{
 			Console.WriteLine ("GetForeignKeyRelationsRequestMessageReceived()");
@@ -172,32 +174,34 @@ namespace BD2.Conv.Daemon.MSSQL
 			}
 			ObjectBusSession.SendMessage (response);
 		}
-		SortedSet<ForeignKeyRelation> getForeignKeyRelations(){
+
+		SortedSet<ForeignKeyRelation> getForeignKeyRelations ()
+		{
 			Console.WriteLine ("getForeignKeyRelations()");
 			SortedSet<ForeignKeyRelation> foreignKeyRelations = new SortedSet<ForeignKeyRelation> ();
-			const string FetchForeignKeyRelation = "SELECT\n" + 
-				"    fk.name 'FK Name',\n" + 
-				"    tp.object_id 'Parent Table ID',\n" + 
-				"    tp.name 'Parent Table Name',\n" + 
-				"    cp.name 'Parent Column Name', cp.column_id 'Parent Column ID',\n" + 
-				"    tr.object_id 'Child Table ID',\n" + 
-				"    tr.name 'Child Table Name',\n" + 
-				"    cr.name 'Child Column Name', cr.column_id 'Child Column ID'\n" + 
-				"FROM \n" + 
-				"    sys.foreign_keys fk\n" + 
-				"INNER JOIN \n" + 
-				"    sys.tables tp ON fk.parent_object_id = tp.object_id\n" + 
-				"INNER JOIN \n" + 
-				"    sys.tables tr ON fk.referenced_object_id = tr.object_id\n" + 
-				"INNER JOIN \n" + 
-				"    sys.foreign_key_columns fkc ON fkc.constraint_object_id = fk.object_id\n" + 
-				"INNER JOIN \n" + 
-				"    sys.columns cp ON fkc.parent_column_id = cp.column_id AND fkc.parent_object_id = cp.object_id\n" + 
-				"INNER JOIN \n" + 
-				"    sys.columns cr ON fkc.referenced_column_id = cr.column_id AND fkc.referenced_object_id = cr.object_id\n" + 
-				"ORDER BY\n" + 
-				"    tp.name, cp.column_id";
-			using (IDbConnection conn_foreignKeyRelations = new SqlConnection(connectionString)) {
+			const string FetchForeignKeyRelation = "SELECT\n" +
+			                                       "    fk.name 'FK Name',\n" +
+			                                       "    tp.object_id 'Parent Table ID',\n" +
+			                                       "    tp.name 'Parent Table Name',\n" +
+			                                       "    cp.name 'Parent Column Name', cp.column_id 'Parent Column ID',\n" +
+			                                       "    tr.object_id 'Child Table ID',\n" +
+			                                       "    tr.name 'Child Table Name',\n" +
+			                                       "    cr.name 'Child Column Name', cr.column_id 'Child Column ID'\n" +
+			                                       "FROM \n" +
+			                                       "    sys.foreign_keys fk\n" +
+			                                       "INNER JOIN \n" +
+			                                       "    sys.tables tp ON fk.parent_object_id = tp.object_id\n" +
+			                                       "INNER JOIN \n" +
+			                                       "    sys.tables tr ON fk.referenced_object_id = tr.object_id\n" +
+			                                       "INNER JOIN \n" +
+			                                       "    sys.foreign_key_columns fkc ON fkc.constraint_object_id = fk.object_id\n" +
+			                                       "INNER JOIN \n" +
+			                                       "    sys.columns cp ON fkc.parent_column_id = cp.column_id AND fkc.parent_object_id = cp.object_id\n" +
+			                                       "INNER JOIN \n" +
+			                                       "    sys.columns cr ON fkc.referenced_column_id = cr.column_id AND fkc.referenced_object_id = cr.object_id\n" +
+			                                       "ORDER BY\n" +
+			                                       "    tp.name, cp.column_id";
+			using (IDbConnection conn_foreignKeyRelations = new SqlConnection (connectionString)) {
 				conn_foreignKeyRelations.Open ();
 				using (IDbCommand comm_foreignKeyRelations = conn_foreignKeyRelations.CreateCommand ()) {
 					comm_foreignKeyRelations.CommandText = FetchForeignKeyRelation;
@@ -238,7 +242,7 @@ namespace BD2.Conv.Daemon.MSSQL
 							lastFKName = FKName;
 						}
 						if (FKName != null) {
-							foreignKeyRelations.Add (new ForeignKeyRelation (FKName, childIDs.ToArray(), parentIDs.ToArray()));
+							foreignKeyRelations.Add (new ForeignKeyRelation (FKName, childIDs.ToArray (), parentIDs.ToArray ()));
 						}
 					}
 				}
@@ -255,7 +259,7 @@ namespace BD2.Conv.Daemon.MSSQL
 				Console.WriteLine ("deleting data from provious operations.");
 				returnTables.Clear ();
 			}
-			using (IDbConnection conn_tables = new SqlConnection(connectionString)) {
+			using (IDbConnection conn_tables = new SqlConnection (connectionString)) {
 				conn_tables.Open ();
 				using (IDbCommand comm_tables = conn_tables.CreateCommand ()) {
 					string ListTablesQuery = string.Format (FetchTable, "sys.tables");
@@ -267,7 +271,7 @@ namespace BD2.Conv.Daemon.MSSQL
 							int TableID = reader_tables.GetInt32 (IdFieldOrdinal_tables);
 							string TableName = reader_tables.GetString (NameFieldOrdinal_tables);
 							Table table = new Table (Guid.NewGuid (), TableName, TableID);
-							Console.WriteLine ("table name: {0}",TableName);
+							Console.WriteLine ("table name: {0}", TableName);
 							returnTables.Add (table);
 							tables.Add (table.SqlTableID, table);
 							psc.AddTable (table);
@@ -280,8 +284,8 @@ namespace BD2.Conv.Daemon.MSSQL
 
 		SortedSet<Column> getColumns (int tableID)
 		{
-			SortedSet<Column> returnColumns =  new SortedSet<Column> ();
-			using (IDbConnection conn_columns = new SqlConnection(connectionString)) {
+			SortedSet<Column> returnColumns = new SortedSet<Column> ();
+			using (IDbConnection conn_columns = new SqlConnection (connectionString)) {
 				conn_columns.Open ();
 				using (IDbCommand comm_columns = conn_columns.CreateCommand ()) {
 					const string ListColumnsQuery = "Select * from sys.columns where object_id = @id";

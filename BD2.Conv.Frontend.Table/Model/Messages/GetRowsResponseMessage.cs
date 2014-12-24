@@ -26,11 +26,12 @@
  * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Conv.Frontend.Table
 {
-	[ObjectBusMessageTypeIDAttribute("cfbb5332-deee-4a6b-9a36-fbe3ee447bc2")]
-	[ObjectBusMessageDeserializerAttribute(typeof(GetRowsResponseMessage), "Deserialize")]
+	[ObjectBusMessageTypeIDAttribute ("cfbb5332-deee-4a6b-9a36-fbe3ee447bc2")]
+	[ObjectBusMessageDeserializerAttribute (typeof(GetRowsResponseMessage), "Deserialize")]
 	public class GetRowsResponseMessage : ObjectBusMessage
 	{
 		Guid requestID;
@@ -76,7 +77,7 @@ namespace BD2.Conv.Frontend.Table
 					int rc = BR.ReadInt32 ();
 					Console.WriteLine ("Response contains {0} rows", rc);
 					System.Collections.Generic.List<BD2.Conv.Frontend.Table.Row> rows = new  System.Collections.Generic.List<BD2.Conv.Frontend.Table.Row> ();
-					for (int n  = 0; n != rc; n++) {
+					for (int n = 0; n != rc; n++) {
 						Row r = Row.Deserialize (BR.ReadBytes (BR.ReadInt32 ()));
 						rows.Add (r);
 					}
@@ -94,7 +95,9 @@ namespace BD2.Conv.Frontend.Table
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -124,6 +127,7 @@ namespace BD2.Conv.Frontend.Table
 				return Guid.Parse ("cfbb5332-deee-4a6b-9a36-fbe3ee447bc2");
 			}
 		}
+
 		#endregion
 	}
 }

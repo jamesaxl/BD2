@@ -53,29 +53,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BD2.Chunk.Daemon\BD2.Chunk.Daemon.csproj">
-      <Project>{C60A5077-8EFF-4791-8AA2-89A2EBE58653}</Project>
-      <Name>BD2.Chunk.Daemon</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BD2.Common\BD2.Common.csproj">
       <Project>{FEC92D6C-810E-47D2-A4F1-0E2854DDEB2B}</Project>
       <Name>BD2.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Chunk.Daemon.BloomFilter\BD2.Chunk.Daemon.BloomFilter.csproj">
-      <Project>{8167365B-7849-434A-A5EA-62BE332F523C}</Project>
-      <Name>BD2.Chunk.Daemon.BloomFilter</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Frontend.Table\BD2.Conv.Frontend.Table.csproj">
-      <Project>{074EB447-0B49-4DEE-8B1F-DEB3DC8E095F}</Project>
-      <Name>BD2.Conv.Frontend.Table</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv\BD2.Conv.csproj">
-      <Project>{CFC2FE19-A495-44D1-9B56-E0FB316A6414}</Project>
-      <Name>BD2.Conv</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Daemon.MSSQL\BD2.Conv.Daemon.MSSQL.csproj">
-      <Project>{84598FAA-8E5D-47A9-9463-AFB5A5FAD28F}</Project>
-      <Name>BD2.Conv.Daemon.MSSQL</Name>
     </ProjectReference>
     <ProjectReference Include="..\BD2.Daemon\BD2.Daemon.csproj">
       <Project>{0395A016-3F02-4D16-904D-868CA51EF1B0}</Project>
@@ -96,14 +76,6 @@
     <ProjectReference Include="..\BD2.Repo.File\BD2.Repo.File.csproj">
       <Project>{7C75502F-DF43-42E9-95F4-F00B5D3774D3}</Project>
       <Name>BD2.Repo.File</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Daemon.Sqlite\BD2.Conv.Daemon.Sqlite.csproj">
-      <Project>{436AE80B-3AE2-448F-B0A4-2676449B7AC8}</Project>
-      <Name>BD2.Conv.Daemon.Sqlite</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BD2.Conv.Daemon.DB4O\BD2.Conv.Daemon.DB4O.csproj">
-      <Project>{5B861B2E-347C-4E75-AC23-C05326E330C6}</Project>
-      <Name>BD2.Conv.Daemon.DB4O</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

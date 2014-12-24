@@ -26,11 +26,12 @@
   * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Conv.Frontend.Table
 {
-	[ObjectBusMessageTypeID("836928ae-af11-40d6-b6cc-580a35ec684c")]
-	[ObjectBusMessageDeserializer(typeof(GetSupportedObjectTypesReqestMessage), "Deserialize")]
+	[ObjectBusMessageTypeID ("836928ae-af11-40d6-b6cc-580a35ec684c")]
+	[ObjectBusMessageDeserializer (typeof(GetSupportedObjectTypesReqestMessage), "Deserialize")]
 	public class GetSupportedObjectTypesReqestMessage : ObjectBusMessage
 	{
 		Guid id;
@@ -48,13 +49,15 @@ namespace BD2.Conv.Frontend.Table
 
 		public static ObjectBusMessage Deserialize (byte[] buffer)
 		{
-			using (System.IO.MemoryStream MS  = new System.IO.MemoryStream (buffer,false)) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (buffer, false)) {
 				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					return new GetSupportedObjectTypesReqestMessage (new Guid (BR.ReadBytes (16)));
 				}
 			}
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
 			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
@@ -70,6 +73,7 @@ namespace BD2.Conv.Frontend.Table
 				return Guid.Parse ("836928ae-af11-40d6-b6cc-580a35ec684c");
 			}
 		}
+
 		#endregion
 	}
 }

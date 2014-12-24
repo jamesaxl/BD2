@@ -36,7 +36,7 @@ namespace BD2.Conv.Frontend.Table
 		BD2.Core.FrontendBase frontend;
 		BD2.Core.FrontendBase[] frontends;
 		BD2.Core.Database db;
-		BD2.Core.Snapshot ss;
+		BD2.Core.DataContext ss;
 		BD2.Frontend.Table.FrontendInstance frontendInstance;
 		System.Collections.Concurrent.ConcurrentDictionary<Table, System.Collections.Concurrent.BlockingCollection<Column>> tableColumns;
 		SortedDictionary<Guid, Tuple<Table, List<Column>>> tables;

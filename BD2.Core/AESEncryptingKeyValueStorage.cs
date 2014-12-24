@@ -27,7 +27,6 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Xml;
 
 namespace BD2.Core
 {
@@ -55,6 +54,7 @@ namespace BD2.Core
 				throw new ArgumentNullException ("key");
 			this.baseStorage = baseStorage;
 			this.key = key;
+			Initialize ();
 		}
 
 		#region implemented abstract members of KeyValueStorage
@@ -128,34 +128,28 @@ namespace BD2.Core
 			baseStorage.Delete (key);
 		}
 
-		public override IAsyncResult BeginPut (byte[] key, byte[] value)
+		#endregion
+
+		#region implemented abstract members of KeyValueStorage
+
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateFrom (byte[] start)
 		{
-			return baseStorage.BeginPut (key, Encrypt (value));
+			foreach (var t in baseStorage.EnumerateFrom (start)) {
+				yield return new KeyValuePair<byte[], byte[]> (t.Key, Decrypt (t.Value));
+			}
 		}
 
-		public override IAsyncResult BeginGet (byte[] key)
+		public override IEnumerable<KeyValuePair<byte[], byte[]>> EnumerateRange (byte[] start, byte[] end)
 		{
-			return baseStorage.BeginGet (key);
+			foreach (var t in baseStorage.EnumerateRange (start, end)) {
+				yield return new KeyValuePair<byte[], byte[]> (t.Key, Decrypt (t.Value));
+			}
 		}
 
-		public override IAsyncResult BeginDelete (byte[] key)
-		{
-			return baseStorage.BeginDelete (key);
-		}
-
-		public override void EndPut (IAsyncResult asyncResult)
-		{
-			baseStorage.EndPut (asyncResult);
-		}
-
-		public override byte[] EndGet (IAsyncResult asyncResult)
-		{
-			return Decrypt (baseStorage.EndGet (asyncResult));
-		}
-
-		public override void EndDelete (IAsyncResult asyncResult)
-		{
-			baseStorage.EndDelete (asyncResult);
+		public override int Count {
+			get {
+				return baseStorage.Count;
+			}
 		}
 
 		#endregion

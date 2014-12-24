@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>BD2.UserManagement.CLI</RootNamespace>
     <AssemblyName>BD2.UserManagement.CLI</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <StartupObject>BD2.UserManagement.CLI.MainClass</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>

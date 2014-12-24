@@ -26,6 +26,7 @@
  * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Test.Daemon.Chat
 {
@@ -40,7 +41,7 @@ namespace BD2.Test.Daemon.Chat
 
 		public static ServiceAgent CreateAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, byte[] parameters)
 		{
-			return new ChatAgent (serviceAgentMode, objectBusSession, flush, true);
+			return new ChatAgent (serviceAgentMode, objectBusSession, flush);
 		}
 
 		void ChatMessageReceived (ObjectBusMessage message)

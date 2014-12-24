@@ -1,4 +1,4 @@
-// /*
+﻿// /*
 //  * Copyright (c) 2014 Behrooz Amoozad
 //  * All rights reserved.
 //  *
@@ -24,29 +24,65 @@
 //  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  * */
-
 using System;
-using System.Security.Cryptography;
+using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.IO;
-using BD2.Core;
-using System.Net.Security;
 
 namespace BD2.Core
 {
 	[Serializable]
-	public sealed class UserRepositoryConfiguration
+	public class KeyValueStorageConfiguration
 	{
-		public KeyValueStorageConfiguration Users = new KeyValueStorageConfiguration ("Users", "BPlus");
-		public KeyValueStorageConfiguration UserKeys = new KeyValueStorageConfiguration ("UserKeys", "BPlus");
-		public KeyValueStorageConfiguration UserCerts = new KeyValueStorageConfiguration ("UserCerts", "BPlus");
-		public KeyValueStorageConfiguration UserSigningKeys = new KeyValueStorageConfiguration ("UserSigningKeys", "BPlus");
-		public KeyValueStorageConfiguration UserSigningCerts = new KeyValueStorageConfiguration ("UserSigningCerts", "BPlus");
-		public KeyValueStorageConfiguration UserParents = new KeyValueStorageConfiguration ("UserParents", "BPlus");
-		public KeyValueStorageConfiguration UserRepositores = new KeyValueStorageConfiguration ("UserRepositories", "BPlus");
-		public KeyValueStorageConfiguration Repositores = new KeyValueStorageConfiguration ("Repositories", "BPlus");
-		public KeyValueStorageConfiguration Meta = new KeyValueStorageConfiguration ("Meta", "BPlus");
-		public KeyValueStorageConfiguration Permissions = new KeyValueStorageConfiguration ("Permissions", "BPlus");
+		readonly static SortedDictionary<string, Func<DatabasePath, string, Type, object>> fns = new  SortedDictionary<string, Func<DatabasePath, string, Type, object>> ();
+
+		static KeyValueStorageConfiguration ()
+		{
+			fns.Add ("BPlus", (Path, Name, OutType) => {
+				BPlusKeyValueStorage bpkvs = new BPlusKeyValueStorage (Path, Name);
+				if (OutType == typeof(byte[]))
+					return bpkvs;
+				if (OutType == typeof(byte[][]))
+					return new Byte2EncodingKeyValueStorage (bpkvs);
+				if (OutType == typeof(string))
+					return new StringEncodingKeyValueStorage (bpkvs);
+				throw new NotSupportedException ();
+			});
+			fns.Add ("LevelDB", (Path, Name, OutType) => {
+				LevelDBKeyValueStorage lkvs = new LevelDBKeyValueStorage (Path);
+				if (OutType == typeof(byte[]))
+					return lkvs;
+				if (OutType == typeof(byte[][]))
+					return new Byte2EncodingKeyValueStorage (lkvs);
+				if (OutType == typeof(string))
+					return new StringEncodingKeyValueStorage (lkvs);
+				throw new NotSupportedException ();
+			});
+		}
+
+		public string Type;
+		public string Path;
+
+		public static void AddType<T> (string type, Func<DatabasePath, string, Type, KeyValueStorage<T>> fn)
+		{
+			lock (fns)
+				fns.Add (type, fn);
+		}
+
+		public KeyValueStorage<T> OpenStorage<T> (DatabasePath path)
+		{
+			lock (fns)
+				return (KeyValueStorage<T>)fns [Type].Invoke (path, Path, typeof(T));
+		}
+
+		public KeyValueStorageConfiguration ()
+		{
+		}
+
+		public KeyValueStorageConfiguration (string path, string type)
+		{
+			this.Path = path;
+			this.Type = type;
+		}
 	}
-	
 }
+

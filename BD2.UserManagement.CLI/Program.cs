@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using BD2.Core;
 using BD2.Core.KEx;
 using System.Linq;
+using System.ComponentModel;
 
 namespace BD2.UserManagement.CLI
 {
@@ -83,16 +84,32 @@ namespace BD2.UserManagement.CLI
 				SortedSet<string> CommandModifiers = new SortedSet<string> (commandparts.GetStrippedPart ());
 				switch (CommandParts [0]) {
 				case "Open":
-					UR = new UserRepository (new DatabasePath (Query ("path")), new UserRepositoryConfiguration ());
+					{
+						UR = new UserRepository (new DatabasePath (Query ("path")), new UserRepositoryConfiguration ());
+					}
 					break;
 				case "CreateAdmin":
-					UR.CreateUser (Query ("name"), null);
+					{
+						string name = Query ("name");
+						string password = Query ("Password");
+						string pepper = Query ("Pepper");
+						UR.CreateUser (name, password, pepper, null);
+					}
 					break;
 				case "Create":
-					string name = Query ("name");
-					byte[] parentID;
-					parentID = HexStringToByteArray (Query ("Parent").Replace (" ", "").Replace (":", ""));
-					UR.CreateUser (name, parentID);
+					{
+						string name = Query ("name");
+						string password = Query ("Password");
+						string pepper = (Query ("Pepper"));
+						byte[] parentID;
+						parentID = HexStringToByteArray (Query ("Parent").Replace (" ", "").Replace (":", ""));
+						UR.CreateUser (name, password, pepper, parentID);
+					}
+					break;
+				case "List":
+					foreach (var U in UR.GetUsers ()) {
+						Console.WriteLine ("{0}:{1}", U.Key.ToHexadecimal (), U.Value);
+					}
 					break;
 				case "Exit":
 					return;

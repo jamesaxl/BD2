@@ -1,5 +1,6 @@
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Conv
 {
@@ -8,7 +9,7 @@ namespace BD2.Conv
 		protected readonly Guid ListFrontendsMessageType = Guid.Parse ("b2daf4c6-cdf8-487a-900f-88144bae32e8");
 
 		protected DatabaseConnectionAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, bool run)
-			: base(serviceAgentMode, objectBusSession, flush, run)
+			: base (serviceAgentMode, objectBusSession, flush, run)
 		{
 		}
 	}

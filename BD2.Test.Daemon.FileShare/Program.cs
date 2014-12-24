@@ -26,6 +26,7 @@
  * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Test.Daemon.FileShare
 {
@@ -53,7 +54,7 @@ namespace BD2.Test.Daemon.FileShare
 			ObjectBus OB = new ObjectBus (SH);
 			ServiceManager SM = new ServiceManager (OB);
 			if (modeName == "Server") {
-				SM.AnnounceService (new ServiceAnnounceMessage (Guid.NewGuid (), fileShareServiceAnouncementType, "FileShare"), FileShareAgent.CreateAgent);
+				SM.AnnounceService (new ServiceAnnounceMessage (Guid.NewGuid (), fileShareServiceAnouncementType, "FileShare", null), FileShareAgent.CreateAgent);
 			}
 			if (modeName == "Client") {
 				foreach (ServiceAnnounceMessage RSA in SM.EnumerateRemoteServices ()) {

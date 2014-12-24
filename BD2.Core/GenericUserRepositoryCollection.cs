@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Net.NetworkInformation;
+using CSharpTest.Net.Collections;
 
 namespace BD2.Core
 {
@@ -94,10 +95,22 @@ namespace BD2.Core
 		{
 			//if (this.rsa == null) {
 			this.rsa = rsa;
-			symmetricKeys = new RSAEncryptingKeyValueStorage (eSymmetricKeys, rsa);
 			meta = new RSAEncryptingKeyValueStorage (eMeta, rsa);
-			repositoryConfigurations = new AESEncryptingKeyValueStorage (eRepositoryConfigurations, 
-				symmetricKeys.Get (meta.Get (System.Text.Encoding.Unicode.GetBytes ("RepositoryConfigurationsKeyID"))));
+			symmetricKeys = new RSAEncryptingKeyValueStorage (eSymmetricKeys, rsa);
+			try {
+				eMeta.Get (System.Text.Encoding.Unicode.GetBytes ("RepositoryConfigurationsKeyID").SHA256 ());
+			} catch {
+				byte[] id = new byte[32];
+				byte[] key = new byte[32];
+				RandomNumberGenerator rng = RandomNumberGenerator.Create ();
+				rng.GetBytes (id);
+				rng.GetBytes (key);
+				symmetricKeys.Put (id, key);
+				meta.Put (System.Text.Encoding.Unicode.GetBytes ("RepositoryConfigurationsKeyID").SHA256 (), id);
+			}
+			if (rsa.InverseQ != null)
+				repositoryConfigurations = new AESEncryptingKeyValueStorage (eRepositoryConfigurations,
+					symmetricKeys.Get (meta.Get (System.Text.Encoding.Unicode.GetBytes ("RepositoryConfigurationsKeyID").SHA256 ())));
 			//} else
 			//	throw new InvalidOperationException ();
 		}
@@ -108,9 +121,9 @@ namespace BD2.Core
 				throw new ArgumentNullException ("path");
 			this.path = path;
 			stores = new SortedDictionary<string, KeyValueStorage<byte[]>> ();
-			eSymmetricKeys = new LevelDBKeyValueStorage<byte[]> (path.CreatePath ("Symmetric Keys"));
-			eMeta = new LevelDBKeyValueStorage<byte[]> (path.CreatePath ("Meta"));
-			eRepositoryConfigurations = new LevelDBKeyValueStorage<byte[]> (path.CreatePath ("Repository Configurations"));
+			eSymmetricKeys = new BPlusKeyValueStorage (path, "SymmetricKeys");
+			eMeta = new BPlusKeyValueStorage (path, "Meta");
+			eRepositoryConfigurations = new BPlusKeyValueStorage (path, "RepositoryConfigurations");
 			if (rsa.HasValue)
 				SetRSAParameters (rsa.Value);
 		}
@@ -128,7 +141,7 @@ namespace BD2.Core
 		{
 			if (stores.ContainsKey (name))
 				return stores [name];
-			KeyValueStorage<byte[]> store = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (name));
+			KeyValueStorage<byte[]> store = new LevelDBKeyValueStorage (path.CreatePath (name));
 			System.IO.MemoryStream ms = new System.IO.MemoryStream (repositoryConfigurations.Get 
 				(System.Text.Encoding.Unicode.GetBytes (name)));
 			System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer (typeof(GenericUserRepositoryConfiguration));

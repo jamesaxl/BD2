@@ -97,34 +97,20 @@ namespace BD2.Core.NetworkKeyValueStorage
 
 		#region implemented abstract members of KeyValueStorage
 
-		public override IAsyncResult BeginPut (byte[] key, T value)
+		public override System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<byte[], T>> EnumerateFrom (byte[] start)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override IAsyncResult BeginGet (byte[] key)
+		public override System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<byte[], T>> EnumerateRange (byte[] start, byte[] end)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public override IAsyncResult BeginDelete (byte[] key)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override void EndPut (IAsyncResult asyncResult)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override T EndGet (IAsyncResult asyncResult)
-		{
-			throw new NotImplementedException ();
-		}
-
-		public override void EndDelete (IAsyncResult asyncResult)
-		{
-			throw new NotImplementedException ();
+		public override int Count {
+			get {
+				throw new NotImplementedException ();
+			}
 		}
 
 		#endregion

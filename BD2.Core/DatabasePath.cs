@@ -33,6 +33,7 @@ namespace BD2.Core
 		readonly DatabasePath parent;
 		readonly string path;
 
+
 		public string Path {
 			get {
 				if (parent == null)

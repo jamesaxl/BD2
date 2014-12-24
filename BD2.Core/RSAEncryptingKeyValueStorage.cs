@@ -50,14 +50,11 @@ namespace BD2.Core
 				throw new ArgumentNullException ("baseStorage");
 			this.baseStorage = baseStorage;
 			this.rsap = rsap;
+			Initialize ();
 		}
 
 		#region implemented abstract members of KeyValueStorage
 
-		public override System.Collections.Generic.IEnumerator<byte[]> EnumerateKeys ()
-		{
-			return baseStorage.EnumerateKeys ();
-		}
 
 		public override void Initialize ()
 		{
@@ -80,6 +77,11 @@ namespace BD2.Core
 			return rsacsp.Encrypt (value, true);
 		}
 
+		public override System.Collections.Generic.IEnumerator<byte[]> EnumerateKeys ()
+		{
+			return baseStorage.EnumerateKeys ();
+		}
+
 		public override System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<byte[], byte[]>> GetEnumerator ()
 		{
 			foreach (var t in baseStorage) {
@@ -89,12 +91,18 @@ namespace BD2.Core
 
 		public override void Put (byte[] key, byte[] value)
 		{
-			baseStorage.Put (key, Encrypt (value));
+			if (value == null)
+				baseStorage.Put (key, null);
+			else
+				baseStorage.Put (key, Encrypt (value));
 		}
 
 		public override byte[] Get (byte[] key)
 		{
-			return Decrypt (baseStorage.Get (key));
+			byte[] bytes = baseStorage.Get (key);
+			if (bytes == null)
+				return null;
+			return Decrypt (bytes);
 		}
 
 		public override void Delete (byte[] key)
@@ -104,38 +112,28 @@ namespace BD2.Core
 
 		#endregion
 
+
 		#region implemented abstract members of KeyValueStorage
 
-		public override IAsyncResult BeginPut (byte[] key, byte[] value)
+		public override System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<byte[], byte[]>> EnumerateFrom (byte[] start)
 		{
-			return baseStorage.BeginPut (key, Encrypt (value));
+			foreach (var t in baseStorage.EnumerateFrom (start)) {
+				yield return new System.Collections.Generic.KeyValuePair<byte[], byte[]> (t.Key, Decrypt (t.Value));
+			}
 		}
 
-		public override IAsyncResult BeginGet (byte[] key)
+		public override System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<byte[], byte[]>> EnumerateRange (byte[] start, byte[] end)
 		{
-			return baseStorage.BeginGet (key);
+			foreach (var t in baseStorage.EnumerateRange (start, end)) {
+				yield return new System.Collections.Generic.KeyValuePair<byte[], byte[]> (t.Key, Decrypt (t.Value));
+			}
 		}
 
-		public override IAsyncResult BeginDelete (byte[] key)
-		{
-			return baseStorage.BeginDelete (key);
+		public override int Count {
+			get {
+				return baseStorage.Count;
+			}
 		}
-
-		public override void EndPut (IAsyncResult asyncResult)
-		{
-			baseStorage.EndPut (asyncResult);
-		}
-
-		public override byte[] EndGet (IAsyncResult asyncResult)
-		{
-			return Decrypt (baseStorage.EndGet (asyncResult));
-		}
-
-		public override void EndDelete (IAsyncResult asyncResult)
-		{
-			baseStorage.EndDelete (asyncResult);
-		}
-
 
 		#endregion
 	}

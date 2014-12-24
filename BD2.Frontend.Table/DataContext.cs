@@ -38,12 +38,16 @@ namespace BD2.Frontend.Table
 		SortedDictionary<byte[], RowDrop> rowDrops = new SortedDictionary<byte[], RowDrop> (ByteSequenceComparer.Shared);
 
 		SortedSet<byte[]> deletedObjects = new SortedSet<byte[]> (ByteSequenceComparer.Shared);
+		FrontendInstance frontendInstanceBase;
 
 		public DataContext (FrontendInstanceBase frontendInstanceBase, DataContext baseContext)
-			: base (frontendInstanceBase, baseContext)
+			: base (baseContext)
 		{
 
+			this.frontendInstanceBase = (FrontendInstance)frontendInstanceBase;
 		}
+
+		public FrontendInstance FrontendInstance{ get { return frontendInstanceBase; } }
 
 		public  Row GetRowByID (byte[] id)
 		{
@@ -67,7 +71,7 @@ namespace BD2.Frontend.Table
 
 		public Row CreateRow (Table table, IDictionary<int, ColumnSet> columnSets, IDictionary<int, object[]> objects)
 		{
-			BaseDataObject bdo = new BaseDataObject (FrontendInstanceBase, null);
+			BaseDataObject bdo = new BaseDataObject (FrontendInstance, null);
 			Row r = new Row (null, null, bdo, table, columnSets, objects);
 			rows.Add (r.ID, r);
 			perTableRows [table].Add (r.ID, r);

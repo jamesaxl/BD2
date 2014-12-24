@@ -33,6 +33,12 @@
     <Reference Include="System" />
     <Reference Include="Mono.Security" />
     <Reference Include="System.Xml" />
+    <Reference Include="CSharpTest.Net.BPlusTree">
+      <HintPath>..\CSDN\csharptest-net\src\bin\CSharpTest.Net.BPlusTree.dll</HintPath>
+    </Reference>
+    <Reference Include="CSharpTest.Net.Library">
+      <HintPath>..\CSDN\csharptest-net\src\bin\CSharpTest.Net.Library.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -98,7 +104,6 @@
     <Compile Include="KEx\Agent.cs" />
     <Compile Include="KEx\Stream.cs" />
     <Compile Include="EncryptedStorageManager.cs" />
-    <Compile Include="ChunkRepositoryInfo.cs" />
     <Compile Include="BaseDataObjectVersion.cs" />
     <Compile Include="IDataSource.cs" />
     <Compile Include="DataContext.cs" />
@@ -107,6 +112,12 @@
     <Compile Include="EncryptionMethod.cs" />
     <Compile Include="FrontendBase.cs" />
     <Compile Include="BaseMetaObject.cs" />
+    <Compile Include="NullDataContext.cs" />
+    <Compile Include="BPlusKeyValueStorage.cs" />
+    <Compile Include="KeyValueStorageConfiguration.cs" />
+    <Compile Include="ChunkRepositoryConfiguration.cs" />
+    <Compile Include="Byte2EncodingKeyValueStorage.cs" />
+    <Compile Include="StringEncodingKeyValueStorage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

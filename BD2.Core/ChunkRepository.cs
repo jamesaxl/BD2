@@ -61,6 +61,7 @@ namespace BD2.Core
 
 		public SortedDictionary<byte[], KeyValueStorage<byte[]>> LencryptedData {
 			get {
+				//DO NOT CLONE THE DATA, IF WE HAVE TO THEN THINK OF SOMETHING FOR DATABASE.LOGIN
 				return lencryptedData;
 			}
 		}

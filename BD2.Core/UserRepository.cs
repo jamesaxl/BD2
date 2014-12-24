@@ -34,6 +34,8 @@ using System.IO.MemoryMappedFiles;
 using System.Configuration;
 using System.Security.AccessControl;
 using System.CodeDom.Compiler;
+using System.Xml.Serialization;
+using CSharpTest.Net.Crypto;
 
 namespace BD2.Core
 {
@@ -74,26 +76,27 @@ namespace BD2.Core
 			if (config == null)
 				throw new ArgumentNullException ("config");
 
-			Console.WriteLine ("*");
-			userNames = new LevelDBKeyValueStorage<string> (path.CreatePath (config.UsersPath));
-			userParents = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserParentsPath));
-			userCerts = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserCertsPath));
-			userKeys = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserKeysPath));
-			userSigningCerts = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserSigningCertsPath));
-			userSigningKeys = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.UserSigningKeysPath));
-			userRepositories = new LevelDBKeyValueStorage<byte[][]> (path.CreatePath (config.UserRepositoresPath));
-			repositories = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.RepositoresPath));
-			meta = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.MetaPath));
+			Console.WriteLine ("Reading KeyValueStores");
+			userNames = config.Users.OpenStorage<string> (path);
+			userParents = config.UserParents.OpenStorage<byte[]> (path);
+			userCerts = config.UserCerts.OpenStorage<byte[]> (path);
+			userKeys = config.UserKeys.OpenStorage<byte[]> (path);
+			userSigningCerts = config.UserSigningCerts.OpenStorage<byte[]> (path);
+			userSigningKeys = config.UserSigningKeys.OpenStorage<byte[]> (path);
+			userRepositories = config.UserRepositores.OpenStorage<byte[][]> (path);
+			repositories = config.Repositores.OpenStorage<byte[]> (path);
+			meta = config.Meta.OpenStorage<byte[]> (path);
 			//permissions = new LevelDBKeyValueStorage<byte[]> (path.CreatePath (config.PermissionsPath));
-			genericRepositories = new SortedDictionary<byte[], GenericUserRepositoryCollection> ();
-			loggedInUsers = new SortedDictionary<byte[], RSAParameters> ();
-			Console.WriteLine ("*");
-			foreach (var user in userNames) {
-				Console.WriteLine ("*");
+			genericRepositories = new SortedDictionary<byte[], GenericUserRepositoryCollection> (ByteSequenceComparer.Shared);
+			loggedInUsers = new SortedDictionary<byte[], RSAParameters> (ByteSequenceComparer.Shared);
+			Console.WriteLine ("Done");
+			var e = userNames.GetEnumerator ();
+			while (e.MoveNext ()) {
+				var user = e.Current;
+				Console.WriteLine ("user: {0}:{1}", user.Key, user.Value);
 				genericRepositories.Add (user.Key, 
 					new GenericUserRepositoryCollection (path.CreatePath (user.Key.ToHexadecimal ()),
-						DeserializeKey (new MemoryStream (userCerts.Get (user.Key), false))
-					)
+						DeserializeKey (new MemoryStream (userCerts.Get (user.Key), false)))
 				);
 			}
 		}
@@ -101,6 +104,25 @@ namespace BD2.Core
 		public IEnumerable<KeyValuePair<byte[], string>> GetUsers ()
 		{
 			return userNames;
+		}
+
+		public bool VerifyPassword (byte[] userID, string password, string pepper)
+		{
+			if (userID == null)
+				throw new ArgumentNullException ("userID");
+			if (password == null)
+				throw new ArgumentNullException ("password");
+			if (pepper == null)
+				throw new ArgumentNullException ("pepper");
+			RSAParameters pubKey = GetPublicKey (userID);
+			try {
+				RSAParameters privateKey = GetPrivateKey (userID, password, pepper);
+				if ((ByteSequenceComparer.Shared.Compare (pubKey.Modulus, privateKey.Modulus) != 0) || (ByteSequenceComparer.Shared.Compare (pubKey.Exponent, privateKey.Exponent) != 0))
+					return false;
+			} catch {
+				return false;
+			}
+			return true;
 		}
 
 		public bool Login (byte[] userID, string password, string pepper)
@@ -199,9 +221,9 @@ namespace BD2.Core
 			Rij.KeySize = 256;
 			Rij.Padding = PaddingMode.ISO10126;
 			Rij.Mode = CipherMode.CBC;
-			Rfc2898DeriveBytes aesKey = new Rfc2898DeriveBytes (passpepper, userID, 1 << 24);//16 Mibi, I don't care for cpus, EVER
+			Rfc2898DeriveBytes aesKey = new Rfc2898DeriveBytes (passpepper, userID, 65536);
 			Rij.Key = aesKey.GetBytes (Rij.KeySize / 8);
-			Rij.IV = aesKey.GetBytes (Rij.BlockSize / 8);
+			Rij.GenerateIV ();
 			return Rij;
 		}
 
@@ -225,7 +247,9 @@ namespace BD2.Core
 		{
 			if (stream == null)
 				throw new ArgumentNullException ("stream");
-			System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer (typeof(RSAParameters));
+			XmlRootAttribute xRoot = new XmlRootAttribute ();
+			xRoot.ElementName = "RSAKeyValue";
+			XmlSerializer xmls = new XmlSerializer (typeof(RSAParameters), xRoot);
 			RSAParameters key = (RSAParameters)xmls.Deserialize (stream);
 			return key;
 		}
@@ -306,7 +330,7 @@ namespace BD2.Core
 			return rv.ToArray ();
 		}
 
-		public void CreateUser (string name, byte[] parentID)
+		public void CreateUser (string name, string password, string pepper, byte[] parentID)
 		{
 			byte[] userID = new byte[32];
 			RandomNumberGenerator.Create ().GetBytes (userID);
@@ -322,9 +346,35 @@ namespace BD2.Core
 						if (parentID != null) {
 							userParents.Put (userID, parentID);
 						}
-						userKeys.Put (userID, System.Text.Encoding.Unicode.GetBytes (rsa.ToXmlString (true)));
+						var Rij = CreateRijndael (userID, password, pepper);
+						{
+							MemoryStream streamI = new MemoryStream (System.Text.Encoding.Unicode.GetBytes (rsa.ToXmlString (true)));
+							MemoryStream newKeyStream = new MemoryStream ();
+							CryptoStream streamO = new CryptoStream (newKeyStream, Rij.CreateEncryptor (), CryptoStreamMode.Write);
+							var buffer = new byte[1024];
+							var read = streamI.Read (buffer, 0, buffer.Length);
+							while (read > 0) {
+								streamO.Write (buffer, 0, read);
+								read = streamI.Read (buffer, 0, buffer.Length);
+							}
+							streamO.FlushFinalBlock ();
+							userKeys.Put (userID, newKeyStream.ToArray ());
+						}
 						userCerts.Put (userID, System.Text.Encoding.Unicode.GetBytes (rsa.ToXmlString (false)));
-						userSigningKeys.Put (userID, System.Text.Encoding.Unicode.GetBytes (rsaSign.ToXmlString (true)));
+
+						{
+							MemoryStream streamI = new MemoryStream (System.Text.Encoding.Unicode.GetBytes (rsaSign.ToXmlString (true)));
+							MemoryStream newKeyStream = new MemoryStream ();
+							CryptoStream streamO = new CryptoStream (newKeyStream, Rij.CreateEncryptor (), CryptoStreamMode.Write);
+							var buffer = new byte[1024];
+							var read = streamI.Read (buffer, 0, buffer.Length);
+							while (read > 0) {
+								streamO.Write (buffer, 0, read);
+								read = streamI.Read (buffer, 0, buffer.Length);
+							}
+							streamO.FlushFinalBlock ();
+							userSigningKeys.Put (userID, newKeyStream.ToArray ());
+						}
 						userSigningCerts.Put (userID, System.Text.Encoding.Unicode.GetBytes (rsaSign.ToXmlString (false)));
 
 					} finally {

@@ -28,6 +28,7 @@ using System;
 using BD2.Daemon;
 using System.IO;
 using BD2.Daemon.Buses;
+using BD2.Daemon.Streams;
 
 namespace BD2.Test.Daemon.FileShare
 {

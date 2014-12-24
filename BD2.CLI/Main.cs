@@ -26,8 +26,7 @@
  * */
 using System;
 using System.Collections.Generic;
-using BD2.Common;
-using BD2.Conv.Frontend.Table;
+using BD2.Core;
 
 namespace BD2.CLI
 {
@@ -78,7 +77,7 @@ namespace BD2.CLI
 		{
 			string nick = commandParts [2];
 			string path = commandParts [3];
-			BD2.Chunk.ChunkRepository LRepo = new BD2.Repo.Leveldb.Repository (path);
+			ChunkRepository LRepo = new ChunkRepository (path);
 			lock (repositories)
 				repositories.Add (nick, LRepo);
 		}
@@ -90,7 +89,7 @@ namespace BD2.CLI
 				foreach (string str in System.IO.File.ReadAllLines (args[0]))
 					initial.Enqueue (str);
 			SortedDictionary<int, System.Threading.Thread> jobs = new SortedDictionary<int, System.Threading.Thread> ();
-			repositories = new SortedDictionary<string, BD2.Chunk.ChunkRepository> ();
+			repositories = new SortedDictionary<string, ChunkRepository> ();
 			Modifiers.Add ("async");
 			//BD2.Core.Database DB = new BD2.Core.Database ();
 			string command;
@@ -142,8 +141,7 @@ namespace BD2.CLI
 							continue;
 						}
 						if (CommandModifiers.Contains ("async")) {
-							System.Threading.Thread t_addrepo = new System.Threading.Thread (() =>
-							{
+							System.Threading.Thread t_addrepo = new System.Threading.Thread (() => {
 								OpenLevelDBRepository (CommandParts);
 							});
 							t_addrepo.Start ();
@@ -158,8 +156,7 @@ namespace BD2.CLI
 							continue;
 						}
 						if (CommandModifiers.Contains ("async")) {
-							System.Threading.Thread t_addrepo = new System.Threading.Thread (() =>
-							{
+							System.Threading.Thread t_addrepo = new System.Threading.Thread (() => {
 								OpenNetworkRepository (CommandParts);
 							});
 							t_addrepo.Start ();
@@ -212,7 +209,7 @@ namespace BD2.CLI
 						BD2.Daemon.TransparentAgent agent = 
 							(BD2.Daemon.TransparentAgent)
 								SM.RequestService (TSA, (new BD2.Conv.Daemon.MSSQL.ServiceParameters (Query ("Connection String"))).Serialize (),
-						                     BD2.Daemon.TransparentAgent.CreateAgent, null);
+								BD2.Daemon.TransparentAgent.CreateAgent, null);
 						Client CL = new Client (agent, repositories [Query ("Repository Name")], Query ("Database Name"));
 						CL.Convert ();
 						break;

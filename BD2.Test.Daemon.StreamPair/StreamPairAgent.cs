@@ -27,6 +27,7 @@
 using System;
 using BD2.Daemon;
 using System.IO;
+using BD2.Daemon.Buses;
 
 namespace BD2.Test.Daemon.StreamPair
 {
@@ -34,7 +35,7 @@ namespace BD2.Test.Daemon.StreamPair
 	{
 
 		StreamPairAgent (ServiceAgentMode serviceAgentMode, ObjectBusSession objectBusSession, Action flush, bool run)
-			: base(serviceAgentMode, objectBusSession, flush, run)
+			: base (serviceAgentMode, objectBusSession, flush, run)
 		{
 			#if TRACE
 			Console.WriteLine (new System.Diagnostics.StackTrace (true).GetFrame (0));
@@ -74,7 +75,9 @@ namespace BD2.Test.Daemon.StreamPair
 
 			ObjectBusSession.SendMessage (new StreamPairMessage (CreateStream (stream)));
 		}
+
 		#region implemented abstract members of ServiceAgent
+
 		static void SendObject (BinaryWriter bw, string path)
 		{
 			byte[] buf = System.IO.File.ReadAllBytes (path);
@@ -126,6 +129,7 @@ namespace BD2.Test.Daemon.StreamPair
 			#endif
 			DestroyRequestReceived ();
 		}
+
 		#endregion
 	}
 }

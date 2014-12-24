@@ -26,11 +26,12 @@
   * */
 using System;
 using BD2.Daemon;
+using BD2.Daemon.Buses;
 
 namespace BD2.Conv.Frontend.Table
 {
-	[ObjectBusMessageTypeID("aecfee23-340d-402b-bf41-979ce30b73a8")]
-	[ObjectBusMessageDeserializer(typeof(GetColumnSetsRequestMessage), "Deserialize")]
+	[ObjectBusMessageTypeID ("aecfee23-340d-402b-bf41-979ce30b73a8")]
+	[ObjectBusMessageDeserializer (typeof(GetColumnSetsRequestMessage), "Deserialize")]
 	public class GetColumnSetsRequestMessage : ObjectBusMessage
 	{
 		Guid id;
@@ -49,18 +50,20 @@ namespace BD2.Conv.Frontend.Table
 		public static ObjectBusMessage Deserialize (byte[] bytes)
 		{
 			Guid id;
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream(bytes, false)) {
-				using (System.IO.BinaryReader BR = new System.IO.BinaryReader(MS)) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream (bytes, false)) {
+				using (System.IO.BinaryReader BR = new System.IO.BinaryReader (MS)) {
 					id = new  Guid (BR.ReadBytes (16));
 				}
 			}
 			return new GetColumnSetsRequestMessage (id);
 		}
+
 		#region implemented abstract members of ObjectBusMessage
+
 		public override byte[] GetMessageBody ()
 		{
-			using (System.IO.MemoryStream MS = new System.IO.MemoryStream()) {
-				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter(MS)) {
+			using (System.IO.MemoryStream MS = new System.IO.MemoryStream ()) {
+				using (System.IO.BinaryWriter BW = new System.IO.BinaryWriter (MS)) {
 					BW.Write (id.ToByteArray ());
 				}
 				return MS.ToArray ();
@@ -72,6 +75,7 @@ namespace BD2.Conv.Frontend.Table
 				return Guid.Parse ("aecfee23-340d-402b-bf41-979ce30b73a8");
 			}
 		}
+
 		#endregion
 	}
 }

@@ -96,9 +96,9 @@ namespace BD2.Frontend.Table
 					Dictionary<int, ColumnSet> columnSets = new Dictionary<int, ColumnSet> ();
 					for (int columnSetIndex = 0; columnSetIndex != columnSetCount; columnSetIndex++) {
 						ColumnSet columnSet = ((FrontendInstance)fib).GetColumnSetByID (BR.ReadBytes (32));
-					
+						columnSets.Add (columnSetIndex, columnSet);
 					}
-					int previousVersionCount = BR.ReadInt32 ();
+					//int previousVersionCount = BR.ReadInt32 ();
 					Dictionary<int, object[]> objs = new Dictionary<int, object[]> ();
 					for (int n = 0; n != columnSetCount; n++)
 						objs.Add (n, columnSets [n].DeserializeObjects (BR.ReadBytes (BR.ReadInt32 ())));
